@@ -1,3 +1,31 @@
+# Update — AutomatedPin brand, new home page sections, full SEO (live indexing, sitemaps, meta)
+
+IMPORTANT for the new domain: in config/config.php set
+    define('APP_URL', 'https://automatedpin.io');   // canonical URLs, sitemaps and share links use it
+    define('APP_NAME', 'AutomatedPin');             // optional — the old "Web To Pin" name is replaced automatically
+
+1. Brand: every "Web To Pin" / WebToPin is now AutomatedPin (SITE_BRAND, set in includes/db.php);
+   logos in the header, user area and 404 page; blog posts, footer text and SEO fields in the database are
+   renamed once automatically. Images keep loading from the existing media CDN.
+2. Home page: "Unlimited templates & fonts — free Canva-style editor, no Canva Pro" everywhere the old
+   "70 templates, 56 palettes, 130+ fonts & Canva" text was (home, use cases, free tools); new sections
+   "The Free Canva Alternative" (editor screenshot + Canva Free / Pro comparison) and "Template & Colour
+   Performance Stats"; analytics section is now "Advanced Pinterest Analytics"; new FAQs.
+3. SEO:
+   - Site is live for search engines (switched on once automatically; Admin → SEO Setting → Indexing).
+   - robots.txt lists the sitemap and blocks only private areas (admin, user, auth, config, cron…).
+   - XML sitemaps: /sitemap.xml (index) → sitemap-pages, sitemap-use-cases, sitemap-free-tools, sitemap-blog.
+     Listed in Admin → SEO Setting → Sitemaps with Google Search Console / Bing steps.
+   - Every page has its own canonical URL (clean, no query string); /blog/<category> 301 → /<category>;
+     /index.php 301 → /; shared-design pages are noindex.
+   - Unique, keyword-focused titles (≤ 60 chars) and descriptions (≤ 160 chars) for home, pricing, about,
+     contact, privacy, terms, blog, tutorials, affiliate, use cases hub and all 23 free tools.
+   - Structured data: Organization + WebSite on every page, BreadcrumbList, BlogPosting on posts, FAQ on
+     home/use cases, app schema on the home page only. Open Graph / Twitter cards with image + site name.
+   - Less duplicate content on use case pages: pricing summary instead of the full plan table, rotated
+     testimonials / tools / related links, compact Auto Blog block.
+   - Footer: Comparisons and Use Cases columns filled with links (only if they were empty).
+
 # Update — Classic Wizard start date fix, mobile design editor, Share design
 
 1. Classic Wizard schedule: pins now start on the start date you choose. Before, pins the Pinterest

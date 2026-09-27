@@ -11,8 +11,12 @@ $user = current_user($pdo);
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Free Pinterest Character Counter — Titles, Descriptions, Bio Limits | <?= e(APP_NAME) ?></title>
-<meta name="description" content="Count characters for every Pinterest field free — pin titles, descriptions, board names, board descriptions, and profile bio. See exactly where each one truncates in the feed.">
+<?php require_once __DIR__ . '/../../includes/seo_functions.php'; seo_render_head($pdo, [
+    'title' => 'Pinterest Character Counter: Title & Bio | ' . SITE_BRAND,
+    'description' => 'Check Pinterest title, description, alt text and bio length live against the character limits, so nothing gets cut off. Free counter, no sign-up.',
+    'canonical' => rtrim(APP_URL, '/') . '/free-tools/pinterest-character-counter/',
+    'breadcrumbs' => [['Free Tools', 'free-tools/'], ['Pinterest Character Counter', 'free-tools/pinterest-character-counter/']],
+]); ?>
 <link rel="stylesheet" href="../../assets/css/style.css?v=<?= @filemtime(__DIR__ . '/../../assets/css/style.css') ?: time() ?>">
 <link rel="stylesheet" href="../../assets/css/free-tool.css?v=<?= @filemtime(__DIR__ . '/../../assets/css/free-tool.css') ?: time() ?>">
 </head>

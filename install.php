@@ -91,15 +91,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && (!$alreadyInstalled || isset($_POST
                     'A complete, data-backed playbook for growing Pinterest traffic in 2026: design, SEO, publishing cadence, and the exact 8-step system to break out of the sandbox and scale.',
                     (int)$growthCatId,
                     file_get_contents($seedContentPath),
-                    'Webtopin Team',
+                    'AutomatedPin Team',
                 ]);
             }
 
             // Seed the rest of the default Growth Guide series the same way —
             // see database/blog-seed-manifest.php.
             require_once __DIR__ . '/includes/blog_functions.php';
-            blog_seed_default_posts($pdo, 'growth-guide', 'Webtopin Team');
-            blog_seed_default_posts($pdo, 'compare', 'Webtopin Team', 'blog-compare-manifest.php', 'seed-compare');
+            blog_seed_default_posts($pdo, 'growth-guide', 'AutomatedPin Team');
+            blog_seed_default_posts($pdo, 'compare', 'AutomatedPin Team', 'blog-compare-manifest.php', 'seed-compare');
 
             // Write config.php
             $appSecret = bin2hex(random_bytes(32));

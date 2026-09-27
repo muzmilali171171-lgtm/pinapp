@@ -11,8 +11,12 @@ $user = current_user($pdo);
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Free Pinterest Font Generator — Fancy Text Styles &amp; Symbols | <?= e(APP_NAME) ?></title>
-<meta name="description" content="Transform your text into unique fonts and styles for Pinterest pins, boards, and your profile bio. Bold, italic, script, circled, small caps, and more — type once, copy any style.">
+<?php require_once __DIR__ . '/../../includes/seo_functions.php'; seo_render_head($pdo, [
+    'title' => 'Pinterest Font Generator: Fancy Text | ' . SITE_BRAND,
+    'description' => 'Turn plain text into fancy fonts and symbols you can copy and paste into Pinterest titles, bios and board names. Dozens of styles, free to use.',
+    'canonical' => rtrim(APP_URL, '/') . '/free-tools/pinterest-font-generator/',
+    'breadcrumbs' => [['Free Tools', 'free-tools/'], ['Pinterest Font Generator', 'free-tools/pinterest-font-generator/']],
+]); ?>
 <link rel="stylesheet" href="../../assets/css/style.css?v=<?= @filemtime(__DIR__ . '/../../assets/css/style.css') ?: time() ?>">
 <link rel="stylesheet" href="../../assets/css/free-tool.css?v=<?= @filemtime(__DIR__ . '/../../assets/css/free-tool.css') ?: time() ?>">
 </head>

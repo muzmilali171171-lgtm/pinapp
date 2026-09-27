@@ -79,24 +79,29 @@ require_once __DIR__ . '/includes/use_case_functions.php';
 $seo = get_seo_settings($pdo);
 $hpMeta = [
     // Admin → SEO Setting values win when set; these are the fallbacks.
-    'title' => ($seo['meta_title'] ?? '') ?: 'AI Pinterest Automation & Auto Blog | ' . APP_NAME,
-    'description' => ($seo['meta_description'] ?? '') ?: 'AI creates pins for hundreds of pages in 1 click, writes and publishes blog posts with images, and schedules Pinterest pins on autopilot. Start free.',
-    'keywords' => ($seo['meta_keywords'] ?? '') ?: 'Pinterest automation, AI Pinterest pin maker, auto pin to Pinterest, Pinterest pin scheduler, AI auto blog, auto blogging tool, bulk pin scheduler, Pinterest marketing tool, unlimited pin templates, Pinterest traffic',
-    'canonical' => ($seo['canonical_url'] ?? '') ?: rtrim(APP_URL, '/') . '/',
+    'title' => (($seo['meta_title'] ?? '') !== '' && $seo['meta_title'] !== SITE_BRAND) ? $seo['meta_title'] : SEO_HOME_TITLE,
+    'description' => ($seo['meta_description'] ?? '') ?: SEO_HOME_DESCRIPTION,
+    'keywords' => ($seo['meta_keywords'] ?? '') ?: SEO_HOME_KEYWORDS,
+    'canonical' => rtrim(APP_URL, '/') . '/',
+    'image' => SEO_DEFAULT_IMAGE,
+    'image_alt' => SITE_BRAND . ' free Pinterest design editor and pin scheduler',
+    'site_schema' => false,   // Organization + WebSite are in this page's own graph below
 ];
 $hpFaq = [
-    ['What is ' . APP_NAME . '?', APP_NAME . ' is a Pinterest automation platform. Connect your Pinterest account once and schedule pins — with AI-written titles, descriptions and pin designs — to publish automatically, on your own timeline.'],
+    ['What is ' . SITE_BRAND . '?', SITE_BRAND . ' is a Pinterest automation platform. Connect your Pinterest account once and schedule pins — with AI-written titles, descriptions and pin designs — to publish automatically, on your own timeline.'],
     ['How does Pinterest pin scheduling work?', 'Scan your website, choose your pages, pick a design and a publishing pace, and approve. Our scheduler runs in the background and publishes each pin exactly when it is due.'],
     ['Is it safe to connect my Pinterest account?', 'Yes — you connect through Pinterest’s official login (OAuth). We never see or store your Pinterest password, and you can disconnect at any time.'],
     ['Do I need my own Pinterest developer API access?', 'No. Just click “Connect Pinterest” and authorize your own account.'],
-    ['How many pin templates are there?', 'The Classic Wizard includes 70 templates, 56 colour palettes and 130+ Google fonts, and you can import your own design from Canva as an SVG.'],
+    ['How many pin templates are there?', 'Unlimited. You get 500+ AI pin templates and styles, unlimited colour palettes and fonts, and a free Canva-style design editor with thousands of premium designs — no Canva Pro subscription needed.'],
+    ['Is ' . SITE_BRAND . ' a free Canva alternative for Pinterest?', 'Yes. The built-in design editor has the drag-and-drop tools you know from Canva — templates, fonts, text effects, frames, shapes, photos, resize and PNG/JPG/PDF/SVG download — and every premium feature is free. Finished designs go straight into your pin scheduler.'],
+    ['Can I see which templates and colours perform best?', 'Yes. Template Tracking shows views, clicks, CTR and save rate for every template you use, and colour stats show which main pin colours get the most saves and clicks — so your next pins use what already works.'],
     ['Can I schedule pins to hundreds of pages at once?', 'Yes — add your website, let it scan your sitemap, select hundreds of pages and schedule several pins for each in a single run.'],
     ['Does it write pin titles and descriptions automatically?', 'Yes. AI writes a unique title, description, alt text and keywords for every pin from the page content. You can edit anything before approving.'],
     ['How does AI choose or create a board?', 'AI matches each page to the closest board on your account, or creates a new, well-named board if none fits.'],
     ['Is it safe for a new Pinterest account?', 'Yes. The new-account warm-up grows your pace from 1 pin a day in month one to 20 a day by month five, and the time between pins is set automatically.'],
     ['Can AI create pins for hundreds of pages in 1 click?', 'Yes. Scan your site, select hundreds of pages and approve once — AI designs the pin images from your own photos, writes the copy, picks the boards and schedules everything.'],
     ['Can AI write and publish blog posts for me?', 'Yes, on plans that include Auto Blog. Paste a list of titles (or competitor links that AI rewrites into your own titles); AI writes each article with images, publishes to your WordPress, Shopify, Wix or custom site at your daily pace, and schedules pins for every post.'],
-    ['Are pin templates really unlimited?', 'You get 70 templates, 56 colour palettes and 130+ fonts, plus any Canva designs you import — AI mixes them per page, so the number of different pin designs is practically unlimited.'],
+    ['Are pin templates really unlimited?', 'Yes. 500+ pin templates and styles, unlimited colour palettes and fonts, plus a free design editor for your own layouts — AI mixes them per page, so every pin can look different.'],
     ['What is Bulk Pin Scheduler?', 'Bulk Pin Scheduler lets you paste a list of titles or links, generate pins for each, and queue them all in one pass.'],
     ['What is Auto Blog and Auto Pin?', 'On plans that include it, AI writes and publishes articles to your website and pins them to Pinterest on a daily schedule — no manual input after setup.'],
     ['Can I use my own images?', 'Yes. Pins use the photos from your own pages, and you can upload a different image for any pin before it is scheduled.'],
@@ -130,10 +135,8 @@ $hpV = fn($f) => @filemtime(__DIR__ . '/' . $f) ?: time();
 <script type="application/ld+json"><?= json_encode([
     '@context' => 'https://schema.org',
     '@graph' => [
-        ['@type' => 'Organization', 'name' => APP_NAME, 'url' => rtrim(APP_URL, '/') . '/'],
-        ['@type' => 'WebSite', 'name' => APP_NAME, 'url' => rtrim(APP_URL, '/') . '/'],
-        ['@type' => 'SoftwareApplication', 'name' => APP_NAME, 'applicationCategory' => 'BusinessApplication', 'operatingSystem' => 'Web',
-            'description' => $hpMeta['description'], 'offers' => ['@type' => 'Offer', 'price' => '0', 'priceCurrency' => 'USD']],
+        ['@type' => 'Organization', 'name' => SITE_BRAND, 'url' => rtrim(APP_URL, '/') . '/'],
+        ['@type' => 'WebSite', 'name' => SITE_BRAND, 'url' => rtrim(APP_URL, '/') . '/'],
         ['@type' => 'FAQPage', 'mainEntity' => array_map(fn($q) => ['@type' => 'Question', 'name' => $q[0], 'acceptedAnswer' => ['@type' => 'Answer', 'text' => $q[1]]], $hpFaq)],
     ],
 ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) ?></script>
@@ -156,7 +159,7 @@ $hpV = fn($f) => @filemtime(__DIR__ . '/' . $f) ?: time();
                 <?php foreach ([
                     ['⚡', 'AI Auto-Creates Pin Images for Hundreds of Pages in 1 Click & Schedules Them'],
                     ['✍️', 'AI Auto Blog: Creates & Publishes Posts With Images, Then Schedules Pins'],
-                    ['♾️', 'Unlimited AI Pin Designs — 70 Templates, 56 Palettes, 130+ Fonts & Canva'],
+                    ['♾️', 'Unlimited Templates & Fonts + Free Canva-Style Editor — No Canva Pro Needed'],
                     ['🤖', 'AI Writes Titles, Descriptions, Alt Text & Keywords'],
                     ['💯', 'AI Picks the Best Board — or Creates One'],
                 ] as $i => $b): ?>
@@ -213,7 +216,7 @@ $hpV = fn($f) => @filemtime(__DIR__ . '/' . $f) ?: time();
                     You've used your free pins — <a href="auth/register">sign up free</a> to keep going
                 <?php endif; ?>
             </div>
-            <p class="hp-mini-link">Want several pins with 70 templates? <a href="free-tools/pinterest-pin-maker/">Try the full free Pin Maker →</a></p>
+            <p class="hp-mini-link">Want several pins with unlimited templates? <a href="free-tools/pinterest-pin-maker/">Try the full free Pin Maker →</a></p>
         </div>
     </div>
 </section>
@@ -249,7 +252,7 @@ $hpV = fn($f) => @filemtime(__DIR__ . '/' . $f) ?: time();
             <p class="uc-muted">A slower first month while Pinterest learns your content, then steady growth as your pin library builds up — the shape a real account scheduling daily takes over 12 months.</p>
         </div>
         <div class="uc-counters">
-            <?php foreach ([[5, 'x', 'more traffic, up to'], [47, '%', 'higher engagement after pruning'], [365, '', 'days of pins in one run'], [70, '', 'pin templates']] as $i => $st): ?>
+            <?php foreach ([[5, 'x', 'more traffic, up to'], [47, '%', 'higher engagement after pruning'], [365, '', 'days of pins in one run'], [500, '+', 'premium pin templates, free']] as $i => $st): ?>
                 <div class="uc-counter hp-spot hp-rv" data-rv="<?= $i % 2 ? 'down' : 'up' ?>" style="--d: <?= $i * 90 ?>ms"><b><span data-count="<?= $st[0] ?>">0</span><?= e($st[1]) ?></b><span><?= e($st[2]) ?></span></div>
             <?php endforeach; ?>
         </div>
@@ -285,9 +288,9 @@ $hpV = fn($f) => @filemtime(__DIR__ . '/' . $f) ?: time();
             </div>
             <div class="hp-ps-arrow hp-rv" data-rv="zoom" aria-hidden="true">→</div>
             <div class="hp-ps-card hp-ps-gain rg-border-glow hp-rv" data-rv="right">
-                <h3>🚀 With <?= e(APP_NAME) ?></h3>
+                <h3>🚀 With <?= e(SITE_BRAND) ?></h3>
                 <ul>
-                    <li>70 templates applied to your photos automatically</li>
+                    <li>Unlimited premium templates applied to your photos automatically</li>
                     <li>AI writes keyword-rich copy for every pin</li>
                     <li>A year of pins scheduled in one run</li>
                     <li>AI Auto Blog writes, publishes and pins new posts</li>
@@ -311,7 +314,7 @@ $hpV = fn($f) => @filemtime(__DIR__ . '/' . $f) ?: time();
             <?php
             $hpSteps = [
                 ['📄', 'Setup', 'Add Your Website', ['We read your sitemap and list every page automatically.', 'Search and select pages in bulk — or select them all.'], 'Scanning a website to find pages for Pinterest pins'],
-                ['🎨', 'Design', 'Match Pins to Your Brand', ['70 templates, 56 colour palettes and 130+ fonts with a live preview.', 'Import your own Canva design, or let AI pick the template per page.', 'Tiny and banner images are skipped automatically.'], 'Choosing pin templates, colours and fonts'],
+                ['🎨', 'Design', 'Match Pins to Your Brand', ['Unlimited templates, colour palettes and fonts with a live preview.', 'Design your own in the free Canva-style editor, or let AI pick the template per page.', 'Tiny and banner images are skipped automatically.'], 'Choosing pin templates, colours and fonts'],
                 ['⚙️', 'Schedule', 'Set a Safe Publishing Pace', ['Pins per day with automatic gaps — or the new-account warm-up.', 'Pins per page and the gap before a page is pinned again.', 'Choose boards yourself or let AI place every pin.'], 'Pin publishing pace settings'],
                 ['🚀', 'Approve', 'One Click. Fully Automated.', ['Review, edit or remove any pin, then approve.', 'Pins publish on autopilot all year. Anything unapproved waits in Drafts.'], 'One-click AI pin design and scheduling'],
             ];
@@ -352,12 +355,12 @@ $hpV = fn($f) => @filemtime(__DIR__ . '/' . $f) ?: time();
         </div>
         <div class="hp-bento">
             <?php foreach ([
-                ['wide', '⚡', 'Hundreds of Pins in 1 Click', 'Scan your site, select hundreds of pages and AI designs, writes and schedules every pin — with a live preview of 70 templates, palettes and fonts.', 'left'],
+                ['wide', '⚡', 'Hundreds of Pins in 1 Click', 'Scan your site, select hundreds of pages and AI designs, writes and schedules every pin — with a live preview of unlimited templates, palettes and fonts.', 'left'],
                 ['', '🤖', 'AI Pin Copy', 'Titles, descriptions, alt text and keywords written for every pin.', 'right'],
                 ['', '🗂️', 'Smart Boards', 'AI chooses the best board for each pin, or creates a new one.', 'up'],
                 ['tall', '✍️', 'AI Auto Blog + Auto Pin', 'Paste a list of titles: AI writes every article with images, publishes to WordPress, Shopify, Wix or your site at your daily pace, and schedules pins for each post.', 'down'],
                 ['', '📦', 'Bulk Pin Scheduler', 'Paste a list of titles or links and queue them all at once.', 'up'],
-                ['', '♾️', 'Unlimited Pin Designs', '70 templates × 56 palettes × 130+ fonts, plus your Canva designs.', 'up'],
+                ['', '♾️', 'Unlimited Pin Designs', 'Unlimited templates, palettes and fonts plus a free Canva-style editor — every premium feature, no Canva Pro.', 'up'],
                 ['wide', '📊', 'Pinterest Analytics', 'See which pins drive clicks and saves, compare by board, keyword or time, and clean out underperformers.', 'right'],
                 ['', '👥', 'Team Management', 'Invite teammates without sharing your login.', 'left'],
             ] as $i => $f): ?>
@@ -376,7 +379,7 @@ $hpV = fn($f) => @filemtime(__DIR__ . '/' . $f) ?: time();
     <div class="container">
         <div class="uc-head hp-rv" data-rv="up">
             <div class="uc-eyebrow">// PIN DESIGNS THAT GET SAVED</div>
-            <h2>70 Pinterest Templates Modelled on Pins People Save</h2>
+            <h2>Unlimited Pinterest Templates Modelled on Pins People Save</h2>
             <p class="uc-muted">Recipe bands, outfit collages, hairstyle numbers, home decor frames — every style applied to your own photos automatically.</p>
         </div>
     </div>
@@ -387,19 +390,70 @@ $hpV = fn($f) => @filemtime(__DIR__ . '/' . $f) ?: time();
     <div class="uc-center"><a href="free-tools/pinterest-pin-maker/" class="btn-primary rg-shine">Try the Templates Free →</a></div>
 </section>
 
+<!-- ===================== FREE CANVA ALTERNATIVE ===================== -->
+<?php $hpEditorUrl = $user ? 'user/design-editor' : 'auth/register'; ?>
+<section class="hp-canva" id="free-design-editor">
+    <div class="container hp-canva-grid">
+        <div class="hp-canva-copy hp-rv" data-rv="left">
+            <div class="uc-eyebrow">// FREE CANVA ALTERNATIVE</div>
+            <h2>The Free <span class="uc-grad-text">Canva Alternative</span> Built for Pinterest Pins</h2>
+            <p class="uc-muted">Everything you pay Canva Pro for is free inside <?= e(SITE_BRAND) ?>: a drag-and-drop design editor with thousands of premium pin designs, unlimited templates and fonts — and your finished pins go straight into the scheduler.</p>
+            <ul class="hp-canva-list">
+                <li><span>♾️</span> Unlimited templates &amp; fonts — no Canva Pro subscription</li>
+                <li><span>💎</span> Thousands of premium pin designs, free to use and edit</li>
+                <li><span>✨</span> Text effects, photo frames, shapes, 3D elements &amp; emoji</li>
+                <li><span>📐</span> One-click resize for pins, stories, posts and banners</li>
+                <li><span>⬇️</span> Download PNG, JPG, PDF or SVG — transparent backgrounds included</li>
+                <li><span>🔗</span> Share designs with a link, or schedule them to Pinterest in one click</li>
+            </ul>
+            <div class="uc-cta-row">
+                <a href="<?= e($hpEditorUrl) ?>" class="btn-primary rg-shine hp-btn-lg">Open the Free Design Editor →</a>
+                <a href="#canva-compare" class="btn-secondary uc-btn-outline hp-btn-lg">Compare with Canva Pro</a>
+            </div>
+        </div>
+        <figure class="hp-canva-shot hp-rv" data-rv="right">
+            <div class="hp-canva-bar" aria-hidden="true"><i></i><i></i><i></i><span><?= e(SITE_BRAND) ?> · Design Editor</span></div>
+            <img src="https://media.webtopin.com/cdn/uploads/acc058d92f65e7730cdf1dbfd1973c5f.webp" alt="<?= e(SITE_BRAND) ?> free design editor — a Canva alternative for creating Pinterest pins with templates, fonts and elements" width="1600" height="1000" loading="lazy" decoding="async">
+            <figcaption>The <?= e(SITE_BRAND) ?> design editor — every premium tool, free.</figcaption>
+        </figure>
+    </div>
+    <div class="container" id="canva-compare">
+        <div class="uc-compare-wrap hp-rv" data-rv="zoom">
+            <table class="uc-compare-table hp-canva-table">
+                <thead><tr><th scope="col">Feature</th><th scope="col">Canva Free</th><th scope="col">Canva Pro</th><th scope="col" class="uc-col-us"><?= e(SITE_BRAND) ?></th></tr></thead>
+                <tbody>
+                <?php foreach ([
+                    ['Premium templates', 'Limited', 'Included (paid)', 'Unlimited — free'],
+                    ['Fonts', 'Limited', 'Included (paid)', 'Unlimited — free'],
+                    ['Transparent PNG download', '✕', 'Included (paid)', 'Free'],
+                    ['Resize a design for other sizes', '✕', 'Included (paid)', 'Free'],
+                    ['AI pin titles, descriptions & alt text', '✕', '✕', 'Built in'],
+                    ['Schedule pins to Pinterest automatically', '✕', 'Limited', 'Built in, a year at a time'],
+                    ['Template & colour performance stats', '✕', '✕', 'Built in'],
+                    ['Price', 'Free', 'Paid subscription', 'Free to start'],
+                ] as $r): ?>
+                    <tr><th scope="row"><?= e($r[0]) ?></th><td><?= e($r[1]) ?></td><td><?= e($r[2]) ?></td><td class="uc-col-us"><span class="uc-ok">✓</span> <?= e($r[3]) ?></td></tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+            <p class="uc-graph-note">Canva is a trademark of Canva Pty Ltd. Comparison based on Canva's publicly listed free and Pro plan features.</p>
+        </div>
+    </div>
+</section>
+
 <!-- ===================== MANUAL VS AUTOMATED ===================== -->
 <section class="uc-compare">
     <div class="container">
         <div class="uc-head hp-rv" data-rv="up">
             <div class="uc-eyebrow">// MANUAL VS AUTOMATED</div>
-            <h2>Manual Pinning vs <?= e(APP_NAME) ?></h2>
+            <h2>Manual Pinning vs <?= e(SITE_BRAND) ?></h2>
         </div>
         <div class="uc-compare-wrap hp-rv" data-rv="zoom">
             <table class="uc-compare-table">
-                <thead><tr><th scope="col">Task</th><th scope="col">Doing it by hand</th><th scope="col" class="uc-col-us">With <?= e(APP_NAME) ?></th></tr></thead>
+                <thead><tr><th scope="col">Task</th><th scope="col">Doing it by hand</th><th scope="col" class="uc-col-us">With <?= e(SITE_BRAND) ?></th></tr></thead>
                 <tbody>
                 <?php foreach ([
-                    ['Designing pins', 'Canva, one pin at a time', '70 templates applied automatically'],
+                    ['Designing pins', 'Canva, one pin at a time', 'Unlimited free templates applied automatically'],
                     ['Titles & descriptions', 'Written one by one', 'AI writes keyword-rich copy'],
                     ['Choosing boards', 'Picked manually every time', 'AI picks or creates the board'],
                     ['Posting', 'Log in and post daily', 'A year scheduled in one run'],
@@ -420,9 +474,9 @@ $hpV = fn($f) => @filemtime(__DIR__ . '/' . $f) ?: time();
 <section class="uc-analytics">
     <div class="container">
         <div class="uc-head hp-rv" data-rv="up">
-            <div class="uc-eyebrow">// DATA-DRIVEN GROWTH</div>
-            <h2>Powerful Pinterest Analytics That Convert</h2>
-            <p class="uc-muted">Stop guessing what works. See exactly what drives traffic, so you can focus on what moves the needle.</p>
+            <div class="uc-eyebrow">// ADVANCED PINTEREST ANALYTICS</div>
+            <h2>Advanced Pinterest Analytics That Show What Works</h2>
+            <p class="uc-muted">Stop guessing. See exactly which pins, boards, keywords, templates and colours drive traffic — then do more of it.</p>
         </div>
         <div class="uc-analytics-grid">
             <div class="uc-acard hp-spot hp-rv" data-rv="left"><div class="uc-astat">Up to 5x more traffic</div><img src="<?= e($hpA[0]) ?>" alt="Pinterest analytics dashboard showing traffic growth" loading="lazy"><h3>Analytics</h3><p>Understand where your traffic comes from and make data-driven decisions.</p></div>
@@ -434,6 +488,49 @@ $hpV = fn($f) => @filemtime(__DIR__ . '/' . $f) ?: time();
                     <div class="uc-chips"><span>Boards</span><span>URLs</span><span>Keywords</span><span>Titles</span><span>Descriptions</span><span>Time</span></div></div>
             </div>
         </div>
+    </div>
+</section>
+
+<!-- ===================== TEMPLATE & COLOUR PERFORMANCE ===================== -->
+<section class="hp-tstats" id="template-performance">
+    <div class="container">
+        <div class="uc-head hp-rv" data-rv="up">
+            <div class="uc-eyebrow">// TEMPLATE &amp; COLOUR PERFORMANCE STATS</div>
+            <h2>Know Which <span class="uc-grad-text">Templates and Colours</span> Win</h2>
+            <p class="uc-muted">Template Tracking links every published pin to the template that made it, then ranks templates — and the main colours inside them — by real Pinterest results.</p>
+        </div>
+        <div class="hp-tstats-grid">
+            <div class="hp-tpanel hp-spot hp-rv" data-rv="left">
+                <div class="hp-tpanel-head"><b>📊 Template performance</b><small>Example report</small></div>
+                <table class="hp-ttable">
+                    <thead><tr><th scope="col">Template</th><th scope="col">Views</th><th scope="col">CTR</th><th scope="col">Save rate</th></tr></thead>
+                    <tbody>
+                    <?php foreach ([['Recipe Band', '48.2K', 2.9, 94], ['Outfit Collage', '39.5K', 2.4, 80], ['Big Number', '31.1K', 2.1, 71], ['Script Overlay', '22.8K', 1.6, 55]] as $t): ?>
+                        <tr><th scope="row"><?= e($t[0]) ?></th><td><?= e($t[1]) ?></td><td><?= e(number_format($t[2], 1)) ?>%</td><td><span class="hp-tbar"><i style="width: <?= (int)$t[3] ?>%"></i></span></td></tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+            <div class="hp-tpanel hp-spot hp-rv" data-rv="right">
+                <div class="hp-tpanel-head"><b>🎨 Colour performance</b><small>Example report</small></div>
+                <ul class="hp-colors">
+                    <?php foreach ([['Red', '#e53935', 92, '3.1%'], ['Beige', '#e8d8b8', 81, '2.7%'], ['Green', '#43a047', 68, '2.2%'], ['Navy', '#1a237e', 57, '1.9%'], ['Pink', '#ec407a', 49, '1.7%']] as $c): ?>
+                        <li><span class="hp-sw" style="background: <?= e($c[1]) ?>"></span><b><?= e($c[0]) ?></b><span class="hp-tbar"><i style="width: <?= (int)$c[2] ?>%"></i></span><em><?= e($c[3]) ?> CTR</em></li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+        </div>
+        <div class="hp-tfeatures">
+            <?php foreach ([
+                ['🏆', 'Top templates', 'Views, clicks, CTR and save rate for every template you use.'],
+                ['🎨', 'Winning colours', 'Main pin colours ranked by saves and clicks — per template or across all pins.'],
+                ['📈', 'Trends & top pins', 'Daily trends, your best pins and which boards, URLs and keywords bring traffic.'],
+                ['🧹', 'Clean-up', 'Find and delete underperforming pins to lift your account’s engagement.'],
+            ] as $i => $f): ?>
+                <div class="hp-tfeat hp-rv" data-rv="up" style="--d: <?= $i * 70 ?>ms"><span><?= $f[0] ?></span><h3><?= e($f[1]) ?></h3><p><?= e($f[2]) ?></p></div>
+            <?php endforeach; ?>
+        </div>
+        <p class="uc-graph-note">Numbers above are an illustrative example — your reports use your own Pinterest data.</p>
     </div>
 </section>
 
@@ -481,7 +578,7 @@ uc_section_real_results($pdo, $user, $hpUc, '');
         <div class="uc-head hp-rv" data-rv="up">
             <div class="uc-eyebrow">// WHO IT'S FOR</div>
             <h2>Made for people who <span class="uc-red">monetize traffic</span></h2>
-            <p class="uc-muted">Whether the money comes from products, affiliate links or ads — <?= e(APP_NAME) ?> keeps the Pinterest side running itself.</p>
+            <p class="uc-muted">Whether the money comes from products, affiliate links or ads — <?= e(SITE_BRAND) ?> keeps the Pinterest side running itself.</p>
         </div>
         <div class="uc-who-grid">
             <div class="uc-who-card hp-spot hp-rv" data-rv="left"><h3>Bloggers &amp; affiliates</h3><p>Every post becomes several fresh pins pointing at your content — compounding traffic from a platform where pins keep working for months.</p></div>
@@ -494,7 +591,7 @@ uc_section_real_results($pdo, $user, $hpUc, '');
 <section class="uc-cta-red">
     <div class="container uc-cta-red-inner hp-rv" data-rv="up">
         <div><h2>Make Pinterest the easy part.</h2><p>Create pins, schedule a year in a click, and bring visitors to your site.</p></div>
-        <?= $hpCta('Try ' . APP_NAME . ' Free →', 'uc-cta-pill rg-shine') ?>
+        <?= $hpCta('Try ' . SITE_BRAND . ' Free →', 'uc-cta-pill rg-shine') ?>
     </div>
 </section>
 
@@ -934,6 +1031,56 @@ uc_section_real_results($pdo, $user, $hpUc, '');
 @media (prefers-reduced-motion: reduce) {
     .hp-rv { opacity: 1 !important; transform: none !important; }
     .hp-aurora i, .hp-glow-ring { animation: none !important; }
+}
+/* ---------- Free Canva alternative ---------- */
+.hp-canva { padding: 80px 0 40px; background: linear-gradient(180deg, #fff 0%, #f7f3ff 100%); }
+.hp-canva-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 46px; align-items: center; margin-bottom: 40px; }
+.hp-canva-copy h2 { font-size: 38px; line-height: 1.15; margin: 8px 0 14px; }
+.hp-canva-list { list-style: none; padding: 0; margin: 18px 0 24px; display: grid; gap: 10px; }
+.hp-canva-list li { display: flex; gap: 10px; align-items: flex-start; font-weight: 500; }
+.hp-canva-list li span { flex: none; width: 30px; height: 30px; border-radius: 9px; background: #fff; box-shadow: 0 4px 14px rgba(124,58,237,.14); display: inline-flex; align-items: center; justify-content: center; }
+.hp-canva-shot { margin: 0; border-radius: 16px; overflow: hidden; background: #fff; box-shadow: 0 30px 70px rgba(76,29,149,.22); border: 1px solid #ede9fe; transform: perspective(1400px) rotateY(-4deg); transition: transform .4s ease; }
+.hp-canva-shot:hover { transform: none; }
+.hp-canva-bar { display: flex; align-items: center; gap: 6px; padding: 9px 12px; background: linear-gradient(90deg, #6d28d9, #db2777); color: #fff; font-size: 12px; font-weight: 600; }
+.hp-canva-bar i { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,.6); }
+.hp-canva-bar span { margin-left: 8px; }
+.hp-canva-shot img { display: block; width: 100%; height: auto; }
+.hp-canva-shot figcaption { font-size: 12.5px; color: var(--gray); padding: 8px 12px; }
+.hp-canva-table td { text-align: center; }
+.hp-canva-table td.uc-col-us { text-align: left; font-weight: 600; }
+/* ---------- Template & colour performance ---------- */
+.hp-tstats { padding: 80px 0; background: #0f1024; color: #e5e7eb; }
+.hp-tstats .uc-head h2, .hp-tstats h3 { color: #fff; }
+.hp-tstats .uc-muted, .hp-tstats .uc-graph-note { color: #a5a8c3; }
+.hp-tstats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-top: 26px; }
+.hp-tpanel { background: #181a36; border: 1px solid #2a2d52; border-radius: 16px; padding: 18px; position: relative; overflow: hidden; }
+.hp-tpanel-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
+.hp-tpanel-head b { color: #fff; font-size: 16px; }
+.hp-tpanel-head small { color: #8b8fb4; font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em; }
+.hp-ttable { width: 100%; border-collapse: collapse; font-size: 14px; }
+.hp-ttable th, .hp-ttable td { padding: 10px 6px; border-bottom: 1px solid #2a2d52; text-align: left; color: #e5e7eb; background: none; }
+.hp-ttable thead th { color: #8b8fb4; font-size: 12px; font-weight: 600; }
+.hp-tbar { display: inline-block; width: 100%; min-width: 70px; height: 8px; border-radius: 99px; background: #2a2d52; overflow: hidden; vertical-align: middle; }
+.hp-tbar i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #e60023, #ff7a59); }
+.hp-colors { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.hp-colors li { display: grid; grid-template-columns: 22px 64px 1fr 80px; gap: 10px; align-items: center; font-size: 14px; }
+.hp-colors em { font-style: normal; color: #a5a8c3; font-size: 12.5px; text-align: right; }
+.hp-sw { width: 22px; height: 22px; border-radius: 7px; border: 1px solid rgba(255,255,255,.25); }
+.hp-tfeatures { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin: 26px 0 12px; }
+.hp-tfeat { background: #181a36; border: 1px solid #2a2d52; border-radius: 14px; padding: 16px; }
+.hp-tfeat span { font-size: 24px; }
+.hp-tfeat h3 { font-size: 16px; margin: 8px 0 6px; }
+.hp-tfeat p { margin: 0; color: #a5a8c3; font-size: 14px; }
+@media (max-width: 980px) {
+    .hp-canva-grid, .hp-tstats-grid { grid-template-columns: 1fr; }
+    .hp-canva-shot { transform: none; }
+    .hp-tfeatures { grid-template-columns: 1fr 1fr; }
+    .hp-canva-copy h2 { font-size: 30px; }
+}
+@media (max-width: 560px) {
+    .hp-tfeatures { grid-template-columns: 1fr; }
+    .hp-colors li { grid-template-columns: 22px 54px 1fr 70px; }
+    .hp-canva-table { font-size: 13px; }
 }
 </style>
 

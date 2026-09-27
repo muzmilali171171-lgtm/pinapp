@@ -7,7 +7,7 @@ require_once __DIR__ . '/../../includes/pricing_functions.php';
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title><?= e($pageTitle ?? 'Dashboard') ?> — <?= e(APP_NAME) ?></title>
+<title><?= e($pageTitle ?? 'Dashboard') ?> — <?= e(SITE_BRAND) ?></title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="../assets/css/style.css?v=<?= @filemtime(__DIR__ . '/../../assets/css/style.css') ?: time() ?>">
 <link rel="stylesheet" href="../assets/css/free-tool.css?v=<?= @filemtime(__DIR__ . '/../../assets/css/free-tool.css') ?: time() ?>">
@@ -26,7 +26,7 @@ require_once __DIR__ . '/../../includes/pricing_functions.php';
     <div class="topbar-left">
         <button type="button" class="hamburger-btn" id="mobileMenuBtn" aria-label="Open menu" aria-controls="mainSidebar" aria-expanded="false"><span></span><span></span><span></span></button>
         <a href="dashboard" class="topbar-logo" title="Dashboard">📍</a>
-        <a href="dashboard" class="topbar-brand" title="Dashboard">Web To <span>Pin</span></a>
+        <a href="dashboard" class="topbar-brand" title="Dashboard">Automated<span>Pin</span></a>
         <button type="button" class="topbar-icon-btn" id="sidebarToggleBtn" title="Toggle sidebar">⇤</button>
     </div>
     <div class="topbar-right">
@@ -56,7 +56,7 @@ require_once __DIR__ . '/../../includes/pricing_functions.php';
 <div class="app-shell">
     <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
     <aside class="sidebar user-sidebar" id="mainSidebar">
-        <div class="brand">Web To <span>Pin</span><button type="button" class="sidebar-close" id="sidebarCloseBtn" aria-label="Close menu">&times;</button></div>
+        <div class="brand">Automated<span>Pin</span><button type="button" class="sidebar-close" id="sidebarCloseBtn" aria-label="Close menu">&times;</button></div>
         <?php
         // Sidebar, grouped by what the user is doing. Each group: [id, label, active pages, items[href, page, label]]
         $cwDraftCount = 0;

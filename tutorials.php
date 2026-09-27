@@ -26,8 +26,9 @@ foreach ($tutorials as $t) {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <?php seo_render_head($pdo, [
-    'title' => 'Tutorials — ' . APP_NAME,
-    'description' => 'Short video tutorials to get you up to speed with ' . APP_NAME . '.',
+    'title' => 'Video Tutorials: Pinterest Automation Guide | ' . SITE_BRAND,
+    'description' => 'Short step-by-step video tutorials for ' . SITE_BRAND . ': scheduling pins, the Classic Wizard, Auto Blog, the free design editor and Pinterest analytics.',
+    'breadcrumbs' => [['Tutorials', 'tutorials']],
 ]); ?>
 <link rel="stylesheet" href="assets/css/style.css?v=<?= @filemtime(__DIR__ . '/assets/css/style.css') ?: time() ?>">
 </head>

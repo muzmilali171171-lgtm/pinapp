@@ -58,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $emailSettings = email_settings_get($pdo);
                     if ($emailSettings['email_change_notify_enabled']) {
                         send_app_email($pdo, $oldEmail, 'Your email address was changed',
-                            "<p>Hi " . e($user['name']) . ",</p><p>Your " . e(defined('APP_NAME') ? APP_NAME : 'account') . " login email was changed to <strong>" . e($newEmail) . "</strong>. If you didn't make this change, please contact support immediately.</p>");
+                            "<p>Hi " . e($user['name']) . ",</p><p>Your " . e(defined('SITE_BRAND') ? SITE_BRAND : 'account') . " login email was changed to <strong>" . e($newEmail) . "</strong>. If you didn't make this change, please contact support immediately.</p>");
                     }
                     $success = 'Your email was updated.';
                 }
@@ -331,7 +331,7 @@ include __DIR__ . '/includes/user-header.php';
     <div class="card">
         <h2>Use your own AI model (OpenRouter)</h2>
         <p class="muted">Runs pin text / article text generation on <strong>your own</strong> OpenRouter account and model
-        instead of <?= e(defined('APP_NAME') ? APP_NAME : 'the platform') ?>'s models. If your key hits a limit or errors out,
+        instead of <?= e(defined('SITE_BRAND') ? SITE_BRAND : 'the platform') ?>'s models. If your key hits a limit or errors out,
         generation automatically falls back to the platform's own model so your request still completes.</p>
         <p class="muted">Status:
             <?php if (!empty($aiSettings['text_enabled']) && !empty($aiSettings['text_api_key'])): ?>
@@ -369,7 +369,7 @@ include __DIR__ . '/includes/user-header.php';
     <div class="card">
         <h2>Use your own AI model (OpenRouter)</h2>
         <p class="muted">Runs AI image generation on <strong>your own</strong> OpenRouter account and model instead of
-        <?= e(defined('APP_NAME') ? APP_NAME : 'the platform') ?>'s models. Falls back automatically to the platform's own
+        <?= e(defined('SITE_BRAND') ? SITE_BRAND : 'the platform') ?>'s models. Falls back automatically to the platform's own
         image model if your key hits a limit or errors out.</p>
         <p class="muted">Status:
             <?php if (!empty($aiSettings['image_enabled']) && !empty($aiSettings['image_api_key'])): ?>

@@ -7,7 +7,7 @@ require_once __DIR__ . "/../../includes/seo_functions.php";
 require_once __DIR__ . "/../../includes/use_case_functions.php";
 
 $user = current_user($pdo);
-$app = APP_NAME;
+$app = SITE_BRAND;
 
 $uc = uc_build([
 'slug' => 'webflow-website', 'name' => 'Webflow Websites', 'short' => 'Webflow Site', 'site' => 'Webflow Site', 'accent' => '#4353ff', 'noun' => 'CMS pages', 'niche' => 'your Webflow site’s topics',
@@ -20,7 +20,7 @@ $uc = uc_build([
 'placeholder' => 'https://yoursite.webflow.io/blog/your-post',
 'marquee' => ['Blog posts', 'Case studies', 'Portfolio', 'Templates', 'Resources', 'Products', 'Guides', 'Landing pages', 'Design tips', 'SaaS content'],
 'results' => ['Your Webflow Site, Discovered', 'Every CMS page is another way in. Pinned consistently, they add a steady, free traffic source to your site.'],
-'design_title' => 'Match Your Design System', 'design_point' => 'Set your brand palette and fonts once, or import your Canva template.',
+'design_title' => 'Match Your Design System', 'design_point' => 'Set your brand palette and fonts once, or build your own template in the free editor.',
 'features' => ['Why Webflow Sites Automate Pinterest', 'Design-quality pins for a design-quality site.', [
     ['🗺️', 'Sitemap scanning', 'Webflow’s auto-generated sitemap lists every page.'],
     ['🎨', 'Brand-true pins', 'Your palette and fonts on every pin.'],

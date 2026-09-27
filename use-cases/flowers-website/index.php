@@ -7,7 +7,7 @@ require_once __DIR__ . "/../../includes/seo_functions.php";
 require_once __DIR__ . "/../../includes/use_case_functions.php";
 
 $user = current_user($pdo);
-$app = APP_NAME;
+$app = SITE_BRAND;
 
 $uc = [
     'slug' => 'flowers-website',
@@ -32,7 +32,7 @@ $uc = [
     ],
     'start' => ['label' => '✨ FREE PIN MAKER · NO SIGN-UP', 'title' => 'Paste a Bouquet or Guide Link', 'text' => 'Get elegant flower pins in seconds.', 'placeholder' => 'https://yourflowershop.com/spring-bouquet/'],
     'marquee' => ['Spring bouquets', 'Peonies', 'Wedding flowers', 'Valentine’s roses', 'Dried flowers', 'Flower arranging', 'Mother’s Day', 'Table centerpieces', 'Wildflowers', 'Flower care'],
-    'results' => ['title' => 'See the Results: Blooming Every Holiday', 'text' => 'Flower searches peak around Valentine’s Day, Mother’s Day and wedding season. Pin ahead and your shop is on the boards when buyers decide.', 'stats' => [[5, 'x', 'more traffic, up to'], [56, '', 'colour palettes'], [70, '', 'pin templates'], [130, '+', 'elegant fonts']], 'alt' => 'Pinterest traffic growth for a flower website'],
+    'results' => ['title' => 'See the Results: Blooming Every Holiday', 'text' => 'Flower searches peak around Valentine’s Day, Mother’s Day and wedding season. Pin ahead and your shop is on the boards when buyers decide.', 'stats' => [[5, 'x', 'more traffic, up to'], [100, '%', 'free design editor, no Canva Pro'], [500, '+', 'premium pin templates'], [1000, '+', 'font & colour combinations']], 'alt' => 'Pinterest traffic growth for a flower website'],
     'features' => ['eyebrow' => 'MADE FOR FLOWERS', 'title' => 'Why Florists & Flower Blogs Automate Pinterest', 'text' => 'Beautiful photos plus perfect timing.', 'items' => [
         ['🌷', 'Elegant templates', 'Arch frames, soft palettes and script accents that suit florals.'],
         ['❤️', 'Holiday timing', 'Valentine’s, Mother’s Day and wedding season pinned weeks ahead.'],

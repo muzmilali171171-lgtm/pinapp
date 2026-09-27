@@ -43,8 +43,12 @@ $remainingAttempts = free_tool_attempts_remaining($pdo, $settings['max_pins'], '
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Free AI Pinterest Pin Create — Generate a Pin From Any Title | <?= e(APP_NAME) ?></title>
-<meta name="description" content="Create a scroll-stopping Pinterest pin free with AI. Enter a blog title or keyword, pick a size, and get a ready-to-post pin design in seconds — no design skills needed.">
+<?php require_once __DIR__ . '/../../includes/seo_functions.php'; seo_render_head($pdo, [
+    'title' => 'AI Pinterest Pin Creator: Pin From a Title | ' . SITE_BRAND,
+    'description' => 'Turn any title or keyword into a fully designed Pinterest pin with AI. Choose a template, size and colours, then download your pin free.',
+    'canonical' => rtrim(APP_URL, '/') . '/free-tools/ai-pinterest-pin-create/',
+    'breadcrumbs' => [['Free Tools', 'free-tools/'], ['AI Pinterest Pin Creator', 'free-tools/ai-pinterest-pin-create/']],
+]); ?>
 <link rel="stylesheet" href="../../assets/css/style.css?v=<?= @filemtime(__DIR__ . '/../../assets/css/style.css') ?: time() ?>">
 <link rel="stylesheet" href="../../assets/css/free-tool.css?v=<?= @filemtime(__DIR__ . '/../../assets/css/free-tool.css') ?: time() ?>">
 </head>

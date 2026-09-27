@@ -7,7 +7,7 @@ require_once __DIR__ . "/../../includes/seo_functions.php";
 require_once __DIR__ . "/../../includes/use_case_functions.php";
 
 $user = current_user($pdo);
-$app = APP_NAME;
+$app = SITE_BRAND;
 
 $uc = [
     'slug' => 'hairstyles-website',
@@ -40,7 +40,7 @@ $uc = [
         ['🗂️', 'Hair boards', 'Short hair, curly hair, over 50 — sorted automatically.'],
         ['✍️', 'Auto Blog', 'AI writes hair roundups with images and pins them.'],
     ]],
-    'results' => ['title' => 'See the Results: Evergreen Hair Traffic', 'text' => 'Haircut searches never stop. Pin every roundup and keep a steady stream of readers planning their next cut.', 'stats' => [[5, 'x', 'more traffic, up to'], [10, '', 'pins per roundup, max'], [70, '', 'pin templates'], [20, '/day', 'pins at full pace']], 'alt' => 'Pinterest traffic growth for a hairstyle website'],
+    'results' => ['title' => 'See the Results: Evergreen Hair Traffic', 'text' => 'Haircut searches never stop. Pin every roundup and keep a steady stream of readers planning their next cut.', 'stats' => [[5, 'x', 'more traffic, up to'], [10, '', 'pins per roundup, max'], [500, '+', 'premium pin templates'], [20, '/day', 'pins at full pace']], 'alt' => 'Pinterest traffic growth for a hairstyle website'],
     'steps' => ['title' => 'From Hair Roundup to', 'title_accent' => 'Top Pin', 'text' => 'Scan, pick number templates, schedule, approve.', 'items' => [
         ['icon' => '💇‍♀️', 'label' => 'Setup', 'title' => 'Scan Your Hair Posts', 'alt' => 'Scanning a hairstyle website', 'points' => ['Every roundup listed from your sitemap.', 'Search “bob”, “over 50” or “curly” and select.']],
         ['icon' => '🔢', 'label' => 'Design', 'title' => 'Use Hair-Style Templates', 'alt' => 'Choosing number templates for hair pins', 'points' => ['Number and outlined-text templates.', 'Collages for multi-look roundups.']],

@@ -11,7 +11,7 @@ return [
         'title' => 'Later vs Tailwind for Pinterest (2026): Which Should You Use?',
         'subtitle' => 'A visual multi-platform planner versus the Pinterest specialist — and where automated pin creation fits in.',
         'meta_title' => 'Later vs Tailwind for Pinterest — 2026 Comparison',
-        'meta_description' => 'Later vs Tailwind compared for Pinterest pin scheduling: pricing, features, pros and cons, and where automated pin creation with WebToPin fits in.',
+        'meta_description' => 'Later vs Tailwind compared for Pinterest pin scheduling: pricing, features, pros and cons, and where automated pin creation with AutomatedPin fits in.',
         'file' => 'later-vs-tailwind.html',
     ],
     [

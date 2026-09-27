@@ -76,7 +76,7 @@ include __DIR__ . '/includes/admin-header.php';
         <p class="muted">Applied to every free (logged-out) pin. Upload a logo to use it instead of text.</p>
         <div class="form-row">
             <label>Watermark Text <span class="muted">(used when no logo is set)</span></label>
-            <input type="text" name="watermark_text" value="<?= e($settings['pincreate_watermark_text'] ?? APP_NAME) ?>">
+            <input type="text" name="watermark_text" value="<?= e($settings['pincreate_watermark_text'] ?? SITE_BRAND) ?>">
         </div>
         <div class="form-row">
             <label>Watermark Logo</label>

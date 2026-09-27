@@ -37,8 +37,12 @@ $remainingAttempts = free_tool_attempts_remaining($pdo, $settings['daily_limit']
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Free AI Image Creator — Generate Images From Text | <?= e(APP_NAME) ?></title>
-<meta name="description" content="Generate free AI images from a text prompt. Pick your size and create high-quality images in seconds — no sign-up needed to try it.">
+<?php require_once __DIR__ . '/../../includes/seo_functions.php'; seo_render_head($pdo, [
+    'title' => 'Free AI Image Creator: Text to Image | ' . SITE_BRAND,
+    'description' => 'Create unique AI images from a text prompt for free. Pick a style and size for Pinterest pins, blog posts or social media and download in seconds.',
+    'canonical' => rtrim(APP_URL, '/') . '/free-tools/ai-image-creater/',
+    'breadcrumbs' => [['Free Tools', 'free-tools/'], ['AI Image Creator', 'free-tools/ai-image-creater/']],
+]); ?>
 <link rel="stylesheet" href="../../assets/css/style.css?v=<?= @filemtime(__DIR__ . '/../../assets/css/style.css') ?: time() ?>">
 <link rel="stylesheet" href="../../assets/css/free-tool.css?v=<?= @filemtime(__DIR__ . '/../../assets/css/free-tool.css') ?: time() ?>">
 </head>

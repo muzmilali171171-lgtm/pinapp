@@ -7,7 +7,7 @@ require_once __DIR__ . "/../../includes/seo_functions.php";
 require_once __DIR__ . "/../../includes/use_case_functions.php";
 
 $user = current_user($pdo);
-$app = APP_NAME;
+$app = SITE_BRAND;
 
 $uc = uc_build([
 'slug' => 'sustainable-fashion', 'name' => 'Sustainable Fashion Brands', 'short' => 'Sustainable Fashion Brand', 'site' => 'Store', 'accent' => '#4d7c0f', 'noun' => 'products', 'niche' => 'sustainable fashion and slow living',

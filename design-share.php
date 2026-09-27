@@ -34,7 +34,7 @@ $owner = trim(explode(' ', (string)$design['owner_name'])[0] ?? '');
 $pages = count((array)(json_decode((string)$design['design_json'], true)['pages'] ?? [1]));
 $img0 = $images ? seo_asset_url($images[0]) : '';
 $u = rawurlencode($shareUrl);
-$t = rawurlencode($title . ' — made with ' . APP_NAME);
+$t = rawurlencode($title . ' — made with ' . SITE_BRAND);
 $socials = [
     ['Facebook', 'https://www.facebook.com/sharer/sharer.php?u=' . $u, '#1877f2', 'f'],
     ['X', 'https://twitter.com/intent/tweet?url=' . $u . '&text=' . $t, '#000000', '𝕏'],
@@ -52,10 +52,11 @@ $socials = [
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <?php seo_render_head($pdo, [
-    'title' => $title . ' — Design on ' . APP_NAME,
-    'description' => 'A design shared on ' . APP_NAME . '. Open it in the free design editor, edit it and make it yours.',
+    'title' => $title . ' — Design on ' . SITE_BRAND,
+    'description' => 'A design shared on ' . SITE_BRAND . '. Open it in the free design editor, edit it and make it yours.',
     'image' => $img0 ?: null,
     'canonical' => $shareUrl,
+    'noindex' => true,   // user-made designs: shareable, but kept out of search results (thin / duplicate pages)
 ]); ?>
 <link rel="stylesheet" href="assets/css/style.css?v=<?= @filemtime(__DIR__ . '/assets/css/style.css') ?: time() ?>">
 <style>

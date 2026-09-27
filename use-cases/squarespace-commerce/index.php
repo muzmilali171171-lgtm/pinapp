@@ -7,7 +7,7 @@ require_once __DIR__ . "/../../includes/seo_functions.php";
 require_once __DIR__ . "/../../includes/use_case_functions.php";
 
 $user = current_user($pdo);
-$app = APP_NAME;
+$app = SITE_BRAND;
 
 $uc = uc_build([
 'slug' => 'squarespace-commerce', 'name' => 'Squarespace Commerce', 'short' => 'Squarespace Store', 'site' => 'Squarespace Site', 'accent' => '#1f2937', 'noun' => 'products', 'niche' => 'your store and blog topics',
@@ -39,7 +39,7 @@ $uc = uc_build([
 'faq' => [
     ['Does it work with Squarespace sitemaps?', 'Yes — Squarespace publishes a sitemap, and we read it to list products and posts.'],
     ['Do I need to install anything?', 'No — we read your public pages.'],
-    ['Can pins match my site design?', 'Yes — set your brand palette and fonts, or import your own Canva template.'],
+    ['Can pins match my site design?', 'Yes — set your brand palette and fonts, or design your own template in the free editor.'],
 ],
 'cta_red' => ['A beautiful store deserves shoppers.', 'Pin every product automatically.'],
 'cta_dark' => 'Ready to grow your Squarespace store?',

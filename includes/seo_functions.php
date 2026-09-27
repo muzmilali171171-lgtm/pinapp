@@ -14,22 +14,23 @@ function get_seo_settings(PDO $pdo): array
 {
     static $cache = null;
     if ($cache !== null) return $cache;
+    seo_go_live_once($pdo);
 
     $defaults = [
-        'meta_title' => defined('APP_NAME') ? APP_NAME : 'Pin Scheduler',
+        'meta_title' => defined('SITE_BRAND') ? SITE_BRAND : 'Pin Scheduler',
         'meta_description' => '',
         'meta_keywords' => '',
         'favicon_path' => '',
         'logo_path' => '',
         'og_image_path' => '',
         'canonical_url' => '',
-        'robots_index' => 0,          // default OFF, as requested
+        'robots_index' => 1,          // the site is live: search engines may index it (Admin → SEO Setting can switch it off)
         'robots_follow' => 1,
         'robots_txt' => '',
         'extra_head_code' => '',
         'schema_enabled' => 1,
         'app_type' => 'WebApplication',
-        'app_name' => defined('APP_NAME') ? APP_NAME : '',
+        'app_name' => defined('SITE_BRAND') ? SITE_BRAND : '',
         'app_url' => defined('APP_URL') ? rtrim(APP_URL, '/') . '/' : '',
         'app_category' => 'BusinessApplication',
         'app_operating_system' => 'Any',
@@ -80,6 +81,109 @@ function seo_reviews(PDO $pdo, bool $activeOnly = true): array
     } catch (Throwable $e) {
         return [];
     }
+}
+
+/* ===================== Site-wide SEO defaults ===================== */
+
+const SEO_HOME_TITLE = 'AI Pinterest Automation & Pin Scheduler | AutomatedPin';
+const SEO_HOME_DESCRIPTION = 'Automate Pinterest with AI: create pins for hundreds of pages in 1 click, schedule them, auto-write blog posts and design free with unlimited templates.';
+const SEO_HOME_KEYWORDS = 'Pinterest automation tool, AI Pinterest pin scheduler, auto pin to Pinterest, Pinterest pin maker, Canva alternative for Pinterest, free Pinterest pin templates, AI auto blog, bulk pin scheduler, Pinterest analytics';
+const SEO_DEFAULT_IMAGE = 'https://media.webtopin.com/cdn/uploads/acc058d92f65e7730cdf1dbfd1973c5f.webp';
+
+/**
+ * One-time "go live" for the new domain (flag file): switches indexing on, sets the optimized home
+ * meta, clears a site-wide canonical / custom robots.txt that could hide pages, renames the old
+ * brand in blog posts, and rewrites the static robots.txt. Admin → SEO Setting still controls it after.
+ */
+function seo_go_live_once(PDO $pdo): void
+{
+    static $done = false;
+    if ($done) return;
+    $done = true;
+    $flag = __DIR__ . '/../uploads/.seo_live_v1';
+    if (is_file($flag)) return;
+    try {
+        $id = $pdo->query("SELECT id FROM seo_settings ORDER BY id ASC LIMIT 1")->fetchColumn();
+        if ($id) {
+            $pdo->prepare("UPDATE seo_settings SET robots_index = 1, robots_follow = 1, robots_txt = NULL, canonical_url = NULL,
+                meta_title = ?, meta_description = ?, meta_keywords = ?, app_name = ?, app_url = ? WHERE id = ?")
+                ->execute([SEO_HOME_TITLE, SEO_HOME_DESCRIPTION, SEO_HOME_KEYWORDS, SITE_BRAND, rtrim(APP_URL, '/') . '/', $id]);
+        }
+        // Old brand name saved in the database (footer text, email sender name, SEO fields, blog posts).
+        // Only the site's own address changes — media.webtopin.com image links (the CDN) stay as they are.
+        $brandPairs = [['WebToPin', SITE_BRAND], ['Webtopin', SITE_BRAND], ['Web To Pin', SITE_BRAND]];
+        $domainPairs = [['://www.webtopin.com', '://automatedpin.io'], ['://webtopin.com', '://automatedpin.io'], [' webtopin.com', ' automatedpin.io'], ['>webtopin.com', '>automatedpin.io']];
+        $targets = [
+            ['footer_settings', ['logo_text', 'description', 'footer_text'], true],
+            ['seo_settings', ['publisher_name', 'app_description'], true],
+            ['seo_reviews', ['item_name', 'review_body'], true],
+            ['platform_settings', ['setting_value'], false],
+            ['blog_posts', ['title', 'subtitle', 'meta_title', 'meta_description', 'content', 'author'], true],
+        ];
+        foreach ($targets as [$table, $cols, $withDomain]) {
+            foreach ($cols as $col) {
+                // settings table: only the plain brand name (e.g. email sender) — never keys, buckets or URLs
+                foreach ($withDomain ? array_merge($brandPairs, $domainPairs) : [['Web To Pin', SITE_BRAND]] as [$old, $new]) {
+                    try {
+                        $pdo->prepare("UPDATE $table SET $col = REPLACE($col, ?, ?) WHERE $col LIKE BINARY ?")
+                            ->execute([$old, $new, '%' . $old . '%']);
+                    } catch (Throwable $e) { /* table / column missing */ }
+                }
+            }
+        }
+    } catch (Throwable $e) { /* tables missing — defaults apply */ }
+    if (!is_dir(dirname($flag))) @mkdir(dirname($flag), 0755, true);
+    @file_put_contents($flag, date('c'));
+    seo_write_robots_file($pdo);
+}
+
+/** Absolute, clean URL of the page being shown (no query string, no ".php", no "index.php"). */
+function seo_current_url(): string
+{
+    $path = parse_url((string)($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_PATH) ?: '/';
+    $path = preg_replace('#/index\.php$#', '/', $path);
+    $path = preg_replace('#\.php$#', '', $path);
+    $path = preg_replace('#/{2,}#', '/', $path);
+    return rtrim(defined('APP_URL') ? APP_URL : '', '/') . $path;
+}
+
+/** Keeps a title within ~60 characters: drops the " | Brand" / " — Brand" suffix when it would not fit. */
+function seo_fit_title(string $title): string
+{
+    $title = trim(preg_replace('/\s+/', ' ', $title));
+    if (mb_strlen($title) <= 60) return $title;
+    $b = preg_quote(SITE_BRAND, '/');
+    $short = preg_replace('/\s*[|—–-]\s*(Blog\s*[|—–-]\s*)?' . $b . '$/u', '', $title);
+    return $short !== '' ? $short : $title;
+}
+
+/** Keeps a meta description within 160 characters, cut at a word. */
+function seo_fit_description(string $d): string
+{
+    $d = trim(preg_replace('/\s+/', ' ', $d));
+    if (mb_strlen($d) <= 160) return $d;
+    $cut = mb_substr($d, 0, 157);
+    $cut = preg_replace('/\s+\S*$/u', '', $cut);
+    return rtrim($cut, " ,;:—–-") . '…';
+}
+
+/** Organization + WebSite (+ BreadcrumbList) JSON-LD for every public page. */
+function seo_site_schema(PDO $pdo, array $breadcrumbs = []): array
+{
+    $s = get_seo_settings($pdo);
+    $home = rtrim(APP_URL, '/') . '/';
+    $logo = seo_asset_url($s['logo_path'] ?: $s['favicon_path']);
+    $org = ['@type' => 'Organization', '@id' => $home . '#organization', 'name' => SITE_BRAND, 'url' => $home];
+    if ($logo !== '') $org['logo'] = $logo;
+    $graph = [$org, ['@type' => 'WebSite', '@id' => $home . '#website', 'name' => SITE_BRAND, 'url' => $home, 'publisher' => ['@id' => $home . '#organization']]];
+    if ($breadcrumbs) {
+        $items = [['@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => $home]];
+        foreach (array_values($breadcrumbs) as $i => [$name, $url]) {
+            $items[] = ['@type' => 'ListItem', 'position' => $i + 2, 'name' => $name, 'item' => preg_match('#^https?://#', $url) ? $url : rtrim(APP_URL, '/') . '/' . ltrim($url, '/')];
+        }
+        $graph[] = ['@type' => 'BreadcrumbList', 'itemListElement' => $items];
+    }
+    return ['@context' => 'https://schema.org', '@graph' => $graph];
 }
 
 /** Turn a stored path ("uploads/seo/x.png") into a full URL; leaves absolute URLs alone. */
@@ -280,24 +384,27 @@ function seo_render_schema(PDO $pdo): void
  */
 function seo_render_head(PDO $pdo, array $opts = []): void
 {
+    seo_go_live_once($pdo);
     $s = get_seo_settings($pdo);
 
-    $title = trim((string)($opts['title'] ?? $s['meta_title'])) ?: (defined('APP_NAME') ? APP_NAME : '');
-    $desc = trim((string)($opts['description'] ?? $s['meta_description']));
+    $title = seo_fit_title(trim((string)($opts['title'] ?? $s['meta_title'])) ?: SITE_BRAND);
+    $desc = seo_fit_description(trim((string)($opts['description'] ?? $s['meta_description'])));
     $keywords = trim((string)($opts['keywords'] ?? $s['meta_keywords']));
-    $canonical = trim((string)($opts['canonical'] ?? $s['canonical_url']));
-    $image = seo_asset_url($opts['image'] ?? ($s['og_image_path'] ?: $s['logo_path']));
+    // Every page is its own canonical (clean URL, no query string) unless the page says otherwise.
+    $canonical = trim((string)($opts['canonical'] ?? '')) ?: seo_current_url();
+    $image = seo_asset_url($opts['image'] ?? ($s['og_image_path'] ?: SEO_DEFAULT_IMAGE));
+    $imageAlt = trim((string)($opts['image_alt'] ?? $title));
 
     // Indexing: page-level noindex always wins; otherwise the admin toggle decides.
     $noindex = !empty($opts['noindex']) || empty($s['robots_index']);
-    $robots = ($noindex ? 'noindex' : 'index') . ',' . (empty($s['robots_follow']) ? 'nofollow' : 'follow');
+    $robots = ($noindex ? 'noindex' : 'index') . ',' . (empty($s['robots_follow']) ? 'nofollow' : 'follow')
+        . ($noindex ? '' : ',max-image-preview:large,max-snippet:-1');
 
     echo '<title>' . e($title) . "</title>\n";
     if ($desc !== '')     echo '<meta name="description" content="' . e($desc) . "\">\n";
     if ($keywords !== '') echo '<meta name="keywords" content="' . e($keywords) . "\">\n";
     echo '<meta name="robots" content="' . e($robots) . "\">\n";
-    echo '<meta name="googlebot" content="' . e($robots) . "\">\n";
-    if ($canonical !== '') echo '<link rel="canonical" href="' . e($canonical) . "\">\n";
+    echo '<link rel="canonical" href="' . e($canonical) . "\">\n";
 
     $favicon = seo_asset_url($s['favicon_path']);
     if ($favicon !== '') {
@@ -309,17 +416,26 @@ function seo_render_head(PDO $pdo, array $opts = []): void
     }
 
     // Open Graph / Twitter
-    echo '<meta property="og:type" content="website">' . "\n";
+    echo '<meta property="og:type" content="' . e($opts['og_type'] ?? 'website') . "\">\n";
+    echo '<meta property="og:site_name" content="' . e(SITE_BRAND) . "\">\n";
     echo '<meta property="og:title" content="' . e($title) . "\">\n";
     if ($desc !== '') echo '<meta property="og:description" content="' . e($desc) . "\">\n";
-    if ($canonical !== '') echo '<meta property="og:url" content="' . e($canonical) . "\">\n";
-    if ($image !== '') echo '<meta property="og:image" content="' . e($image) . "\">\n";
+    echo '<meta property="og:url" content="' . e($canonical) . "\">\n";
+    if ($image !== '') {
+        echo '<meta property="og:image" content="' . e($image) . "\">\n";
+        echo '<meta property="og:image:alt" content="' . e($imageAlt) . "\">\n";
+    }
     echo '<meta name="twitter:card" content="' . ($image !== '' ? 'summary_large_image' : 'summary') . "\">\n";
     echo '<meta name="twitter:title" content="' . e($title) . "\">\n";
     if ($desc !== '') echo '<meta name="twitter:description" content="' . e($desc) . "\">\n";
     if ($image !== '') echo '<meta name="twitter:image" content="' . e($image) . "\">\n";
 
-    if (($opts['schema'] ?? true) && !$noindex) {
+    if (!$noindex && ($opts['site_schema'] ?? true)) {
+        echo '<script type="application/ld+json">' . json_encode(seo_site_schema($pdo, $opts['breadcrumbs'] ?? []), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) . "</script>\n";
+    }
+    // The app / rating / offers markup describes the whole product: home page only (or where a page asks for it).
+    $isHome = rtrim($canonical, '/') === rtrim(defined('APP_URL') ? APP_URL : '', '/');
+    if (($opts['schema'] ?? $isHome) && !$noindex) {
         seo_render_schema($pdo);
     }
 
@@ -342,13 +458,9 @@ function seo_robots_txt(PDO $pdo): string
 
     $base = defined('APP_URL') ? rtrim(APP_URL, '/') : '';
     $txt  = "User-agent: *\n";
-    $txt .= "Disallow: /admin/\n";
-    $txt .= "Disallow: /user/\n";
-    $txt .= "Disallow: /auth/\n";
-    $txt .= "Disallow: /config/\n";
-    $txt .= "Disallow: /oauth/\n";
-    $txt .= "Disallow: /cron/\n";
     $txt .= "Allow: /\n";
+    foreach (['/admin/', '/user/', '/auth/', '/config/', '/oauth/', '/cron/', '/includes/', '/database/', '/wp-plugin/', '/uploads/cw-src/', '/uploads/cw-pt/'] as $p) $txt .= "Disallow: $p\n";
+    foreach (['/install.php', '/migrate.php', '/update-pricing-plans.php', '/robots.php', '/media.php', '/pin-template-preview', '/pin-templates', '/image-categories', '/sitemap.php'] as $p) $txt .= "Disallow: $p\n";
     if ($base !== '') $txt .= "\nSitemap: $base/sitemap.xml\n";
     return $txt;
 }

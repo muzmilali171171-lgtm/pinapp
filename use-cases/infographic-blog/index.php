@@ -7,7 +7,7 @@ require_once __DIR__ . "/../../includes/seo_functions.php";
 require_once __DIR__ . "/../../includes/use_case_functions.php";
 
 $user = current_user($pdo);
-$app = APP_NAME;
+$app = SITE_BRAND;
 
 $uc = uc_build([
 'slug' => 'infographic-blog', 'name' => 'Infographic Blogs', 'short' => 'Infographic Blog', 'site' => 'Blog', 'accent' => '#3b82f6', 'noun' => 'infographics', 'niche' => 'data, facts and how-to infographics',
@@ -20,7 +20,7 @@ $uc = uc_build([
 'placeholder' => 'https://yourblog.com/sleep-hygiene-infographic/',
 'marquee' => ['Cheat sheets', 'Checklists', 'How-to graphics', 'Statistics', 'Timelines', 'Comparisons', 'Study guides', 'Health facts', 'Money tips', 'Marketing charts'],
 'results' => ['Graphics That Get Re-Shared', 'Useful infographics get saved and re-saved across boards. Each one can keep sending visitors for years.'],
-'stats' => [[5, 'x', 'more traffic, up to'], [2, '', 'tall pin sizes (1:2.1 & 9:16)'], [70, '', 'pin templates'], [365, '', 'days of pins in one run']],
+'stats' => [[5, 'x', 'more traffic, up to'], [2, '', 'tall pin sizes (1:2.1 & 9:16)'], [500, '+', 'premium pin templates'], [365, '', 'days of pins in one run']],
 'design_title' => 'Go Tall', 'design_point' => 'Choose the long 1:2.1 or 9:16 size so tall infographics fit.',
 'features' => ['Why Infographic Creators Automate Pinterest', 'Your format is already Pinterest-native.', [
     ['📐', 'Tall pin sizes', '1000 × 2100 and 1080 × 1920 for long graphics.'],

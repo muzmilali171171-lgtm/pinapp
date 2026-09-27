@@ -102,7 +102,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
-auth_layout_start($pdo, 'Sign up free — ' . APP_NAME, 'register');
+auth_layout_start($pdo, 'Sign up free — ' . SITE_BRAND, 'register');
 $hasSocial = $authSettings['google_enabled'] || $authSettings['facebook_enabled'] || $authSettings['microsoft_enabled'] || $authSettings['pinterest_login_enabled'];
 ?>
 <h1>Start growing on Pinterest — <span>free</span></h1>

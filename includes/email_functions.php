@@ -15,7 +15,7 @@ function email_settings_get(PDO $pdo): array
         'smtp_username' => platform_setting($pdo, 'email_smtp_username', ''),
         'smtp_password' => platform_setting($pdo, 'email_smtp_password', ''),
         'smtp_encryption' => platform_setting($pdo, 'email_smtp_encryption', 'tls'), // tls | ssl | none
-        'from_name' => platform_setting($pdo, 'email_from_name', defined('APP_NAME') ? APP_NAME : 'App'),
+        'from_name' => platform_setting($pdo, 'email_from_name', defined('SITE_BRAND') ? SITE_BRAND : 'App'),
         'from_email' => platform_setting($pdo, 'email_from_email', ''),
         'mailchimp_api_key' => platform_setting($pdo, 'email_mailchimp_api_key', ''),
         'mailchimp_audience_id' => platform_setting($pdo, 'email_mailchimp_audience_id', ''),
@@ -35,7 +35,7 @@ function send_app_email(PDO $pdo, string $to, string $subject, string $htmlBody)
 {
     $settings = email_settings_get($pdo);
     $fromEmail = $settings['from_email'] !== '' ? $settings['from_email'] : ('no-reply@' . preg_replace('#^https?://#', '', rtrim(defined('APP_URL') ? APP_URL : '', '/')));
-    $fromName = $settings['from_name'] !== '' ? $settings['from_name'] : (defined('APP_NAME') ? APP_NAME : 'App');
+    $fromName = $settings['from_name'] !== '' ? $settings['from_name'] : (defined('SITE_BRAND') ? SITE_BRAND : 'App');
 
     if ($settings['smtp_enabled'] && $settings['smtp_host'] !== '') {
         return smtp_send_mail($settings, $to, $subject, $htmlBody, $fromEmail, $fromName);

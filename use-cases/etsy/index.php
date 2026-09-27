@@ -7,7 +7,7 @@ require_once __DIR__ . "/../../includes/seo_functions.php";
 require_once __DIR__ . "/../../includes/use_case_functions.php";
 
 $user = current_user($pdo);
-$app = APP_NAME;
+$app = SITE_BRAND;
 
 $uc = [
     'slug' => 'etsy',
@@ -41,7 +41,7 @@ $uc = [
     'results' => [
         'title' => 'See the Results: Your Shop, Found Every Day',
         'text' => 'Etsy search shows you for a few days. A pin can keep sending buyers for months — especially for gifts and seasonal items people save for later.',
-        'stats' => [[70, '', 'pin templates'], [130, '+', 'fonts, script to bold'], [56, '', 'colour palettes'], [5, 'x', 'more traffic, up to']],
+        'stats' => [[500, '+', 'premium pin templates'], [1000, '+', 'font & colour combinations'], [100, '%', 'free design editor, no Canva Pro'], [5, 'x', 'more traffic, up to']],
         'alt' => 'Pinterest traffic growth for an Etsy shop',
     ],
     'features' => [
@@ -62,7 +62,7 @@ $uc = [
         'text' => 'Add your listing or shop pages, pick a look, set your pace — and get back to your craft.',
         'items' => [
             ['icon' => '🧵', 'label' => 'Setup', 'title' => 'Add Your Listings', 'alt' => 'Adding Etsy listing pages to create pins', 'points' => ['Paste listing or shop links — or your own website if you sell there too.', 'Select the listings you want to promote first, like best sellers and seasonal items.']],
-            ['icon' => '🎨', 'label' => 'Design', 'title' => 'Make It Look Like Your Shop', 'alt' => 'Choosing pin templates and fonts for Etsy listings', 'points' => ['Pick templates, colours and fonts that match your shop branding.', 'Import a pin design you made in Canva and reuse it for every listing.']],
+            ['icon' => '🎨', 'label' => 'Design', 'title' => 'Make It Look Like Your Shop', 'alt' => 'Choosing pin templates and fonts for Etsy listings', 'points' => ['Pick templates, colours and fonts that match your shop branding.', 'Build a pin design in the free Canva-style editor and reuse it for every listing.']],
             ['icon' => '⚙️', 'label' => 'Schedule', 'title' => 'Pin at a Natural Pace', 'alt' => 'Pinterest scheduling pace for an Etsy seller', 'points' => ['Start slow on a new account and build up month by month.', 'Several pins per listing, spaced out so your feed stays fresh.']],
             ['icon' => '🎉', 'label' => 'Approve', 'title' => 'Approve and Get Back to Making', 'alt' => 'Approving Etsy listing pins', 'points' => ['Check the pins, tweak anything you like, approve.', 'Pins publish on schedule while you work on orders.']],
         ],
@@ -110,7 +110,7 @@ $uc = [
         ['Will pins link back to my Etsy listing?', 'Yes. Each pin links to the page it was made from, so a listing pin sends people straight to that listing.'],
         ['Do I need an Etsy API connection?', 'No. There is nothing to connect on Etsy — only your Pinterest account.'],
         ['What about digital downloads and printables?', 'They work great. Collage and number templates are ideal for showing several pages of a printable or planner.'],
-        ['Can I use my own pin design from Canva?', 'Yes. Export your design from Canva as SVG and import it — headlines and photos are filled in for every listing.'],
+        ['Can I use my own pin design from Canva?', 'Yes. Import it from Canva as SVG — or build it free in the built-in design editor — and headlines and photos are filled in for every listing.'],
         ['How many pins should I post per day?', 'New accounts should start slowly — the warm-up mode begins at 1 pin a day and grows to 20 by month five.'],
         ['Does AI write in my shop’s style?', 'AI writes from each listing’s content, and you can edit any title or description before approving.'],
         ['Is it free to try?', 'Yes. Use the free Pin Maker above, or create a free account to schedule pins.'],

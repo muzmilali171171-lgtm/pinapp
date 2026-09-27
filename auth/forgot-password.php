@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<?php seo_render_head($pdo, ['title' => 'Forgot password — ' . APP_NAME, 'description' => '', 'noindex' => true, 'schema' => false]); ?>
+<?php seo_render_head($pdo, ['title' => 'Forgot password — ' . SITE_BRAND, 'description' => '', 'noindex' => true, 'schema' => false]); ?>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="../assets/css/style.css?v=<?= @filemtime(__DIR__ . '/../assets/css/style.css') ?: time() ?>">
 </head>

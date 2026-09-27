@@ -13,7 +13,7 @@ try {
 } catch (Throwable $e) {
     $pdo = null;
 }
-if (!defined('APP_NAME')) define('APP_NAME', 'Web To Pin');
+if (!defined('SITE_BRAND')) define('SITE_BRAND', 'AutomatedPin');
 if (!function_exists('e')) {
     function e(string $s): string { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
 }
@@ -43,7 +43,7 @@ $cssVer = @filemtime(__DIR__ . '/assets/css/style.css') ?: time();
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, follow">
-<title>Page not found — <?= e(APP_NAME) ?></title>
+<title>Page not found — <?= e(SITE_BRAND) ?></title>
 <link rel="stylesheet" href="/assets/css/style.css?v=<?= $cssVer ?>">
 <style>
 .nf-wrap {
@@ -123,7 +123,7 @@ $cssVer = @filemtime(__DIR__ . '/assets/css/style.css') ?: time();
 <body>
 
 <?php if (function_exists('render_site_header')): render_site_header($pdo ?? null); else: ?>
-<header class="navbar"><div class="container"><div class="logo"><a href="/" style="color:inherit;text-decoration:none;">Web To<span>Pin</span></a></div></div></header>
+<header class="navbar"><div class="container"><div class="logo"><a href="/" style="color:inherit;text-decoration:none;">Automated<span>Pin</span></a></div></div></header>
 <?php endif; ?>
 
 <main class="nf-wrap">

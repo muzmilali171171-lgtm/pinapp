@@ -11,8 +11,12 @@ $user = current_user($pdo);
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Free Etsy QR Code Generator — Link Buyers To Your Shop | <?= e(APP_NAME) ?></title>
-<meta name="description" content="Create a free scannable QR code for your Etsy shop, listing, or coupon link. Customize size, colors, and margin, then download as PNG for packaging or print.">
+<?php require_once __DIR__ . '/../../includes/seo_functions.php'; seo_render_head($pdo, [
+    'title' => 'Free Etsy QR Code Generator | ' . SITE_BRAND,
+    'description' => 'Make a free QR code for your Etsy shop, listing or review page. Customise colours, add your logo and download PNG or SVG to print on packaging.',
+    'canonical' => rtrim(APP_URL, '/') . '/free-tools/etsy-qr-code-generator/',
+    'breadcrumbs' => [['Free Tools', 'free-tools/'], ['Etsy QR Code Generator', 'free-tools/etsy-qr-code-generator/']],
+]); ?>
 <link rel="stylesheet" href="../../assets/css/style.css?v=<?= @filemtime(__DIR__ . '/../../assets/css/style.css') ?: time() ?>">
 <link rel="stylesheet" href="../../assets/css/free-tool.css?v=<?= @filemtime(__DIR__ . '/../../assets/css/free-tool.css') ?: time() ?>">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>

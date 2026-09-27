@@ -7,7 +7,7 @@ require_once __DIR__ . "/../../includes/seo_functions.php";
 require_once __DIR__ . "/../../includes/use_case_functions.php";
 
 $user = current_user($pdo);
-$app = APP_NAME;
+$app = SITE_BRAND;
 
 $uc = [
     'slug' => 'diy-website',
@@ -31,7 +31,7 @@ $uc = [
     ],
     'start' => ['label' => '✨ FREE PIN MAKER · NO SIGN-UP', 'title' => 'Paste a DIY Tutorial Link', 'text' => 'Get project pins from your step photos.', 'placeholder' => 'https://yourdiyblog.com/diy-floating-shelves/'],
     'marquee' => ['Weekend projects', 'Before & after', 'Budget makeovers', 'Furniture flips', 'Wall decor DIY', 'Outdoor projects', 'Storage ideas', 'Upcycling', 'Holiday DIY', 'Beginner woodworking'],
-    'results' => ['title' => 'See the Results: Tutorials That Keep Getting Built', 'text' => 'DIY tutorials stay useful for years. Pin each project several times and makers keep finding it, season after season.', 'stats' => [[5, 'x', 'more traffic, up to'], [70, '', 'pin templates'], [365, '', 'days of pins in one run'], [10, '', 'pins per project, max']], 'alt' => 'Pinterest traffic growth for a DIY website'],
+    'results' => ['title' => 'See the Results: Tutorials That Keep Getting Built', 'text' => 'DIY tutorials stay useful for years. Pin each project several times and makers keep finding it, season after season.', 'stats' => [[5, 'x', 'more traffic, up to'], [500, '+', 'premium pin templates'], [365, '', 'days of pins in one run'], [10, '', 'pins per project, max']], 'alt' => 'Pinterest traffic growth for a DIY website'],
     'steps' => ['title' => 'From DIY Tutorial to', 'title_accent' => 'Saved Project', 'text' => 'Scan, design, schedule, approve.', 'items' => [
         ['icon' => '🔨', 'label' => 'Setup', 'title' => 'Scan Your Projects', 'alt' => 'Scanning a DIY website', 'points' => ['Every tutorial listed from your sitemap.', 'Select by room, material or season.']],
         ['icon' => '🧩', 'label' => 'Design', 'title' => 'Show the Process', 'alt' => 'Choosing collage templates for DIY pins', 'points' => ['Collages for steps and before-and-afters.', 'Bold roundup templates for project lists.']],

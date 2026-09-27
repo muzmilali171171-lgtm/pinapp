@@ -13,8 +13,9 @@ $user = current_user($pdo);
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <?php seo_render_head($pdo, [
-    'title' => 'Terms and Conditions — ' . APP_NAME,
-    'description' => 'The terms and conditions for using ' . APP_NAME . '.',
+    'title' => 'Terms and Conditions | ' . SITE_BRAND,
+    'description' => 'The terms and conditions for using ' . SITE_BRAND . ': accounts, plans and billing, acceptable use, Pinterest integration, content ownership and liability.',
+    'breadcrumbs' => [['Terms and Conditions', 'terms']],
     'schema' => false,
 ]); ?>
 <link rel="stylesheet" href="assets/css/style.css?v=<?= @filemtime(__DIR__ . '/assets/css/style.css') ?: time() ?>">
@@ -27,7 +28,7 @@ $user = current_user($pdo);
     <h1>Terms and Conditions</h1>
     <p class="muted">Last updated: <?= date('F Y') ?></p>
 
-    <p>These Terms and Conditions ("Terms") govern your use of <?= e(APP_NAME) ?> (the "Service"). By creating an
+    <p>These Terms and Conditions ("Terms") govern your use of <?= e(SITE_BRAND) ?> (the "Service"). By creating an
     account or using the Service, you agree to these Terms.</p>
 
     <h2>1. Using the Service</h2>

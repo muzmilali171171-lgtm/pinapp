@@ -7,7 +7,7 @@ require_once __DIR__ . "/../../includes/seo_functions.php";
 require_once __DIR__ . "/../../includes/use_case_functions.php";
 
 $user = current_user($pdo);
-$app = APP_NAME;
+$app = SITE_BRAND;
 
 $uc = uc_build([
 'slug' => 'printables-shop', 'name' => 'Printables Shops', 'short' => 'Printables Shop', 'site' => 'Shop', 'accent' => '#0ea5e9', 'noun' => 'printables', 'niche' => 'printables, planners and printable art',

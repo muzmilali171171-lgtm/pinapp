@@ -7,7 +7,7 @@ require_once __DIR__ . "/../../includes/seo_functions.php";
 require_once __DIR__ . "/../../includes/use_case_functions.php";
 
 $user = current_user($pdo);
-$app = APP_NAME;
+$app = SITE_BRAND;
 
 $uc = uc_build([
 'slug' => 'gumroad', 'name' => 'Gumroad Creators', 'short' => 'Gumroad Shop', 'site' => 'Gumroad Shop', 'accent' => '#ff90e8', 'noun' => 'products', 'niche' => 'your digital products’ topics',

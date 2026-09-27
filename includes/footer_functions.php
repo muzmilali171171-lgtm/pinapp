@@ -103,9 +103,51 @@ function footer_ensure_defaults(PDO $pdo): void
 }
 
 /** All footer columns, in order, each carrying its own ordered items. */
+/**
+ * Internal links for SEO (once): fills the Comparisons and Use Cases columns when they are still empty,
+ * and adds Blog / Tutorials / Use Cases to Product when missing. Items the admin added are never touched.
+ */
+function footer_fill_links_once(PDO $pdo): void
+{
+    $flag = __DIR__ . '/../uploads/.footer_links_v1';
+    if (is_file($flag)) return;
+    try {
+        $cols = $pdo->query("SELECT id, slug FROM footer_menu_columns")->fetchAll(PDO::FETCH_KEY_PAIR);
+        $bySlug = array_flip($cols);
+        $count = function (int $colId) use ($pdo) { $st = $pdo->prepare("SELECT COUNT(*) FROM footer_menu_items WHERE column_id = ?"); $st->execute([$colId]); return (int)$st->fetchColumn(); };
+        $has = function (int $colId, string $url) use ($pdo) { $st = $pdo->prepare("SELECT COUNT(*) FROM footer_menu_items WHERE column_id = ? AND url = ?"); $st->execute([$colId, $url]); return (int)$st->fetchColumn() > 0; };
+        $add = function (int $colId, array $items) use ($pdo, $count) {
+            $n = $count($colId);
+            foreach ($items as [$label, $url]) $pdo->prepare("INSERT INTO footer_menu_items (column_id, label, url, sort_order) VALUES (?, ?, ?, ?)")->execute([$colId, $label, $url, ++$n]);
+        };
+        if (isset($bySlug['product'])) {
+            $pid = (int)$bySlug['product'];
+            $extra = [];
+            foreach ([['Use Cases', 'use-cases/'], ['Blog', 'blog'], ['Tutorials', 'tutorials'], ['Affiliate Program', 'affiliate']] as $it) if (!$has($pid, $it[1])) $extra[] = $it;
+            $add($pid, $extra);
+        }
+        if (isset($bySlug['comparisons']) && $count((int)$bySlug['comparisons']) === 0) {
+            $rows = $pdo->query("SELECT p.title, CONCAT(c.slug, '/', p.slug) url FROM blog_posts p JOIN blog_categories c ON c.id = p.category_id
+                WHERE c.slug = 'compare' AND p.status = 'published' ORDER BY p.published_at DESC LIMIT 8")->fetchAll(PDO::FETCH_NUM);
+            $add((int)$bySlug['comparisons'], array_map(fn($r) => [preg_replace('/\s+for Pinterest.*$/i', '', $r[0]), $r[1]], $rows));
+        }
+        if (isset($bySlug['use-cases']) && $count((int)$bySlug['use-cases']) === 0) {
+            $add((int)$bySlug['use-cases'], [
+                ['Pinterest for Shopify', 'use-cases/shopify/'], ['Pinterest for WordPress', 'use-cases/wordpress/'],
+                ['Pinterest for Etsy', 'use-cases/etsy/'], ['Pinterest for WooCommerce', 'use-cases/woocommerce/'],
+                ['Pinterest for Food Blogs', 'use-cases/food-website/'], ['Pinterest for Home Decor', 'use-cases/home-decor/'],
+                ['Pinterest for Print on Demand', 'use-cases/print-on-demand/'], ['All Use Cases', 'use-cases/'],
+            ]);
+        }
+    } catch (Throwable $e) { /* footer tables missing */ }
+    if (!is_dir(dirname($flag))) @mkdir(dirname($flag), 0755, true);
+    @file_put_contents($flag, date('c'));
+}
+
 function get_footer_columns(PDO $pdo): array
 {
     footer_ensure_defaults($pdo);
+    footer_fill_links_once($pdo);
     $columns = $pdo->query("SELECT * FROM footer_menu_columns WHERE status = 'active' ORDER BY sort_order ASC, id ASC")->fetchAll();
     $items = $pdo->query("SELECT * FROM footer_menu_items ORDER BY sort_order ASC, id ASC")->fetchAll();
     foreach ($columns as &$col) {
@@ -182,7 +224,7 @@ function render_site_footer(PDO $pdo): void
     $settings = get_footer_settings($pdo);
     $columns = get_footer_columns($pdo);
     $logo = trim((string)($settings['logo_path'] ?? ''));
-    $logoText = trim((string)($settings['logo_text'] ?? '')) ?: APP_NAME;
+    $logoText = trim((string)($settings['logo_text'] ?? '')) ?: SITE_BRAND;
     ?>
     <footer class="site-footer">
         <div class="container footer-grid">
@@ -218,7 +260,7 @@ function render_site_footer(PDO $pdo): void
             <?php if (!empty($settings['footer_text'])): ?>
                 <?= nl2br(e($settings['footer_text'])) ?>
             <?php else: ?>
-                &copy; <?= date('Y') ?> <?= e(APP_NAME) ?>. All rights reserved.
+                &copy; <?= date('Y') ?> <?= e(SITE_BRAND) ?>. All rights reserved.
             <?php endif; ?>
         </div>
     </footer>

@@ -7,7 +7,7 @@ require_once __DIR__ . "/../../includes/seo_functions.php";
 require_once __DIR__ . "/../../includes/use_case_functions.php";
 
 $user = current_user($pdo);
-$app = APP_NAME;
+$app = SITE_BRAND;
 
 $uc = [
     'slug' => 'food-website',
@@ -41,7 +41,7 @@ $uc = [
     'results' => [
         'title' => 'See the Results: Recipes That Rise Every Season',
         'text' => 'Recipe pins are among the most saved content on Pinterest, and seasonal recipes come back every year. Consistent pinning builds a library that keeps sending cooks your way.',
-        'stats' => [[70, '', 'pin templates incl. recipe styles'], [5, 'x', 'more traffic, up to'], [365, '', 'days of recipe pins at once'], [56, '', 'colour palettes']],
+        'stats' => [[500, '+', 'premium pin templates incl. recipe styles'], [5, 'x', 'more traffic, up to'], [365, '', 'days of recipe pins at once'], [100, '%', 'free design editor, no Canva Pro']],
         'alt' => 'Pinterest traffic growth for a recipe website',
     ],
     'features' => [

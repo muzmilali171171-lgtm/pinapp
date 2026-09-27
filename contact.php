@@ -35,8 +35,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <?php seo_render_head($pdo, [
-    'title' => 'Contact Us — ' . APP_NAME,
-    'description' => 'Get in touch with the ' . APP_NAME . ' team — support email, WhatsApp and a contact form.',
+    'title' => 'Contact Us: Support & Sales | ' . SITE_BRAND,
+    'description' => 'Questions about Pinterest automation, pricing or your account? Contact the ' . SITE_BRAND . ' team by email, WhatsApp or the contact form. We reply fast.',
+    'breadcrumbs' => [['Contact Us', 'contact']],
 ]); ?>
 <link rel="stylesheet" href="assets/css/style.css?v=<?= @filemtime(__DIR__ . '/assets/css/style.css') ?: time() ?>">
 </head>

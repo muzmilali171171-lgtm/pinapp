@@ -11,8 +11,12 @@ $user = current_user($pdo);
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Free Pinterest Color Palette Generator | <?= e(APP_NAME) ?></title>
-<meta name="description" content="Extract a color palette from any image free, or generate a brand palette instantly. Get hex codes ready to use for your Pinterest pins, boards, and profile design.">
+<?php require_once __DIR__ . '/../../includes/seo_functions.php'; seo_render_head($pdo, [
+    'title' => 'Pinterest Color Palette Generator (Free) | ' . SITE_BRAND,
+    'description' => 'Create beautiful colour palettes for your pins and brand. Generate, lock and tweak colours, then copy HEX codes for your Pinterest designs. Free tool.',
+    'canonical' => rtrim(APP_URL, '/') . '/free-tools/pinterest-color-palette-generator/',
+    'breadcrumbs' => [['Free Tools', 'free-tools/'], ['Pinterest Color Palette Generator', 'free-tools/pinterest-color-palette-generator/']],
+]); ?>
 <link rel="stylesheet" href="../../assets/css/style.css?v=<?= @filemtime(__DIR__ . '/../../assets/css/style.css') ?: time() ?>">
 <link rel="stylesheet" href="../../assets/css/free-tool.css?v=<?= @filemtime(__DIR__ . '/../../assets/css/free-tool.css') ?: time() ?>">
 </head>

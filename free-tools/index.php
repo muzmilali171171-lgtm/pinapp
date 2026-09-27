@@ -42,8 +42,12 @@ $pageTitleText = 'Pinterest Free Tools';
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Free Pinterest &amp; Etsy Tools — <?= e(APP_NAME) ?></title>
-<meta name="description" content="Every free Pinterest and Etsy tool in one place — pin design, keyword research, bio and hashtag generators, calculators, and more. No sign-up required to try them.">
+<?php require_once __DIR__ . '/../includes/seo_functions.php'; seo_render_head($pdo, [
+    'title' => 'Free Pinterest & Etsy Tools (No Sign-Up) | ' . SITE_BRAND,
+    'description' => 'Free Pinterest and Etsy tools in one place: AI pin maker, keyword research, title, bio and hashtag generators, image resizer and fee calculator. No sign-up.',
+    'canonical' => rtrim(APP_URL, '/') . '/free-tools/',
+    'breadcrumbs' => [['Free Tools', 'free-tools/']],
+]); ?>
 <link rel="stylesheet" href="../assets/css/style.css?v=<?= @filemtime(__DIR__ . '/../assets/css/style.css') ?: time() ?>">
 <link rel="stylesheet" href="../assets/css/free-tool.css?v=<?= @filemtime(__DIR__ . '/../assets/css/free-tool.css') ?: time() ?>">
 </head>

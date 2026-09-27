@@ -13,8 +13,9 @@ $user = current_user($pdo);
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <?php seo_render_head($pdo, [
-    'title' => 'About Us — ' . APP_NAME,
-    'description' => 'Learn about ' . APP_NAME . ' and how it automates Pinterest marketing for your website.',
+    'title' => 'About Us: AI Pinterest Automation Team | ' . SITE_BRAND,
+    'description' => 'Learn who we are and why we built ' . SITE_BRAND . ': an AI tool that designs, writes and schedules Pinterest pins so websites grow traffic on autopilot.',
+    'breadcrumbs' => [['About Us', 'about']],
 ]); ?>
 <link rel="stylesheet" href="assets/css/style.css?v=<?= @filemtime(__DIR__ . '/assets/css/style.css') ?: time() ?>">
 </head>
@@ -23,8 +24,8 @@ $user = current_user($pdo);
 <?php render_site_header($pdo ?? null); ?>
 
 <section class="container" style="max-width:800px; padding:50px 20px;">
-    <h1>About <?= e(APP_NAME) ?></h1>
-    <p><?= e(APP_NAME) ?> helps website and shop owners put their Pinterest marketing on autopilot. Connect your
+    <h1>About <?= e(SITE_BRAND) ?></h1>
+    <p><?= e(SITE_BRAND) ?> helps website and shop owners put their Pinterest marketing on autopilot. Connect your
     Pinterest account, and we design, write and schedule pins for your content automatically — every day, on time.</p>
 
     <h2>What we do</h2>
@@ -33,7 +34,7 @@ $user = current_user($pdo);
     recurring schedule.</p>
 
     <h2>Why we built it</h2>
-    <p>Keeping a Pinterest presence consistent takes real time every week. We built <?= e(APP_NAME) ?> so that
+    <p>Keeping a Pinterest presence consistent takes real time every week. We built <?= e(SITE_BRAND) ?> so that
     time gets spent growing your business instead of manually designing and posting pins.</p>
 
     <p>Have a question about how it works? <a href="contact">Get in touch</a> — we're happy to help.</p>

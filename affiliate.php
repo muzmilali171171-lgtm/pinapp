@@ -23,8 +23,9 @@ $joinUrl = $user ? '/user/affiliate-dashboard' : '/auth/register';
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <?php seo_render_head($pdo, [
-    'title' => 'Affiliate Program — Earn ' . $commission . '% Commission — ' . APP_NAME,
-    'description' => 'Join the ' . APP_NAME . ' affiliate program and earn ' . $commission . '% ' . $durationLabel . ' commission on every referral you send our way.',
+    'title' => 'Affiliate Program: Earn ' . $commission . '% Commission | ' . SITE_BRAND,
+    'description' => 'Join the ' . SITE_BRAND . ' affiliate program and earn ' . $commission . '% ' . $durationLabel . ' commission on every customer you refer. Free to join, request payouts from your dashboard.',
+    'breadcrumbs' => [['Affiliate Program', 'affiliate']],
 ]); ?>
 <link rel="stylesheet" href="/assets/css/style.css?v=<?= @filemtime(__DIR__ . '/assets/css/style.css') ?: time() ?>">
 <link rel="stylesheet" href="/assets/css/rg-effects.css?v=<?= @filemtime(__DIR__ . '/assets/css/rg-effects.css') ?: time() ?>">
@@ -37,7 +38,7 @@ $joinUrl = $user ? '/user/affiliate-dashboard' : '/auth/register';
     <div class="container" style="max-width:820px;text-align:center;">
         <div class="rg-badge rg-border-glow rg-pop" style="margin-bottom:22px;">💸 Affiliate Program</div>
         <h1 class="rg-affiliate-h1">Earn <span class="rg-text-blink"><?= e($commission) ?>%</span> Commission<br>On Every Referral</h1>
-        <p class="rg-affiliate-sub">Share <?= e(APP_NAME) ?> with your audience and get paid <?= e($durationLabel) ?> commission on everything they spend — no cap, no complicated tiers.</p>
+        <p class="rg-affiliate-sub">Share <?= e(SITE_BRAND) ?> with your audience and get paid <?= e($durationLabel) ?> commission on everything they spend — no cap, no complicated tiers.</p>
         <div style="margin-top:30px;">
             <a href="<?= e($joinUrl) ?>" class="btn-primary rg-shine rg-border-glow" style="font-size:17px;padding:15px 34px;"><?= $user ? 'Go to Affiliate Dashboard' : 'Join Free — Start Earning' ?></a>
         </div>
@@ -79,7 +80,7 @@ $joinUrl = $user ? '/user/affiliate-dashboard' : '/auth/register';
 </section>
 
 <div class="rg-cta-inline rg-border-glow" style="max-width:800px;margin:50px auto;">
-    <h3>Why creators promote <?= e(APP_NAME) ?></h3>
+    <h3>Why creators promote <?= e(SITE_BRAND) ?></h3>
     <p style="margin-bottom:18px;">Pinterest automation is a genuinely recurring need — your referrals keep paying, and so do you, for as long as they stay subscribed. No caps on how much you can earn.</p>
     <a href="<?= e($joinUrl) ?>" class="btn-primary rg-shine"><?= $user ? 'Go to Affiliate Dashboard' : 'Join Free Now' ?></a>
 </div>

@@ -7,7 +7,7 @@ require_once __DIR__ . "/../../includes/seo_functions.php";
 require_once __DIR__ . "/../../includes/use_case_functions.php";
 
 $user = current_user($pdo);
-$app = APP_NAME;
+$app = SITE_BRAND;
 
 $uc = [
     'slug' => 'woocommerce',
@@ -40,7 +40,7 @@ $uc = [
     'results' => [
         'title' => 'See the Results: A Catalog That Markets Itself',
         'text' => 'Most WooCommerce stores have hundreds of product pages nobody promotes. Pinned regularly, each one becomes a small, steady source of visitors.',
-        'stats' => [[70, '', 'pin templates'], [56, '', 'colour palettes'], [5, 'x', 'more traffic, up to'], [20, '/day', 'pins at full pace']],
+        'stats' => [[500, '+', 'premium pin templates'], [100, '%', 'free design editor, no Canva Pro'], [5, 'x', 'more traffic, up to'], [20, '/day', 'pins at full pace']],
         'alt' => 'Pinterest traffic growth for a WooCommerce store',
     ],
     'steps' => [
@@ -48,7 +48,7 @@ $uc = [
         'text' => 'Paste your store link. We handle the product list, the pin designs, the copy and the posting schedule.',
         'items' => [
             ['icon' => '🗺️', 'label' => 'Setup', 'title' => 'Scan Your WooCommerce Store', 'alt' => 'Scanning a WooCommerce product sitemap', 'points' => ['We read the sitemap your WordPress site already publishes — product pages, categories and posts.', 'Search by product name or URL and pick what to pin, or select everything.']],
-            ['icon' => '🎨', 'label' => 'Design', 'title' => 'Pick Your Pin Style', 'alt' => 'Choosing templates and colours for WooCommerce product pins', 'points' => ['70 templates with a live preview on your own product photos.', 'Brand colours, 130+ fonts, and your own Canva designs as SVG.', 'Collage templates show several product photos in one pin.']],
+            ['icon' => '🎨', 'label' => 'Design', 'title' => 'Pick Your Pin Style', 'alt' => 'Choosing templates and colours for WooCommerce product pins', 'points' => ['Unlimited templates with a live preview on your own product photos.', 'Brand colours, unlimited fonts and a free Canva-style design editor.', 'Collage templates show several product photos in one pin.']],
             ['icon' => '⚙️', 'label' => 'Schedule', 'title' => 'Set How Fast Pins Go Out', 'alt' => 'Scheduling settings for WooCommerce product pins', 'points' => ['Fixed pins per day, or a warm-up plan for brand-new Pinterest accounts.', 'Several pins per product, spaced a month apart by default.', 'Choose boards yourself or let AI place each product.']],
             ['icon' => '✅', 'label' => 'Approve', 'title' => 'Review and Approve', 'alt' => 'Approving AI-designed WooCommerce product pins', 'points' => ['Every pin can be edited — text, photos, template, board.', 'Approve once and the whole batch is scheduled to Pinterest.']],
         ],

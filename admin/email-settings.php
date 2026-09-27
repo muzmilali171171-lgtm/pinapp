@@ -40,8 +40,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($to === '' || !filter_var($to, FILTER_VALIDATE_EMAIL)) {
             $testResult = ['ok' => false, 'error' => 'Enter a valid email address to send the test to.'];
         } else {
-            $testResult = send_app_email($pdo, $to, 'Test email from ' . APP_NAME,
-                '<p>This is a test email from your ' . e(APP_NAME) . ' Email Setting page. If you received this, your SMTP settings are working.</p>');
+            $testResult = send_app_email($pdo, $to, 'Test email from ' . SITE_BRAND,
+                '<p>This is a test email from your ' . e(SITE_BRAND) . ' Email Setting page. If you received this, your SMTP settings are working.</p>');
             $testResult['to'] = $to;
         }
     }
@@ -107,7 +107,7 @@ include __DIR__ . '/includes/admin-header.php';
         <div class="two-col">
             <div class="form-row">
                 <label>From Name</label>
-                <input type="text" name="from_name" value="<?= e($s['from_name']) ?>" placeholder="<?= e(APP_NAME) ?>">
+                <input type="text" name="from_name" value="<?= e($s['from_name']) ?>" placeholder="<?= e(SITE_BRAND) ?>">
             </div>
             <div class="form-row">
                 <label>From Email</label>

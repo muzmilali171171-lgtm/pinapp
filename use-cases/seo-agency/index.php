@@ -7,7 +7,7 @@ require_once __DIR__ . "/../../includes/seo_functions.php";
 require_once __DIR__ . "/../../includes/use_case_functions.php";
 
 $user = current_user($pdo);
-$app = APP_NAME;
+$app = SITE_BRAND;
 
 $uc = uc_build([
 'tools' => ['pinterest-pin-maker', 'ai-pinterest-pin-create', 'pinterest-title-description-generator', 'pinterest-keyword-research-tool', 'pinterest-board-name-generator', 'pinterest-bio-generator', 'pinterest-image-resizer', 'ai-image-creater'],
@@ -21,7 +21,7 @@ $uc = uc_build([
 'placeholder' => 'https://clientsite.com/guide/',
 'marquee' => ['Organic traffic', 'Content clusters', 'Keyword research', 'Evergreen guides', 'Client reporting', 'Referral traffic', 'Visual search', 'E-commerce clients', 'Local clients', 'Content briefs'],
 'results' => ['More Organic Traffic for Clients', 'Pinterest traffic compounds like search traffic — and pins keep sending visits to the same pages you already optimise.'],
-'stats' => [[5, 'x', 'more traffic, up to'], [365, '', 'days of pins per run'], [70, '', 'pin templates'], [1, '', 'dashboard for all clients']],
+'stats' => [[5, 'x', 'more traffic, up to'], [365, '', 'days of pins per run'], [500, '+', 'premium pin templates'], [1, '', 'dashboard for all clients']],
 'eyebrow' => 'BUILT FOR ORGANIC GROWTH AGENCIES',
 'features' => ['Why Organic Growth Agencies Add Pinterest', 'Another search engine, the same content.', [
     ['🔎', 'Visual search', 'Pinterest users search with intent — your clients’ pages can answer.'],

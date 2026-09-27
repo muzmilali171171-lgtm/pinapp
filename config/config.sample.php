@@ -13,8 +13,8 @@ define('DB_USER', 'your_database_user');
 define('DB_PASS', 'your_database_password');
 
 // --- App ---
-define('APP_URL', 'https://videoconvertly.com'); // no trailing slash
-define('APP_NAME', 'Web To Pin');
+define('APP_URL', 'https://automatedpin.io'); // no trailing slash
+define('APP_NAME', 'AutomatedPin');
 define('APP_SECRET', 'change_this_to_a_random_string');
 
 // Timezone used for scheduling

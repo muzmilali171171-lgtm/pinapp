@@ -68,9 +68,19 @@ if (!empty($_GET['ajax'])) {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<?php seo_render_head($pdo, [
-    'title' => ($activeCategory ? $activeCategory['name'] . ' — ' : '') . 'Blog — ' . APP_NAME,
-    'description' => $activeCategory ? ('Articles in ' . $activeCategory['name'] . ' from ' . APP_NAME . '.') : ('Growth guides, and help articles from ' . APP_NAME . '.'),
+<?php
+// One URL per listing: /blog for all posts, /<category> for a category (/blog/<category> points there too).
+$blogCanonical = rtrim(APP_URL, '/') . '/' . ($activeCategory ? $activeCategory['slug'] : 'blog');
+seo_render_head($pdo, [
+    'title' => $activeCategory
+        ? $activeCategory['name'] . ': Pinterest Guides & Articles | ' . SITE_BRAND
+        : 'Pinterest Marketing Blog & Growth Guides | ' . SITE_BRAND,
+    'description' => $activeCategory
+        ? $activeCategory['name'] . ' articles from the ' . SITE_BRAND . ' blog: practical Pinterest marketing tips, step-by-step guides and honest comparisons to grow your traffic.'
+        : 'Pinterest marketing guides, growth strategies, tool comparisons and how-to tutorials to get more traffic from Pinterest with automation and AI.',
+    'canonical' => $blogCanonical,
+    'noindex' => $search !== '',   // search result pages stay out of the index
+    'breadcrumbs' => $activeCategory ? [['Blog', 'blog'], [$activeCategory['name'], $activeCategory['slug']]] : [['Blog', 'blog']],
 ]); ?>
 <link rel="stylesheet" href="/assets/css/style.css?v=<?= @filemtime(__DIR__ . '/assets/css/style.css') ?: time() ?>">
 </head>

@@ -29,11 +29,30 @@ $isGrowthArticle = $post['slug'] === 'pinterest-growth';
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<?php seo_render_head($pdo, [
-    'title' => ($post['meta_title'] ?: $post['title']) . ' — ' . APP_NAME,
+<?php
+$postUrl = rtrim(APP_URL, '/') . '/' . $post['category_slug'] . '/' . $post['slug'];
+seo_render_head($pdo, [
+    'title' => ($post['meta_title'] ?: $post['title']) . ' | ' . SITE_BRAND,
     'description' => $post['meta_description'] ?: blog_excerpt($content, 160),
     'image' => $post['feature_image'] ?: null,
-]); ?>
+    'image_alt' => $post['title'],
+    'canonical' => $postUrl,
+    'og_type' => 'article',
+    'breadcrumbs' => [['Blog', 'blog'], [$post['category_name'], $post['category_slug']], [$post['title'], $postUrl]],
+]);
+$articleLd = [
+    '@context' => 'https://schema.org', '@type' => 'BlogPosting',
+    'headline' => mb_substr($post['title'], 0, 110),
+    'description' => blog_excerpt($post['meta_description'] ?: $content, 200),
+    'mainEntityOfPage' => $postUrl, 'url' => $postUrl,
+    'datePublished' => date('c', strtotime($post['published_at'] ?: $post['created_at'])),
+    'dateModified' => date('c', strtotime($post['updated_at'] ?: ($post['published_at'] ?: $post['created_at']))),
+    'author' => ['@type' => $post['author'] && stripos($post['author'], 'team') === false ? 'Person' : 'Organization', 'name' => $post['author'] ?: SITE_BRAND],
+    'publisher' => ['@type' => 'Organization', 'name' => SITE_BRAND, 'url' => rtrim(APP_URL, '/') . '/'],
+];
+if ($post['feature_image']) $articleLd['image'] = seo_asset_url($post['feature_image']);
+?>
+<script type="application/ld+json"><?= json_encode($articleLd, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) ?></script>
 <link rel="stylesheet" href="/assets/css/style.css?v=<?= @filemtime(__DIR__ . '/assets/css/style.css') ?: time() ?>">
 <?php if ($isGrowthArticle): ?>
 <link rel="stylesheet" href="/assets/css/rg-effects.css?v=<?= @filemtime(__DIR__ . '/assets/css/rg-effects.css') ?: time() ?>">

@@ -40,8 +40,12 @@ $remainingAttempts = free_tool_attempts_remaining($pdo, $settings['max_attempts'
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Free Pinterest Bio Generator — SEO-Optimized Profile Bios | <?= e(APP_NAME) ?></title>
-<meta name="description" content="Generate a compelling, SEO-optimized Pinterest bio free with AI. Enter your niche, pick a tone and language, and get a ready-to-use profile bio under Pinterest's character limit.">
+<?php require_once __DIR__ . '/../../includes/seo_functions.php'; seo_render_head($pdo, [
+    'title' => 'Free Pinterest Bio Generator: SEO Bios | ' . SITE_BRAND,
+    'description' => 'Write an SEO-friendly Pinterest profile bio in seconds. Tell the AI about your brand and niche and get short bios that fit the 500-character limit.',
+    'canonical' => rtrim(APP_URL, '/') . '/free-tools/pinterest-bio-generator/',
+    'breadcrumbs' => [['Free Tools', 'free-tools/'], ['Pinterest Bio Generator', 'free-tools/pinterest-bio-generator/']],
+]); ?>
 <link rel="stylesheet" href="../../assets/css/style.css?v=<?= @filemtime(__DIR__ . '/../../assets/css/style.css') ?: time() ?>">
 <link rel="stylesheet" href="../../assets/css/free-tool.css?v=<?= @filemtime(__DIR__ . '/../../assets/css/free-tool.css') ?: time() ?>">
 </head>

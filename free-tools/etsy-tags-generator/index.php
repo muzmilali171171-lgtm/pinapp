@@ -33,8 +33,12 @@ $remainingAttempts = free_tool_attempts_remaining($pdo, $settings['max_attempts'
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Free Etsy Tags Generator — SEO Tags In Seconds | <?= e(APP_NAME) ?></title>
-<meta name="description" content="Generate SEO-optimized Etsy listing tags free with AI. Describe your product and get 30 tag ideas to choose your best 13 from, each within Etsy's 20-character limit.">
+<?php require_once __DIR__ . '/../../includes/seo_functions.php'; seo_render_head($pdo, [
+    'title' => 'Free Etsy Tags Generator: 13 SEO Tags | ' . SITE_BRAND,
+    'description' => 'Generate 13 SEO-friendly Etsy tags for any listing in seconds. AI picks long-tail phrases buyers search so your products get found. Free, no sign-up.',
+    'canonical' => rtrim(APP_URL, '/') . '/free-tools/etsy-tags-generator/',
+    'breadcrumbs' => [['Free Tools', 'free-tools/'], ['Etsy Tags Generator', 'free-tools/etsy-tags-generator/']],
+]); ?>
 <link rel="stylesheet" href="../../assets/css/style.css?v=<?= @filemtime(__DIR__ . '/../../assets/css/style.css') ?: time() ?>">
 <link rel="stylesheet" href="../../assets/css/free-tool.css?v=<?= @filemtime(__DIR__ . '/../../assets/css/free-tool.css') ?: time() ?>">
 </head>

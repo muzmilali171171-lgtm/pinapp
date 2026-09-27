@@ -346,10 +346,10 @@ try {
             (meta_title, app_name, app_url, publisher_name, publisher_url, robots_index)
             VALUES (?, ?, ?, ?, ?, 0)")
             ->execute([
-                defined('APP_NAME') ? APP_NAME : null,
-                defined('APP_NAME') ? APP_NAME : null,
+                defined('SITE_BRAND') ? SITE_BRAND : null,
+                defined('SITE_BRAND') ? SITE_BRAND : null,
                 defined('APP_URL') ? rtrim(APP_URL, '/') . '/' : null,
-                defined('APP_NAME') ? APP_NAME : null,
+                defined('SITE_BRAND') ? SITE_BRAND : null,
                 defined('APP_URL') ? rtrim(APP_URL, '/') . '/' : null,
             ]);
     }
@@ -469,7 +469,7 @@ try {
                     (int)$growthCatId,
                     null,
                     $seedContent,
-                    'Webtopin Team',
+                    'AutomatedPin Team',
                 ]);
             }
         }
@@ -482,7 +482,7 @@ try {
 // playbooks) the same way — see database/blog-seed-manifest.php. Already-seeded
 // or admin-edited posts (matched by slug) are always left untouched.
 try {
-    blog_seed_default_posts($pdo, 'growth-guide', 'Webtopin Team');
+    blog_seed_default_posts($pdo, 'growth-guide', 'AutomatedPin Team');
 } catch (Throwable $e) {
     $errors[] = 'Seeding the Growth Guide series: ' . $e->getMessage();
 }
@@ -490,7 +490,7 @@ try {
 // Seed the /compare category (Later vs Tailwind, Buffer vs Hootsuite,
 // Pin Generator vs Tailwind) the same way — see database/blog-compare-manifest.php.
 try {
-    blog_seed_default_posts($pdo, 'compare', 'Webtopin Team', 'blog-compare-manifest.php', 'seed-compare');
+    blog_seed_default_posts($pdo, 'compare', 'AutomatedPin Team', 'blog-compare-manifest.php', 'seed-compare');
 } catch (Throwable $e) {
     $errors[] = 'Seeding the Compare series: ' . $e->getMessage();
 }

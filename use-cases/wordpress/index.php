@@ -7,7 +7,7 @@ require_once __DIR__ . "/../../includes/seo_functions.php";
 require_once __DIR__ . "/../../includes/use_case_functions.php";
 
 $user = current_user($pdo);
-$app = APP_NAME;
+$app = SITE_BRAND;
 
 $uc = [
     'slug' => 'wordpress',
@@ -40,7 +40,7 @@ $uc = [
     'results' => [
         'title' => 'See the Results: Your Archive, Working Again',
         'text' => 'Search traffic fades after a post is published. Pinterest traffic compounds — every pin you schedule adds to a library that keeps getting discovered.',
-        'stats' => [[5, 'x', 'more traffic, up to'], [365, '', 'days of pins in one run'], [3, '', 'pins per post by default'], [70, '', 'pin templates']],
+        'stats' => [[5, 'x', 'more traffic, up to'], [365, '', 'days of pins in one run'], [3, '', 'pins per post by default'], [500, '+', 'premium pin templates']],
         'alt' => 'Pinterest traffic growth for a WordPress blog over 12 months',
     ],
     'steps' => [
@@ -48,7 +48,7 @@ $uc = [
         'text' => 'Paste your blog link. We find every post, design every pin and schedule a year of content.',
         'items' => [
             ['icon' => '🗺️', 'label' => 'Setup', 'title' => 'Scan Your Blog', 'alt' => 'Scanning a WordPress blog sitemap', 'points' => ['We read your WordPress sitemap and list every post and page.', 'Search your archive and select posts in bulk.']],
-            ['icon' => '🎨', 'label' => 'Design', 'title' => 'Pick a Style for Your Blog', 'alt' => 'Choosing pin templates for WordPress blog posts', 'points' => ['70 templates with a live preview using your own post images.', 'Brand colours, fonts, and your Canva designs.', 'AI picks the right template for each post’s topic.']],
+            ['icon' => '🎨', 'label' => 'Design', 'title' => 'Pick a Style for Your Blog', 'alt' => 'Choosing pin templates for WordPress blog posts', 'points' => ['Unlimited templates with a live preview using your own post images.', 'Brand colours, unlimited fonts and a free Canva-style editor.', 'AI picks the right template for each post’s topic.']],
             ['icon' => '⚙️', 'label' => 'Schedule', 'title' => 'Spread Pins Over the Year', 'alt' => 'Scheduling WordPress post pins over a year', 'points' => ['Several pins per post, a month apart by default.', 'Warm-up mode for new accounts, steady daily pins for established ones.']],
             ['icon' => '🚀', 'label' => 'Approve', 'title' => 'Approve and Keep Writing', 'alt' => 'Approving scheduled blog pins', 'points' => ['Review, edit or remove any pin, then approve.', 'Your pins publish on schedule while you write the next post.']],
         ],

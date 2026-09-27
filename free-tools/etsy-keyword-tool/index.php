@@ -35,8 +35,12 @@ $remainingAttempts = free_tool_attempts_remaining($pdo, $settings['max_attempts'
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Free Etsy Keyword Tool — Find Keywords Buyers Actually Search | <?= e(APP_NAME) ?></title>
-<meta name="description" content="Find Etsy keyword ideas free with AI. Describe your product, get 15 search phrases with volume, competition, and opportunity estimates to optimize your listings.">
+<?php require_once __DIR__ . '/../../includes/seo_functions.php'; seo_render_head($pdo, [
+    'title' => 'Free Etsy Keyword Tool for SEO | ' . SITE_BRAND,
+    'description' => 'Find Etsy keywords buyers actually search for. Get long-tail ideas for your titles and tags, grouped by intent, to rank higher in Etsy search. Free.',
+    'canonical' => rtrim(APP_URL, '/') . '/free-tools/etsy-keyword-tool/',
+    'breadcrumbs' => [['Free Tools', 'free-tools/'], ['Etsy Keyword Tool', 'free-tools/etsy-keyword-tool/']],
+]); ?>
 <link rel="stylesheet" href="../../assets/css/style.css?v=<?= @filemtime(__DIR__ . '/../../assets/css/style.css') ?: time() ?>">
 <link rel="stylesheet" href="../../assets/css/free-tool.css?v=<?= @filemtime(__DIR__ . '/../../assets/css/free-tool.css') ?: time() ?>">
 </head>

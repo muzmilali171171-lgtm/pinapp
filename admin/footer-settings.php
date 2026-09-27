@@ -109,7 +109,7 @@ include __DIR__ . '/includes/admin-header.php';
         <div class="two-col">
             <div class="form-row">
                 <label>Logo Text <span class="muted">(used if no logo image is uploaded)</span></label>
-                <input type="text" name="logo_text" maxlength="100" value="<?= $v('logo_text') ?>" placeholder="<?= e(APP_NAME) ?>">
+                <input type="text" name="logo_text" maxlength="100" value="<?= $v('logo_text') ?>" placeholder="<?= e(SITE_BRAND) ?>">
             </div>
             <div class="form-row">
                 <label>Logo Image</label>

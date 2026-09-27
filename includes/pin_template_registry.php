@@ -223,7 +223,7 @@ function pin_template_sample_image(string $cacheDir): ?string
     $cache = rtrim($cacheDir, '/') . '/_sample.img';
     if (is_file($cache) && filesize($cache) > 1000) return file_get_contents($cache);
     $ch = curl_init($url);
-    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_FOLLOWLOCATION => true, CURLOPT_TIMEOUT => 30, CURLOPT_USERAGENT => 'WebToPin/1.0']);
+    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_FOLLOWLOCATION => true, CURLOPT_TIMEOUT => 30, CURLOPT_USERAGENT => 'AutomatedPin/1.0']);
     $bytes = curl_exec($ch);
     $code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);

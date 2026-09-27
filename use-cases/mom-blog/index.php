@@ -7,7 +7,7 @@ require_once __DIR__ . "/../../includes/seo_functions.php";
 require_once __DIR__ . "/../../includes/use_case_functions.php";
 
 $user = current_user($pdo);
-$app = APP_NAME;
+$app = SITE_BRAND;
 
 $uc = [
     'slug' => 'mom-blog',
@@ -32,7 +32,7 @@ $uc = [
     ],
     'start' => ['label' => '✨ FREE PIN MAKER · NO SIGN-UP', 'title' => 'Paste a Blog Post Link', 'text' => 'See pins made from your post in seconds.', 'placeholder' => 'https://yourmomblog.com/easy-freezer-meals/'],
     'marquee' => ['Freezer meals', 'Mom hacks', 'Morning routines', 'Cleaning schedules', 'Kids crafts', 'Self-care', 'Budget tips', 'Family recipes', 'Printables', 'Postpartum tips'],
-    'results' => ['title' => 'See the Results: Traffic That Keeps Up With You', 'text' => 'Your best posts help new moms every year. Pinned consistently, they keep bringing readers — and ad and affiliate income — while you’re busy.', 'stats' => [[5, 'x', 'more traffic, up to'], [365, '', 'days of pins in one run'], [3, '', 'pins per post by default'], [70, '', 'pin templates']], 'alt' => 'Pinterest traffic growth for a mom blog'],
+    'results' => ['title' => 'See the Results: Traffic That Keeps Up With You', 'text' => 'Your best posts help new moms every year. Pinned consistently, they keep bringing readers — and ad and affiliate income — while you’re busy.', 'stats' => [[5, 'x', 'more traffic, up to'], [365, '', 'days of pins in one run'], [3, '', 'pins per post by default'], [500, '+', 'premium pin templates']], 'alt' => 'Pinterest traffic growth for a mom blog'],
     'steps' => ['title' => 'From Mom Blog to', 'title_accent' => 'Daily Pins', 'text' => 'Four quick steps. Then it runs without you.', 'items' => [
         ['icon' => '📚', 'label' => 'Setup', 'title' => 'Scan Your Blog', 'alt' => 'Scanning a mom blog', 'points' => ['Every post listed automatically.', 'Select all, or pick your favourites.']],
         ['icon' => '🎨', 'label' => 'Design', 'title' => 'Pick Your Blog’s Look', 'alt' => 'Choosing pin templates for a mom blog', 'points' => ['Soft, friendly palettes and fonts.', 'Or let AI pick a template per post.']],

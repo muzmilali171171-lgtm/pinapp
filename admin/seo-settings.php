@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/../includes/seo_functions.php';
+require_once __DIR__ . '/../includes/sitemap_functions.php';
 require_once __DIR__ . '/includes/admin-auth.php';
 require_admin_login();
 
@@ -232,6 +233,7 @@ include __DIR__ . '/includes/admin-header.php';
 <div class="tabs">
     <a class="tab <?= $tab === 'general' ? 'active' : '' ?>" href="?tab=general">Meta &amp; Branding</a>
     <a class="tab <?= $tab === 'indexing' ? 'active' : '' ?>" href="?tab=indexing">Indexing</a>
+    <a class="tab <?= $tab === 'sitemaps' ? 'active' : '' ?>" href="?tab=sitemaps">Sitemaps</a>
     <a class="tab <?= $tab === 'schema' ? 'active' : '' ?>" href="?tab=schema">Software App Schema</a>
     <a class="tab <?= $tab === 'offers' ? 'active' : '' ?>" href="?tab=offers">Pricing Offers <span class="tab-count"><?= count($offers) ?></span></a>
     <a class="tab <?= $tab === 'reviews' ? 'active' : '' ?>" href="?tab=reviews">Review Schema <span class="tab-count"><?= count($reviews) ?></span></a>
@@ -299,9 +301,9 @@ include __DIR__ . '/includes/admin-header.php';
 <?php elseif ($tab === 'indexing'): ?>
 <div class="card">
     <h2>Search Engine Indexing</h2>
-    <p class="muted">This is <strong>off by default</strong>. While it's off, every public page sends
-    <code>noindex, nofollow</code>, robots.txt blocks all crawlers, and no schema markup is output — useful while
-    you're still building. Turn it on once the site is ready to be found on Google.</p>
+    <p class="muted">The site is <strong>live</strong>: search engines may index every public page (home, pricing,
+    use cases, free tools, blog…), while the admin, user area, login and private folders stay blocked. If you switch
+    this off, every public page sends <code>noindex</code>, robots.txt blocks all crawlers and the sitemaps are empty.</p>
     <form method="POST">
         <input type="hidden" name="action" value="save_indexing">
         <div class="form-row">
@@ -332,6 +334,35 @@ include __DIR__ . '/includes/admin-header.php';
     <h3>Current robots.txt output</h3>
     <p class="muted">Served at <code><?= e(rtrim(defined('APP_URL') ? APP_URL : '', '/')) ?>/robots.txt</code></p>
     <pre style="background:var(--light);padding:14px;border-radius:8px;overflow:auto;"><?= e(seo_robots_txt($pdo)) ?></pre>
+</div>
+
+<?php elseif ($tab === 'sitemaps'): ?>
+<div class="card">
+    <h2>XML Sitemaps</h2>
+    <p class="muted">Generated live from your pages, use cases, free tools and published blog posts — new posts appear
+    automatically. Only public, indexable pages are listed, each with its canonical URL.</p>
+    <?php $smBase = rtrim(defined('APP_URL') ? APP_URL : '', '/'); ?>
+    <table>
+        <tr><th>Sitemap</th><th>URLs</th><th>Address</th></tr>
+        <tr><td><strong>Sitemap index</strong> <span class="muted">(submit this one)</span></td><td>—</td>
+            <td><a href="<?= e($smBase) ?>/sitemap.xml" target="_blank" rel="noopener"><?= e($smBase) ?>/sitemap.xml</a></td></tr>
+        <?php foreach (sitemap_sections() as $smKey => $smLabel): ?>
+            <tr><td><?= e($smLabel) ?></td><td><?= count(sitemap_urls($pdo, $smKey)) ?></td>
+                <td><a href="<?= e(sitemap_file_url($smKey)) ?>" target="_blank" rel="noopener"><?= e(sitemap_file_url($smKey)) ?></a></td></tr>
+        <?php endforeach; ?>
+    </table>
+    <?php if (empty($s['robots_index'])): ?>
+        <div class="alert alert-error" style="margin-top:14px;">Indexing is switched off (Indexing tab), so the sitemaps are empty.</div>
+    <?php endif; ?>
+</div>
+<div class="card">
+    <h3>Submit to Google &amp; other search engines</h3>
+    <ol>
+        <li><strong>Google Search Console</strong> → add your domain → <em>Sitemaps</em> → enter <code>sitemap.xml</code> → Submit. Then use <em>URL Inspection</em> on your home page and click <em>Request indexing</em>.</li>
+        <li><strong>Bing Webmaster Tools</strong> (also feeds Yahoo &amp; DuckDuckGo) → add site → <em>Sitemaps</em> → submit <code><?= e($smBase) ?>/sitemap.xml</code>.</li>
+        <li>robots.txt already points crawlers to the sitemap: <code><?= e($smBase) ?>/robots.txt</code>.</li>
+    </ol>
+    <p class="muted">Verification codes (e.g. Google's <code>&lt;meta name="google-site-verification" …&gt;</code>) go in <em>Meta &amp; Branding → Extra head code</em>.</p>
 </div>
 
 <?php elseif ($tab === 'schema'): ?>

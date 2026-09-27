@@ -7,7 +7,7 @@ require_once __DIR__ . "/../../includes/seo_functions.php";
 require_once __DIR__ . "/../../includes/use_case_functions.php";
 
 $user = current_user($pdo);
-$app = APP_NAME;
+$app = SITE_BRAND;
 
 $uc = uc_build([
 'slug' => 'wix-website', 'name' => 'Wix Websites', 'short' => 'Wix Site', 'site' => 'Wix Site', 'accent' => '#0c6efc', 'noun' => 'pages', 'niche' => 'your Wix site’s topics',

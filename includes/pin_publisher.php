@@ -410,7 +410,7 @@ function scheduler_runner_kick(bool $force = false, ?string $only = null): bool
         $ch = curl_init($url);
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT_MS => 1500, CURLOPT_CONNECTTIMEOUT_MS => 1200,
-            CURLOPT_NOSIGNAL => true, CURLOPT_FOLLOWLOCATION => true, CURLOPT_USERAGENT => 'WebToPin-Runner',
+            CURLOPT_NOSIGNAL => true, CURLOPT_FOLLOWLOCATION => true, CURLOPT_USERAGENT => 'AutomatedPin-Runner',
         ]);
         curl_exec($ch);   // times out on purpose — the runner keeps working after we hang up
         curl_close($ch);

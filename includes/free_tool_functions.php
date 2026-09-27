@@ -186,7 +186,7 @@ function free_tool_pincreate_settings(PDO $pdo): array
         'image_provider' => $provider,
         'image_model' => $row['pincreate_image_model'] ?? ($row['wpin_image_model'] ?? 'black-forest-labs/FLUX-1-schnell'),
         'max_pins' => isset($row['pincreate_max_pins']) && $row['pincreate_max_pins'] !== null ? (int)$row['pincreate_max_pins'] : 20,
-        'watermark_text' => $row['pincreate_watermark_text'] ?? APP_NAME,
+        'watermark_text' => $row['pincreate_watermark_text'] ?? SITE_BRAND,
         'watermark_logo_path' => $row['pincreate_watermark_logo_path'] ?? null,
     ];
 }
@@ -643,7 +643,7 @@ function ai_generate_vision_text(PDO $pdo, string $provider, string $model, stri
                 'deepinfra' => 'https://api.deepinfra.com/v1/openai/chat/completions',
             ][$provider];
             $headers = ["Authorization: Bearer $apiKey"];
-            if ($provider === 'openrouter') { $headers[] = 'HTTP-Referer: ' . APP_URL; $headers[] = 'X-Title: ' . APP_NAME; }
+            if ($provider === 'openrouter') { $headers[] = 'HTTP-Referer: ' . APP_URL; $headers[] = 'X-Title: ' . SITE_BRAND; }
             $result = ai_http_post($url, $headers, [
                 'model' => $model,
                 'messages' => [

@@ -48,8 +48,12 @@ $remainingAttempts = free_tool_attempts_remaining($pdo, $settings['max_attempts'
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Free AI Pinterest Hashtag Generator — Trending Hashtags In Seconds | <?= e(APP_NAME) ?></title>
-<meta name="description" content="Generate relevant, trending Pinterest hashtags free with AI. Enter a title or paste a URL, pick your tone, and get a ready-to-use hashtag set to boost your pin reach.">
+<?php require_once __DIR__ . '/../../includes/seo_functions.php'; seo_render_head($pdo, [
+    'title' => 'AI Pinterest Hashtag Generator (Free) | ' . SITE_BRAND,
+    'description' => 'Get relevant, trending Pinterest hashtags for any topic in seconds. AI suggests broad and niche tags to add to your pin descriptions. Free, no sign-up.',
+    'canonical' => rtrim(APP_URL, '/') . '/free-tools/pinterest-hashtag-generator/',
+    'breadcrumbs' => [['Free Tools', 'free-tools/'], ['Pinterest Hashtag Generator', 'free-tools/pinterest-hashtag-generator/']],
+]); ?>
 <link rel="stylesheet" href="../../assets/css/style.css?v=<?= @filemtime(__DIR__ . '/../../assets/css/style.css') ?: time() ?>">
 <link rel="stylesheet" href="../../assets/css/free-tool.css?v=<?= @filemtime(__DIR__ . '/../../assets/css/free-tool.css') ?: time() ?>">
 </head>

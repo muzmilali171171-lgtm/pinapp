@@ -7,7 +7,7 @@ require_once __DIR__ . "/../../includes/seo_functions.php";
 require_once __DIR__ . "/../../includes/use_case_functions.php";
 
 $user = current_user($pdo);
-$app = APP_NAME;
+$app = SITE_BRAND;
 
 $uc = [
     'slug' => 'amazon',
@@ -54,7 +54,7 @@ $uc = [
     'results' => [
         'title' => 'See the Results: Evergreen Affiliate Traffic',
         'text' => 'A good gift guide or review can get saved and clicked for years. Consistent pinning turns your best posts into a steady stream of shoppers.',
-        'stats' => [[5, 'x', 'more traffic, up to'], [365, '', 'days of pins scheduled at once'], [70, '', 'pin templates'], [47, '%', 'higher engagement after pruning']],
+        'stats' => [[5, 'x', 'more traffic, up to'], [365, '', 'days of pins scheduled at once'], [500, '+', 'premium pin templates'], [47, '%', 'higher engagement after pruning']],
         'alt' => 'Pinterest traffic growth for an Amazon affiliate website',
     ],
     'steps' => [

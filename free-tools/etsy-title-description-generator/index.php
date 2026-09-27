@@ -35,8 +35,12 @@ $remainingAttempts = free_tool_attempts_remaining($pdo, $settings['max_attempts'
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Free Etsy Title &amp; Description Generator | <?= e(APP_NAME) ?></title>
-<meta name="description" content="Write SEO-optimized Etsy titles and descriptions free with AI. Describe your product, add target keywords and details, and get listing copy that converts.">
+<?php require_once __DIR__ . '/../../includes/seo_functions.php'; seo_render_head($pdo, [
+    'title' => 'Etsy Title & Description Generator (AI) | ' . SITE_BRAND,
+    'description' => 'Write keyword-rich Etsy listing titles and descriptions that convert. Describe your product and AI drafts copy ready to paste into Etsy. Free to use.',
+    'canonical' => rtrim(APP_URL, '/') . '/free-tools/etsy-title-description-generator/',
+    'breadcrumbs' => [['Free Tools', 'free-tools/'], ['Etsy Title & Description Generator', 'free-tools/etsy-title-description-generator/']],
+]); ?>
 <link rel="stylesheet" href="../../assets/css/style.css?v=<?= @filemtime(__DIR__ . '/../../assets/css/style.css') ?: time() ?>">
 <link rel="stylesheet" href="../../assets/css/free-tool.css?v=<?= @filemtime(__DIR__ . '/../../assets/css/free-tool.css') ?: time() ?>">
 </head>

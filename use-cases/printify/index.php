@@ -7,7 +7,7 @@ require_once __DIR__ . "/../../includes/seo_functions.php";
 require_once __DIR__ . "/../../includes/use_case_functions.php";
 
 $user = current_user($pdo);
-$app = APP_NAME;
+$app = SITE_BRAND;
 
 $uc = [
     'slug' => 'printify',
@@ -43,7 +43,7 @@ $uc = [
         'text' => 'Printify publishes your products to your store. We pin them from there.',
         'items' => [
             ['icon' => '🔗', 'label' => 'Setup', 'title' => 'Scan the Store Printify Publishes To', 'alt' => 'Scanning a print-on-demand store connected to Printify', 'points' => ['Shopify, WooCommerce, Etsy or your Printify Pop-Up Store — paste the store link.', 'Select products in bulk, including brand-new designs.']],
-            ['icon' => '🎨', 'label' => 'Design', 'title' => 'Turn Mockups Into Pins', 'alt' => 'Turning product mockups into pin designs', 'points' => ['Collages show one design on several products.', 'Brand colours, fonts and your own Canva templates.']],
+            ['icon' => '🎨', 'label' => 'Design', 'title' => 'Turn Mockups Into Pins', 'alt' => 'Turning product mockups into pin designs', 'points' => ['Collages show one design on several products.', 'Brand colours, unlimited fonts and your own templates from the free editor.']],
             ['icon' => '⚙️', 'label' => 'Schedule', 'title' => 'Pace Your Launches', 'alt' => 'Scheduling print-on-demand product pins', 'points' => ['Pins per day, per-product gap and warm-up mode for new accounts.', 'AI places each product on the right board.']],
             ['icon' => '📈', 'label' => 'Approve', 'title' => 'Approve and Watch the Data', 'alt' => 'Approving POD product pins', 'points' => ['Approve the batch and it publishes on schedule.', 'Use analytics to spot winning designs.']],
         ],
@@ -51,7 +51,7 @@ $uc = [
     'results' => [
         'title' => 'See the Results: Find Your Winning Designs',
         'text' => 'Print-on-demand is a numbers game. Pinning every product consistently shows you which designs people actually want.',
-        'stats' => [[5, 'x', 'more traffic, up to'], [47, '%', 'higher engagement after pruning'], [70, '', 'pin templates'], [4, '', 'store platforms supported']],
+        'stats' => [[5, 'x', 'more traffic, up to'], [47, '%', 'higher engagement after pruning'], [500, '+', 'premium pin templates'], [4, '', 'store platforms supported']],
         'alt' => 'Pinterest traffic growth for a print-on-demand store',
     ],
     'features' => [

@@ -7,7 +7,7 @@ require_once __DIR__ . "/../../includes/seo_functions.php";
 require_once __DIR__ . "/../../includes/use_case_functions.php";
 
 $user = current_user($pdo);
-$app = APP_NAME;
+$app = SITE_BRAND;
 
 $uc = [
     'slug' => 'shopify',
@@ -39,7 +39,7 @@ $uc = [
     'results' => [
         'title' => 'See the Results: Pins That Keep Selling',
         'text' => 'A Pinterest pin keeps getting saved and clicked for months — so every product you pin keeps sending shoppers to your Shopify store long after you schedule it.',
-        'stats' => [[5, 'x', 'more traffic, up to'], [47, '%', 'higher engagement after pruning weak pins'], [70, '', 'pin templates to match your brand'], [1, '-click', 'scheduling for your whole catalog']],
+        'stats' => [[5, 'x', 'more traffic, up to'], [47, '%', 'higher engagement after pruning weak pins'], [500, '+', 'premium pin templates to match your brand'], [1, '-click', 'scheduling for your whole catalog']],
         'alt' => 'Pinterest traffic growth for a Shopify store over 12 months',
     ],
     'steps' => [
@@ -47,7 +47,7 @@ $uc = [
         'text' => 'No design skills, no Pinterest expertise. Scan your store, choose a look, set your pace — AI designs every pin, writes the copy, picks the board and publishes it all automatically.',
         'items' => [
             ['icon' => '🛍️', 'label' => 'Setup', 'title' => 'Scan Your Shopify Store', 'alt' => 'Scanning a Shopify store sitemap to import product pages', 'points' => ['Paste your store link — we read your Shopify sitemap and list every product and collection page.', 'Search and select the products you want, or select them all in one click.']],
-            ['icon' => '🎨', 'label' => 'Design', 'title' => 'Match Pins to Your Brand', 'alt' => 'Choosing pin templates, colour palettes and fonts for Shopify product pins', 'points' => ['70 templates, 56 colour palettes and 130+ Google fonts — with a live preview on your own product photos.', 'Import your own Canva design as SVG, or let AI pick the best template for each product.', 'Single photo, collage, or a mix of both — tiny and banner images are skipped automatically.']],
+            ['icon' => '🎨', 'label' => 'Design', 'title' => 'Match Pins to Your Brand', 'alt' => 'Choosing pin templates, colour palettes and fonts for Shopify product pins', 'points' => ['Unlimited templates, colour palettes and fonts — with a live preview on your own product photos.', 'Design your own in the free Canva-style editor, or let AI pick the best template for each product.', 'Single photo, collage, or a mix of both — tiny and banner images are skipped automatically.']],
             ['icon' => '⚙️', 'label' => 'Schedule', 'title' => 'Set a Safe Publishing Pace', 'alt' => 'Pin publishing pace settings for a Shopify store', 'points' => ['Pick pins per day — the gap between pins is set automatically.', 'New Pinterest account? The warm-up mode grows from 1 pin a day to 20 over five months.', 'Choose pins per product and how long to wait before a product is pinned again.']],
             ['icon' => '🚀', 'label' => 'Review', 'title' => 'Review, Approve, Done', 'alt' => 'Reviewing AI-generated Shopify product pins before scheduling', 'points' => ['Edit any pin’s text, photos or template before it goes out — or remove it.', 'Click approve and your whole catalog is scheduled. Anything you don’t approve stays in Drafts.']],
         ],
@@ -79,7 +79,7 @@ $uc = [
     'compare' => [
         'title' => 'Manual Pinning vs Automated Shopify Pins',
         'rows' => [
-            ['Designing pins', 'Open Canva for every product', '70 templates applied automatically'],
+            ['Designing pins', 'Open Canva for every product', 'Unlimited free templates applied automatically'],
             ['Writing titles & descriptions', 'Written one by one', 'AI writes keyword-rich copy per pin'],
             ['Choosing boards', 'Pick manually each time', 'AI picks or creates the right board'],
             ['Posting schedule', 'Remember to post daily', 'Set once, publishes on autopilot'],
@@ -112,7 +112,7 @@ $uc = [
         ['Can I choose which products get pinned?', 'Yes. After scanning your store you can search, select single products or collections, or select everything.'],
         ['Will it slow down my store?', 'No. Nothing is installed on your storefront. We only read your public pages when you create pins.'],
         ['Do I need a Pinterest Business account?', 'A Business account is recommended because it unlocks Pinterest analytics, but you connect through Pinterest’s official login either way.'],
-        ['Can pins match my store branding?', 'Yes — choose from 56 colour palettes or set your own brand colours, pick fonts, choose templates, or import your own design from Canva.'],
+        ['Can pins match my store branding?', 'Yes — choose a colour palette or set your own brand colours, pick fonts and templates, or design your own in the free built-in editor.'],
         ['What if a product sells out?', 'You stay in control of every scheduled pin and can remove pins for products that are no longer available.'],
         ['Is there a free way to try it?', 'Yes. Use the free Pin Maker on this page with no account, or create a free account to scan your store and schedule pins.'],
     ],

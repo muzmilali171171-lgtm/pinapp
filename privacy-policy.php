@@ -11,8 +11,9 @@ require_once __DIR__ . '/includes/seo_functions.php';
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <?php seo_render_head($pdo, [
-    'title' => 'Privacy Policy — ' . APP_NAME,
-    'description' => 'How ' . APP_NAME . ' collects, uses and protects your data.',
+    'title' => 'Privacy Policy | ' . SITE_BRAND,
+    'description' => 'Read how ' . SITE_BRAND . ' collects, uses, stores and protects your personal data and Pinterest account information, and the choices you have.',
+    'breadcrumbs' => [['Privacy Policy', 'privacy-policy']],
     'schema' => false,
 ]); ?>
 <link rel="stylesheet" href="assets/css/style.css?v=<?= @filemtime(__DIR__ . '/assets/css/style.css') ?: time() ?>">
@@ -24,7 +25,7 @@ require_once __DIR__ . '/includes/seo_functions.php';
     <h1>Privacy Policy</h1>
     <p class="muted">Last updated: <?= date('F Y') ?></p>
 
-    <p>This Privacy Policy explains how <?= e(APP_NAME) ?> ("we", "our", "the Service") collects, uses and protects
+    <p>This Privacy Policy explains how <?= e(SITE_BRAND) ?> ("we", "our", "the Service") collects, uses and protects
     your information when you use our Pinterest scheduling tool.</p>
 
     <h2>1. Information we collect</h2>

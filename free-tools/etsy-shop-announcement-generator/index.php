@@ -35,8 +35,12 @@ $remainingAttempts = free_tool_attempts_remaining($pdo, $settings['max_attempts'
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Free Etsy Shop Announcement Generator | <?= e(APP_NAME) ?></title>
-<meta name="description" content="Write SEO-friendly Etsy shop announcements free with AI. Spotlight launches, promos, and shipping updates within Etsy's 500-character limit — three tone variants in one click.">
+<?php require_once __DIR__ . '/../../includes/seo_functions.php'; seo_render_head($pdo, [
+    'title' => 'Etsy Shop Announcement Generator (Free) | ' . SITE_BRAND,
+    'description' => 'Write an Etsy shop announcement for sales, holidays, restocks or shipping updates in seconds. AI drafts friendly, on-brand text you can paste in.',
+    'canonical' => rtrim(APP_URL, '/') . '/free-tools/etsy-shop-announcement-generator/',
+    'breadcrumbs' => [['Free Tools', 'free-tools/'], ['Etsy Shop Announcement Generator', 'free-tools/etsy-shop-announcement-generator/']],
+]); ?>
 <link rel="stylesheet" href="../../assets/css/style.css?v=<?= @filemtime(__DIR__ . '/../../assets/css/style.css') ?: time() ?>">
 <link rel="stylesheet" href="../../assets/css/free-tool.css?v=<?= @filemtime(__DIR__ . '/../../assets/css/free-tool.css') ?: time() ?>">
 </head>

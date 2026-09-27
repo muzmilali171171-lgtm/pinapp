@@ -7,7 +7,7 @@ require_once __DIR__ . "/../../includes/seo_functions.php";
 require_once __DIR__ . "/../../includes/use_case_functions.php";
 
 $user = current_user($pdo);
-$app = APP_NAME;
+$app = SITE_BRAND;
 
 $uc = uc_build([
 'slug' => 'ghost-blog', 'name' => 'Ghost Blogs', 'short' => 'Ghost Blog', 'site' => 'Ghost Site', 'accent' => '#15171a', 'noun' => 'posts', 'niche' => 'your publication’s topics',

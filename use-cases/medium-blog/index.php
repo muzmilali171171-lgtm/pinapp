@@ -7,7 +7,7 @@ require_once __DIR__ . "/../../includes/seo_functions.php";
 require_once __DIR__ . "/../../includes/use_case_functions.php";
 
 $user = current_user($pdo);
-$app = APP_NAME;
+$app = SITE_BRAND;
 
 $uc = uc_build([
 'slug' => 'medium-blog', 'name' => 'Medium Writers', 'short' => 'Medium Writer', 'site' => 'Publication', 'accent' => '#111827', 'noun' => 'stories', 'niche' => 'your writing topics',

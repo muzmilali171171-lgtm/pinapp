@@ -7,6 +7,12 @@ if (!file_exists($configFile)) {
 
 require_once $configFile;
 
+// Brand shown everywhere on the site. The old name ("Web To Pin" / WebToPin) is replaced by AutomatedPin;
+// any other APP_NAME set in config.php is used as is.
+if (!defined('SITE_BRAND')) {
+    define('SITE_BRAND', (defined('APP_NAME') && trim(APP_NAME) !== '' && !preg_match('/web\s*to\s*pin|webtopin/i', APP_NAME)) ? APP_NAME : 'AutomatedPin');
+}
+
 // Scheduling uses PHP's time zone (config.php). If config.php doesn't set one, use Pakistan time.
 if (!ini_get('date.timezone') && date_default_timezone_get() === 'UTC' && !defined('APP_TIMEZONE_UTC')) {
     date_default_timezone_set('Asia/Karachi');

@@ -7,7 +7,7 @@ require_once __DIR__ . "/../../includes/seo_functions.php";
 require_once __DIR__ . "/../../includes/use_case_functions.php";
 
 $user = current_user($pdo);
-$app = APP_NAME;
+$app = SITE_BRAND;
 
 $uc = uc_build([
 'slug' => 'dropshipping-store', 'name' => 'Dropshipping Stores', 'short' => 'Dropshipping Store', 'site' => 'Store', 'accent' => '#f97316', 'noun' => 'products', 'niche' => 'your product niche',

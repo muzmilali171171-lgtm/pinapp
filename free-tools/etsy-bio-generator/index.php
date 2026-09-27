@@ -35,8 +35,12 @@ $remainingAttempts = free_tool_attempts_remaining($pdo, $settings['max_attempts'
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Free Etsy Shop Bio Generator | <?= e(APP_NAME) ?></title>
-<meta name="description" content="Write an authentic, trust-building Etsy shop bio free with AI. Tell us about your shop, pick a tone, and get a ready-to-use About section that converts visitors into customers.">
+<?php require_once __DIR__ . '/../../includes/seo_functions.php'; seo_render_head($pdo, [
+    'title' => 'Free Etsy Shop Bio Generator (AI) | ' . SITE_BRAND,
+    'description' => 'Write a warm, keyword-rich Etsy shop bio and About section in seconds. Tell the AI what you sell and pick a tone to get ready-to-paste bios free.',
+    'canonical' => rtrim(APP_URL, '/') . '/free-tools/etsy-bio-generator/',
+    'breadcrumbs' => [['Free Tools', 'free-tools/'], ['Etsy Bio Generator', 'free-tools/etsy-bio-generator/']],
+]); ?>
 <link rel="stylesheet" href="../../assets/css/style.css?v=<?= @filemtime(__DIR__ . '/../../assets/css/style.css') ?: time() ?>">
 <link rel="stylesheet" href="../../assets/css/free-tool.css?v=<?= @filemtime(__DIR__ . '/../../assets/css/free-tool.css') ?: time() ?>">
 </head>

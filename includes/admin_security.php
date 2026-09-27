@@ -100,7 +100,7 @@ function totp_verify(string $secret, string $code): bool
 
 function totp_uri(string $secret, string $account): string
 {
-    $issuer = defined('APP_NAME') ? APP_NAME : 'Admin';
+    $issuer = defined('SITE_BRAND') ? SITE_BRAND : 'Admin';
     return 'otpauth://totp/' . rawurlencode($issuer . ':' . $account) . '?secret=' . $secret . '&issuer=' . rawurlencode($issuer) . '&digits=6&period=30';
 }
 

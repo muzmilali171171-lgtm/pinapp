@@ -7,7 +7,7 @@ require_once __DIR__ . "/../../includes/seo_functions.php";
 require_once __DIR__ . "/../../includes/use_case_functions.php";
 
 $user = current_user($pdo);
-$app = APP_NAME;
+$app = SITE_BRAND;
 
 $uc = [
     'slug' => 'home-decor',
@@ -54,7 +54,7 @@ $uc = [
     'results' => [
         'title' => 'See the Results: Inspiration That Keeps Working',
         'text' => 'Decor pins get saved to boards and resurface for months. Consistent pinning turns your room ideas into long-lasting traffic.',
-        'stats' => [[56, '', 'colour palettes'], [70, '', 'pin templates'], [5, 'x', 'more traffic, up to'], [130, '+', 'elegant fonts']],
+        'stats' => [[100, '%', 'free design editor, no Canva Pro'], [500, '+', 'premium pin templates'], [5, 'x', 'more traffic, up to'], [1000, '+', 'font & colour combinations']],
         'alt' => 'Pinterest traffic growth for a home decor website',
     ],
     'steps' => [
@@ -109,7 +109,7 @@ $uc = [
         ['Which templates suit home decor?', 'Arch-frame, editorial, framed-photo and collage templates look best with interiors, especially with neutral palettes and serif or script fonts.'],
         ['Can I pin both blog posts and products?', 'Yes. Select room idea posts and product pages from the same scan.'],
         ['Will it use my room photos?', 'Yes. Pins are made from the photos on each page; tiny and banner images are skipped.'],
-        ['Can I keep a consistent look?', 'Yes. Pick one palette and font combination, or use your own Canva template for every pin.'],
+        ['Can I keep a consistent look?', 'Yes. Pick one palette and font combination, or build your own template in the free design editor and use it for every pin.'],
         ['When should I pin seasonal decor?', 'About 6–8 weeks before the season. Set the first publish date and the gap between pins to match.'],
         ['Can AI organise pins into boards by room?', 'Yes. AI picks the best board for each page and can create new ones, like “Boho Bedroom Ideas”.'],
         ['Is it free to try?', 'Yes. Use the free Pin Maker above or create a free account.'],

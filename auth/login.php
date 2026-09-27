@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         redirect(rtrim(APP_URL, '/') . '/user/dashboard');
     }
 }
-auth_layout_start($pdo, 'Log in — ' . APP_NAME, 'login');
+auth_layout_start($pdo, 'Log in — ' . SITE_BRAND, 'login');
 ?>
 <h1>Welcome <span>back</span> 👋</h1>
 <p class="au-lead">Log in to see your scheduled pins, drafts and traffic.</p>
@@ -57,5 +57,5 @@ auth_layout_start($pdo, 'Log in — ' . APP_NAME, 'login');
     </div>
     <button type="submit" class="au-submit">Log in</button>
 </form>
-<div class="au-switch">New to <?= e(APP_NAME) ?>? <a href="register">Create a free account →</a></div>
+<div class="au-switch">New to <?= e(SITE_BRAND) ?>? <a href="register">Create a free account →</a></div>
 <?php auth_layout_end('login'); ?>

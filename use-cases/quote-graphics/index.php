@@ -7,20 +7,20 @@ require_once __DIR__ . "/../../includes/seo_functions.php";
 require_once __DIR__ . "/../../includes/use_case_functions.php";
 
 $user = current_user($pdo);
-$app = APP_NAME;
+$app = SITE_BRAND;
 
 $uc = uc_build([
 'slug' => 'quote-graphics', 'name' => 'Quote Graphics Sites', 'short' => 'Quote Site', 'site' => 'Site', 'accent' => '#8b5cf6', 'noun' => 'quote posts', 'niche' => 'quotes, sayings and captions',
-'title' => 'Pinterest for Quote Sites & Quote Graphics', 'desc' => 'Turn quote collections into shareable text pins automatically. Bold typography templates, 130+ fonts, AI-written titles and hundreds of pins in 1 click.',
+'title' => 'Pinterest for Quote Sites & Quote Graphics', 'desc' => 'Turn quote collections into shareable text pins automatically. Bold typography templates, unlimited fonts, AI-written titles and hundreds of pins in 1 click.',
 'kw' => 'quote pins, Pinterest quotes, quote graphics Pinterest, inspirational quotes pins, quote website traffic, sayings Pinterest, caption ideas pins',
 'badge' => '💬 For Quote & Caption Sites', 'h1' => 'Pinterest Automation for Quote Websites', 'h1_accent' => 'Words Worth Saving',
 'sub' => 'Quotes are among the most-shared pins on Pinterest. Turn every quote collection into bold, beautiful text pins with the fonts and colours of your brand — and schedule them for months.',
-'bullets' => [['🔤', 'Typography-First Templates With 130+ Fonts'], ['🎨', '56 Palettes for Moods & Seasons'], ['🔢', '“100 Motivational Quotes” Number Pins'], ['⚡', 'Hundreds of Collections Pinned in 1 Click'], ['🗂️', 'Boards by Mood, Theme & Occasion']],
+'bullets' => [['🔤', 'Typography-First Templates With Unlimited Fonts'], ['🎨', 'Colour Palettes for Moods & Seasons'], ['🔢', '“100 Motivational Quotes” Number Pins'], ['⚡', 'Hundreds of Collections Pinned in 1 Click'], ['🗂️', 'Boards by Mood, Theme & Occasion']],
 'chips' => ['💬 Quote pinned', '💾 Saved to Motivation', '🔁 Shared'],
 'placeholder' => 'https://yourquotesite.com/motivational-quotes/',
 'marquee' => ['Motivational quotes', 'Love quotes', 'Instagram captions', 'Self-care quotes', 'Friendship quotes', 'Funny sayings', 'Bible verses', 'Birthday wishes', 'Mom quotes', 'Monday motivation'],
 'results' => ['Quotes That Keep Getting Shared', 'People save quotes to come back to and share. Each collection can collect saves for years.'],
-'design_title' => 'Make the Words the Design', 'design_point' => 'Bold text templates, script accents and outlined type with 130+ fonts.',
+'design_title' => 'Make the Words the Design', 'design_point' => 'Bold text templates, script accents and outlined type with unlimited fonts.',
 'features' => ['Why Quote Sites Automate Pinterest', 'A quote site can have thousands of pages — pin them all.', [
     ['🔤', 'Type-led templates', 'Outlined, stacked and highlight-line styles.'],
     ['🎨', 'Mood palettes', 'Soft, bold, dark or seasonal colours.'],
@@ -40,7 +40,7 @@ $uc = uc_build([
 'faq' => [
     ['Can I use any quote?', 'Attribute quotes correctly, and be careful with long passages from copyrighted works.'],
     ['Which templates work best?', 'Typography templates — outlined, stacked and highlight lines — with bold or script fonts.'],
-    ['Can I use my own fonts?', 'Choose from 130+ Google fonts, or import your own Canva design as SVG.'],
+    ['Can I use my own fonts?', 'Yes — choose from unlimited fonts, or design your own quote pin in the free Canva-style editor.'],
 ],
 'cta_red' => ['Words worth saving, pinned daily.', 'Every quote collection, automatically.'],
 'cta_dark' => 'Ready to get your quotes shared?',

@@ -7,7 +7,7 @@ require_once __DIR__ . "/../../includes/seo_functions.php";
 require_once __DIR__ . "/../../includes/use_case_functions.php";
 
 $user = current_user($pdo);
-$app = APP_NAME;
+$app = SITE_BRAND;
 
 $uc = [
     'slug' => 'parenting-blog',
@@ -40,10 +40,10 @@ $uc = [
         ['🤖', 'Warm, clear copy', 'AI writes titles by age and problem — “Bedtime Routine for Toddlers”.'],
         ['✍️', 'Auto Blog', 'AI writes new posts with images and pins them while you parent.'],
     ]],
-    'results' => ['title' => 'See the Results: Evergreen Posts, Steady Readers', 'text' => 'Parenting questions come up every year for new parents. Pin your answers once and keep reaching families for months.', 'stats' => [[5, 'x', 'more traffic, up to'], [3, '', 'pins per post by default'], [70, '', 'pin templates'], [365, '', 'days of pins in one run']], 'alt' => 'Pinterest traffic growth for a parenting blog'],
+    'results' => ['title' => 'See the Results: Evergreen Posts, Steady Readers', 'text' => 'Parenting questions come up every year for new parents. Pin your answers once and keep reaching families for months.', 'stats' => [[5, 'x', 'more traffic, up to'], [3, '', 'pins per post by default'], [500, '+', 'premium pin templates'], [365, '', 'days of pins in one run']], 'alt' => 'Pinterest traffic growth for a parenting blog'],
     'steps' => ['title' => 'From Parenting Post to', 'title_accent' => 'Scheduled Pin', 'text' => 'Ten minutes during nap time — then months of pins.', 'items' => [
         ['icon' => '📚', 'label' => 'Setup', 'title' => 'Scan Your Blog', 'alt' => 'Scanning a parenting blog', 'points' => ['Every post listed from your sitemap.', 'Select by age group, topic or season.']],
-        ['icon' => '🎨', 'label' => 'Design', 'title' => 'Pick a Friendly Style', 'alt' => 'Choosing friendly pin templates', 'points' => ['Soft palettes and playful fonts.', 'Your own Canva design if you have one.']],
+        ['icon' => '🎨', 'label' => 'Design', 'title' => 'Pick a Friendly Style', 'alt' => 'Choosing friendly pin templates', 'points' => ['Soft palettes and playful fonts.', 'Or your own design, made free in the built-in editor.']],
         ['icon' => '⚙️', 'label' => 'Schedule', 'title' => 'Set a Gentle Pace', 'alt' => 'Scheduling parenting blog pins', 'points' => ['Warm-up mode for new accounts.', 'Pins per post spaced a month apart.']],
         ['icon' => '✅', 'label' => 'Approve', 'title' => 'Approve and Get Back to Family', 'alt' => 'Approving parenting pins', 'points' => ['Review, edit, approve.', 'Pins go out while you’re busy.']],
     ]],

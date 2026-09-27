@@ -7,7 +7,7 @@ require_once __DIR__ . "/../../includes/seo_functions.php";
 require_once __DIR__ . "/../../includes/use_case_functions.php";
 
 $user = current_user($pdo);
-$app = APP_NAME;
+$app = SITE_BRAND;
 
 $uc = uc_build([
 'slug' => 'beauty-subscription-box', 'name' => 'Beauty Subscription Boxes', 'short' => 'Beauty Box', 'site' => 'Website', 'accent' => '#ec4899', 'noun' => 'pages', 'niche' => 'beauty, skincare and self-care',

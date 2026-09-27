@@ -393,3 +393,10 @@ html { scroll-behavior: smooth; }
 /* Sections far below the fold aren't rendered until you scroll near them. */
 body.uc-page > section:nth-of-type(n+5) { content-visibility: auto; contain-intrinsic-size: auto 900px; }
 .uc-scroll-track img, .hp-show-track img { height: auto; }
+
+/* Pricing summary on use case pages (the full table is on /pricing) */
+.uc-price-teaser { display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; background: #fff; border: 1px solid #eceef2; border-radius: 20px; padding: 28px 30px; box-shadow: 0 14px 40px rgba(17,24,39,.08); }
+.uc-price-teaser h2 { margin: 6px 0 8px; font-size: 28px; }
+.uc-price-teaser p { margin: 0; max-width: 620px; }
+.uc-price-teaser-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+[data-theme="dark"] .uc-price-teaser { background: #1e2025; border-color: #33353c; }

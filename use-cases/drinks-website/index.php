@@ -7,7 +7,7 @@ require_once __DIR__ . "/../../includes/seo_functions.php";
 require_once __DIR__ . "/../../includes/use_case_functions.php";
 
 $user = current_user($pdo);
-$app = APP_NAME;
+$app = SITE_BRAND;
 
 $uc = [
     'slug' => 'drinks-website',
@@ -31,7 +31,7 @@ $uc = [
     ],
     'start' => ['label' => '✨ FREE PIN MAKER · NO SIGN-UP', 'title' => 'Paste a Drink Recipe Link', 'text' => 'We use your drink photos to design pins in seconds.', 'placeholder' => 'https://yourdrinksblog.com/spicy-margarita/'],
     'marquee' => ['Summer cocktails', 'Mocktails', 'Iced coffee', 'Smoothies', 'Holiday punch', 'Margaritas', 'Spritz recipes', 'Batch cocktails', 'Hot chocolate', 'Wine pairings'],
-    'results' => ['title' => 'See the Results: Drinks That Trend Every Season', 'text' => 'Drink searches spike before summer, holidays and game days — and come back every year. Pin early and consistently and your recipes ride each wave.', 'stats' => [[5, 'x', 'more traffic, up to'], [70, '', 'pin templates'], [365, '', 'days of pins in one run'], [56, '', 'colour palettes']], 'alt' => 'Pinterest traffic growth for a cocktail recipe website'],
+    'results' => ['title' => 'See the Results: Drinks That Trend Every Season', 'text' => 'Drink searches spike before summer, holidays and game days — and come back every year. Pin early and consistently and your recipes ride each wave.', 'stats' => [[5, 'x', 'more traffic, up to'], [500, '+', 'premium pin templates'], [365, '', 'days of pins in one run'], [100, '%', 'free design editor, no Canva Pro']], 'alt' => 'Pinterest traffic growth for a cocktail recipe website'],
     'steps' => ['title' => 'From Drink Recipe to', 'title_accent' => 'Scheduled Pin', 'text' => 'Scan your recipes, pick a bright style, and schedule the season.', 'items' => [
         ['icon' => '🍸', 'label' => 'Setup', 'title' => 'Scan Your Drink Recipes', 'alt' => 'Scanning a drinks website for recipes', 'points' => ['Every cocktail, mocktail and coffee recipe listed from your sitemap.', 'Search “margarita” or “christmas” and select in bulk.']],
         ['icon' => '🎨', 'label' => 'Design', 'title' => 'Pick Bright, Party-Ready Designs', 'alt' => 'Choosing colourful pin templates for drinks', 'points' => ['Vivid palettes and bold fonts that pop in the feed.', 'Collages show the drink, the garnish and the batch.']],

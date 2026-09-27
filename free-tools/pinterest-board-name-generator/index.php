@@ -37,8 +37,12 @@ $remainingAttempts = free_tool_attempts_remaining($pdo, $settings['max_attempts'
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Free AI Pinterest Board Name Generator | <?= e(APP_NAME) ?></title>
-<meta name="description" content="Generate catchy, SEO-friendly Pinterest board names free with AI. Enter your board topic, pick a tone and language, and get 8 ready-to-use name ideas.">
+<?php require_once __DIR__ . '/../../includes/seo_functions.php'; seo_render_head($pdo, [
+    'title' => 'AI Pinterest Board Name Generator (Free) | ' . SITE_BRAND,
+    'description' => 'Get keyword-rich Pinterest board names and descriptions for your niche in seconds. AI suggests boards people search for, so your pins get found.',
+    'canonical' => rtrim(APP_URL, '/') . '/free-tools/pinterest-board-name-generator/',
+    'breadcrumbs' => [['Free Tools', 'free-tools/'], ['Pinterest Board Name Generator', 'free-tools/pinterest-board-name-generator/']],
+]); ?>
 <link rel="stylesheet" href="../../assets/css/style.css?v=<?= @filemtime(__DIR__ . '/../../assets/css/style.css') ?: time() ?>">
 <link rel="stylesheet" href="../../assets/css/free-tool.css?v=<?= @filemtime(__DIR__ . '/../../assets/css/free-tool.css') ?: time() ?>">
 </head>

@@ -1,5 +1,5 @@
 # ---------------------------------------------------------------------------
-# WebToPin — clean URLs (no ".php"), pretty blog URLs, custom 404 page.
+# AutomatedPin — clean URLs (no ".php"), pretty blog URLs, custom 404 page.
 # Works on Hostinger (LiteSpeed) and Apache. App must be at the domain root.
 # ---------------------------------------------------------------------------
 DirectoryIndex index.php
@@ -39,6 +39,13 @@ AddType font/woff2 .woff2
 RewriteEngine On
 RewriteBase /
 
+# 0) SEO files: robots.txt and the XML sitemaps are generated live (Admin → SEO Setting).
+RewriteRule ^robots\.txt$ robots.php [L]
+RewriteRule ^sitemap\.xml$ sitemap.php [L]
+RewriteRule ^sitemap-([a-z-]+)\.xml$ sitemap.php?type=$1 [L,QSA]
+RewriteCond %{THE_REQUEST} \s/index\.php[\s?] [NC]
+RewriteRule ^index\.php$ / [R=301,L]
+
 # ---------------------------------------------------------------------------
 # 1) Anyone who types a ".php" URL gets our 404 page.
 #    THE_REQUEST = the raw line the browser sent, so this never fires after
@@ -67,7 +74,8 @@ RewriteRule ^(.+)/$ /$1 [R=301,L]
 
 # 4) Blog
 RewriteRule ^blog/?$ blog.php [L,QSA]
-RewriteRule ^blog/([a-z0-9-]+)/?$ blog.php?category=$1 [L,QSA]
+# one URL per category: /blog/<category> → /<category>
+RewriteRule ^blog/([a-z0-9-]+)/?$ /$1 [R=301,L]
 
 # 5) Clean URL -> real file:  /pricing -> pricing.php,
 #    /user/dashboard -> user/dashboard.php, /admin/users -> admin/users.php

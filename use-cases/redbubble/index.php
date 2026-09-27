@@ -7,7 +7,7 @@ require_once __DIR__ . "/../../includes/seo_functions.php";
 require_once __DIR__ . "/../../includes/use_case_functions.php";
 
 $user = current_user($pdo);
-$app = APP_NAME;
+$app = SITE_BRAND;
 
 $uc = [
     'slug' => 'redbubble',
@@ -54,7 +54,7 @@ $uc = [
     'results' => [
         'title' => 'See the Results: Designs That Keep Getting Found',
         'text' => 'Pinterest rewards steady posting. A few pins a day across your whole portfolio adds up to steady discovery over months.',
-        'stats' => [[20, '/day', 'pins at full pace'], [10, '', 'pins per design, max'], [70, '', 'pin templates'], [5, 'x', 'more traffic, up to']],
+        'stats' => [[20, '/day', 'pins at full pace'], [10, '', 'pins per design, max'], [500, '+', 'premium pin templates'], [5, 'x', 'more traffic, up to']],
         'alt' => 'Pinterest traffic growth for a Redbubble artist',
     ],
     'steps' => [

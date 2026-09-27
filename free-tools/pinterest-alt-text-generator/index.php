@@ -46,8 +46,12 @@ $remainingAttempts = free_tool_attempts_remaining($pdo, $settings['max_attempts'
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Free Pinterest Alt Text Generator — AI Image Descriptions | <?= e(APP_NAME) ?></title>
-<meta name="description" content="Generate SEO-optimized, accessible alt text for your Pinterest images free with AI. Upload an image and get a ready-to-use, descriptive alt text in seconds.">
+<?php require_once __DIR__ . '/../../includes/seo_functions.php'; seo_render_head($pdo, [
+    'title' => 'Free Pinterest Alt Text Generator (AI) | ' . SITE_BRAND,
+    'description' => 'Upload a pin image and get accessible, keyword-rich Pinterest alt text in seconds. AI describes what is in the picture so more people can find it.',
+    'canonical' => rtrim(APP_URL, '/') . '/free-tools/pinterest-alt-text-generator/',
+    'breadcrumbs' => [['Free Tools', 'free-tools/'], ['Pinterest Alt Text Generator', 'free-tools/pinterest-alt-text-generator/']],
+]); ?>
 <link rel="stylesheet" href="../../assets/css/style.css?v=<?= @filemtime(__DIR__ . '/../../assets/css/style.css') ?: time() ?>">
 <link rel="stylesheet" href="../../assets/css/free-tool.css?v=<?= @filemtime(__DIR__ . '/../../assets/css/free-tool.css') ?: time() ?>">
 </head>

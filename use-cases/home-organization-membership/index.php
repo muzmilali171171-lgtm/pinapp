@@ -7,7 +7,7 @@ require_once __DIR__ . "/../../includes/seo_functions.php";
 require_once __DIR__ . "/../../includes/use_case_functions.php";
 
 $user = current_user($pdo);
-$app = APP_NAME;
+$app = SITE_BRAND;
 
 $uc = uc_build([
 'slug' => 'home-organization-membership', 'name' => 'Home Organization Memberships', 'short' => 'Organization Membership Site', 'site' => 'Site', 'accent' => '#14b8a6', 'noun' => 'pages', 'niche' => 'home organization and decluttering',

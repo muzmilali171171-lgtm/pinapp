@@ -7,7 +7,7 @@ require_once __DIR__ . "/../../includes/seo_functions.php";
 require_once __DIR__ . "/../../includes/use_case_functions.php";
 
 $user = current_user($pdo);
-$app = APP_NAME;
+$app = SITE_BRAND;
 
 $uc = uc_build([
 'tools' => ['pinterest-pin-maker', 'ai-pinterest-pin-create', 'pinterest-title-description-generator', 'pinterest-keyword-research-tool', 'pinterest-board-name-generator', 'pinterest-bio-generator', 'pinterest-image-resizer', 'ai-image-creater'],
@@ -21,12 +21,12 @@ $uc = uc_build([
 'placeholder' => 'https://clientsite.com/blog/post',
 'marquee' => ['Client onboarding', 'Content calendars', 'E-commerce clients', 'Blog clients', 'Local businesses', 'Reporting', 'Team access', 'Brand templates', 'Bulk scheduling', 'Auto blogging'],
 'results' => ['A Profitable Pinterest Service', 'Automation turns Pinterest from hours of manual work into a scalable, recurring service.'],
-'stats' => [[1, '', 'dashboard for all clients'], [70, '', 'pin templates'], [365, '', 'days of pins per run'], [5, 'x', 'more traffic, up to']],
+'stats' => [[1, '', 'dashboard for all clients'], [500, '+', 'premium pin templates'], [365, '', 'days of pins per run'], [5, 'x', 'more traffic, up to']],
 'eyebrow' => 'BUILT FOR AGENCIES',
 'features' => ['Why Agencies Automate Pinterest', 'Deliver more, spend less time.', [
     ['🏢', 'Multi-site', 'Add every client website to one account.'],
     ['👥', 'Team Management', 'Invite your team by email — no password sharing.'],
-    ['🎨', 'Brand per client', 'Each client’s palette, fonts or Canva template.'],
+    ['🎨', 'Brand per client', 'Each client’s palette, fonts or custom template.'],
     ['⚡', 'Bulk scheduling', 'Hundreds of pins per client in one run.'],
     ['✍️', 'Auto Blog', 'Offer content creation plus pinning on supported plans.'],
     ['📊', 'Client reporting', 'Pin analytics you can share with clients.'],
@@ -42,7 +42,7 @@ $uc = uc_build([
 'faq' => [
     ['Can I manage many client sites?', 'Yes — add multiple websites and Pinterest accounts, and use Team Management for your staff.'],
     ['Do clients need to share passwords?', 'No — clients connect Pinterest through the official login, and your team works through shared access.'],
-    ['Can each client have its own branding?', 'Yes — pick a palette, fonts or import a Canva template per run.'],
+    ['Can each client have its own branding?', 'Yes — pick a palette, fonts or a custom template (made in the free editor) per run.'],
 ],
 'cta_red' => ['More clients, same team.', 'Run Pinterest for every client automatically.'],
 'cta_dark' => 'Ready to add Pinterest to your agency services?',

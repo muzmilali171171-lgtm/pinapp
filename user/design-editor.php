@@ -38,7 +38,7 @@ $v = function (string $rel) { return @filemtime(__DIR__ . '/../' . $rel) ?: time
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Design Editor — <?= e(APP_NAME) ?></title>
+<title>Design Editor — <?= e(SITE_BRAND) ?></title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

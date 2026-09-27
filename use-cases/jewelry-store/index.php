@@ -7,7 +7,7 @@ require_once __DIR__ . "/../../includes/seo_functions.php";
 require_once __DIR__ . "/../../includes/use_case_functions.php";
 
 $user = current_user($pdo);
-$app = APP_NAME;
+$app = SITE_BRAND;
 
 $uc = uc_build([
 'slug' => 'jewelry-store', 'name' => 'Jewelry Stores', 'short' => 'Jewelry Store', 'site' => 'Store', 'accent' => '#a16207', 'noun' => 'pieces', 'niche' => 'jewelry styles, gifts and trends',

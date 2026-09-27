@@ -108,8 +108,12 @@ $v = fn($f) => @filemtime(__DIR__ . '/../../' . $f) ?: time();
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Free AI Pinterest Pin Maker — <?= e(APP_NAME) ?></title>
-<meta name="description" content="Create Pinterest pins from any page for free. Paste a link, pick from 70 templates, colour palettes and fonts, and let AI write the titles and descriptions.">
+<?php require_once __DIR__ . '/../../includes/seo_functions.php'; seo_render_head($pdo, [
+    'title' => 'Free AI Pinterest Pin Maker: Unlimited Pins | ' . SITE_BRAND,
+    'description' => 'Create Pinterest pins from any page free. Paste a link, pick from unlimited templates, colours and fonts, and let AI write the titles and descriptions.',
+    'canonical' => rtrim(APP_URL, '/') . '/free-tools/pinterest-pin-maker/',
+    'breadcrumbs' => [['Free Tools', 'free-tools/'], ['Pinterest Pin Maker', 'free-tools/pinterest-pin-maker/']],
+]); ?>
 <link rel="stylesheet" href="../../assets/css/style.css?v=<?= $v('assets/css/style.css') ?>">
 <link rel="stylesheet" href="../../assets/css/free-tool.css?v=<?= $v('assets/css/free-tool.css') ?>">
 <link rel="stylesheet" href="../../assets/css/classic-wizard.css?v=<?= $v('assets/css/classic-wizard.css') ?>">

@@ -78,7 +78,7 @@ try {
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Admin Login — <?= e(APP_NAME) ?></title>
+<title>Admin Login — <?= e(SITE_BRAND) ?></title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <link rel="stylesheet" href="<?= $root ?>/assets/css/style.css?v=<?= @filemtime(__DIR__ . '/../assets/css/style.css') ?: time() ?>">
@@ -104,7 +104,7 @@ try {
             <p class="sub">Enter the 6-digit code from your authenticator app.</p>
         <?php else: ?>
             <h1>Admin login</h1>
-            <p class="sub"><?= e(APP_NAME) ?> admin panel</p>
+            <p class="sub"><?= e(SITE_BRAND) ?> admin panel</p>
         <?php endif; ?>
         <?php foreach ($errors as $err): ?><div class="alert alert-error"><?= e($err) ?></div><?php endforeach; ?>
 

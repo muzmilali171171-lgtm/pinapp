@@ -7,7 +7,7 @@ require_once __DIR__ . "/../../includes/seo_functions.php";
 require_once __DIR__ . "/../../includes/use_case_functions.php";
 
 $user = current_user($pdo);
-$app = APP_NAME;
+$app = SITE_BRAND;
 
 $uc = uc_build([
 'slug' => 'photography-blog', 'name' => 'Photography Blogs', 'short' => 'Photography Blog', 'site' => 'Blog', 'accent' => '#6366f1', 'noun' => 'posts', 'niche' => 'photography tips and photo stories',

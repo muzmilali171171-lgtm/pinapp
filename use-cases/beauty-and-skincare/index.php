@@ -7,7 +7,7 @@ require_once __DIR__ . "/../../includes/seo_functions.php";
 require_once __DIR__ . "/../../includes/use_case_functions.php";
 
 $user = current_user($pdo);
-$app = APP_NAME;
+$app = SITE_BRAND;
 
 $uc = uc_build([
 'slug' => 'beauty-and-skincare', 'name' => 'Beauty & Skincare', 'short' => 'Beauty Blog', 'site' => 'Site', 'accent' => '#db2777', 'noun' => 'posts', 'niche' => 'skincare routines, makeup and beauty products',

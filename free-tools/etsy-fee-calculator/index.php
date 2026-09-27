@@ -11,8 +11,12 @@ $user = current_user($pdo);
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Free Etsy Fee Calculator — See Your True Profit Per Order | <?= e(APP_NAME) ?></title>
-<meta name="description" content="Calculate Etsy listing, transaction, and payment processing fees free. See your real profit per order before you publish, including optional Offsite Ads fees.">
+<?php require_once __DIR__ . '/../../includes/seo_functions.php'; seo_render_head($pdo, [
+    'title' => 'Etsy Fee Calculator: See Your Real Profit | ' . SITE_BRAND,
+    'description' => 'Calculate Etsy listing, transaction, payment processing and shipping fees in seconds and see your true profit and margin per order. Free, no sign-up.',
+    'canonical' => rtrim(APP_URL, '/') . '/free-tools/etsy-fee-calculator/',
+    'breadcrumbs' => [['Free Tools', 'free-tools/'], ['Etsy Fee Calculator', 'free-tools/etsy-fee-calculator/']],
+]); ?>
 <link rel="stylesheet" href="../../assets/css/style.css?v=<?= @filemtime(__DIR__ . '/../../assets/css/style.css') ?: time() ?>">
 <link rel="stylesheet" href="../../assets/css/free-tool.css?v=<?= @filemtime(__DIR__ . '/../../assets/css/free-tool.css') ?: time() ?>">
 </head>

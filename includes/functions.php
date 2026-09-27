@@ -1,4 +1,7 @@
 <?php
+if (!defined('SITE_BRAND')) {
+    define('SITE_BRAND', (defined('APP_NAME') && trim(APP_NAME) !== '' && !preg_match('/web\s*to\s*pin|webtopin/i', APP_NAME)) ? APP_NAME : 'AutomatedPin');
+}
 /**
  * Shared helpers: logging, Pinterest API v5 calls (OAuth token exchange,
  * refresh, boards list, pin creation), and small utilities.
@@ -948,10 +951,10 @@ function render_site_header(?PDO $pdo = null): void
     ?>
 <header class="navbar">
     <div class="container">
-        <div class="logo"><a href="/" style="color:inherit;text-decoration:none;">Web To<span>Pin</span></a></div>
+        <div class="logo"><a href="/" style="color:inherit;text-decoration:none;">Automated<span>Pin</span></a></div>
         <button type="button" class="nav-toggle" aria-label="Open menu" aria-expanded="false" onclick="var h=this.closest('.navbar'),o=h.classList.toggle('nav-open');this.setAttribute('aria-expanded',o);document.body.classList.toggle('nav-lock',o);"><span></span><span></span><span></span></button>
         <nav>
-            <div class="nav-drawer-head"><span class="nav-drawer-title">Web To<span>Pin</span></span><button type="button" class="nav-close" aria-label="Close menu" onclick="<?= $close ?>">&times;</button></div>
+            <div class="nav-drawer-head"><span class="nav-drawer-title">Automated<span>Pin</span></span><button type="button" class="nav-close" aria-label="Close menu" onclick="<?= $close ?>">&times;</button></div>
             <?php foreach ($links as [$href, $label]):
                 $base = rtrim($href, '/');
                 $isActive = ($path === $base || strpos($path, $base . '/') === 0); ?>

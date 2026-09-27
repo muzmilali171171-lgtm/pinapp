@@ -35,8 +35,12 @@ $remainingAttempts = free_tool_attempts_remaining($pdo, $settings['max_attempts'
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Free Pinterest Username Generator — Unique, SEO-Friendly Handles | <?= e(APP_NAME) ?></title>
-<meta name="description" content="Generate unique, SEO-friendly Pinterest usernames free with AI. Enter your account topic or niche, pick a style, and get 10 ready-to-use username ideas.">
+<?php require_once __DIR__ . '/../../includes/seo_functions.php'; seo_render_head($pdo, [
+    'title' => 'Pinterest Username Generator (Free) | ' . SITE_BRAND,
+    'description' => 'Get unique, brandable Pinterest username ideas for your niche in seconds. AI suggests short, SEO-friendly handles that fit the 30-character limit.',
+    'canonical' => rtrim(APP_URL, '/') . '/free-tools/pinterest-username-generator/',
+    'breadcrumbs' => [['Free Tools', 'free-tools/'], ['Pinterest Username Generator', 'free-tools/pinterest-username-generator/']],
+]); ?>
 <link rel="stylesheet" href="../../assets/css/style.css?v=<?= @filemtime(__DIR__ . '/../../assets/css/style.css') ?: time() ?>">
 <link rel="stylesheet" href="../../assets/css/free-tool.css?v=<?= @filemtime(__DIR__ . '/../../assets/css/free-tool.css') ?: time() ?>">
 </head>

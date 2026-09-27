@@ -24,8 +24,9 @@ foreach (uc_catalog() as $slug => $c) {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <?php seo_render_head($pdo, [
-    'title' => 'Pinterest Automation Use Cases: Shopify, Etsy, WordPress & More | ' . APP_NAME,
-    'description' => 'See how ' . APP_NAME . ' automates Pinterest for Shopify, WooCommerce, Amazon, Etsy, Redbubble, Printify, WordPress, food and home decor websites.',
+    'title' => 'Pinterest Automation Use Cases for Every Site | ' . SITE_BRAND,
+    'description' => 'See how ' . SITE_BRAND . ' automates Pinterest for Shopify, WooCommerce, Etsy, Amazon, Printify, WordPress, food blogs, home decor sites and agencies.',
+    'breadcrumbs' => [['Use Cases', 'use-cases/']],
     'keywords' => 'Pinterest automation use cases, Pinterest for Shopify, Pinterest for Etsy, Pinterest for WordPress, Pinterest for food bloggers, Pinterest for home decor, Pinterest for print on demand',
     'canonical' => rtrim(APP_URL, '/') . '/use-cases/',
 ]); ?>
@@ -39,7 +40,7 @@ foreach (uc_catalog() as $slug => $c) {
     <div class="container">
         <div class="uc-hub-badge">// USE CASES</div>
         <h1>Pinterest automation for every kind of website</h1>
-        <p>Whether you sell products, publish content, or run Pinterest for clients — see exactly how <?= e(APP_NAME) ?> fits your business.</p>
+        <p>Whether you sell products, publish content, or run Pinterest for clients — see exactly how <?= e(SITE_BRAND) ?> fits your business.</p>
     </div>
 </section>
 
@@ -73,7 +74,7 @@ foreach (uc_catalog() as $slug => $c) {
         <?php if ($user): ?>
             <a href="../user/dashboard" class="uc-hub-cta-pill">Go to Dashboard →</a>
         <?php else: ?>
-            <a href="../auth/register" class="uc-hub-cta-pill">Try <?= e(APP_NAME) ?> Free →</a>
+            <a href="../auth/register" class="uc-hub-cta-pill">Try <?= e(SITE_BRAND) ?> Free →</a>
         <?php endif; ?>
     </div>
 </section>

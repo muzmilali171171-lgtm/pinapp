@@ -99,8 +99,9 @@ $faqs = [
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <?php seo_render_head($pdo, [
-    'title' => 'Pricing — ' . APP_NAME,
-    'description' => 'Simple, transparent Pinterest marketing pricing. AI pin design, scheduling, and article automation — start free, upgrade any time.',
+    'title' => 'Pricing: Pinterest Automation Plans | ' . SITE_BRAND,
+    'description' => 'Simple, transparent pricing for Pinterest automation: AI pin design, pin scheduling, auto blog and analytics. Start free, no card needed, upgrade any time.',
+    'breadcrumbs' => [['Pricing', 'pricing']],
 ]); ?>
 <link rel="stylesheet" href="assets/css/style.css?v=<?= @filemtime(__DIR__ . '/assets/css/style.css') ?: time() ?>">
 <link rel="stylesheet" href="assets/css/free-tool.css?v=<?= @filemtime(__DIR__ . '/assets/css/free-tool.css') ?: time() ?>">

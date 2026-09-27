@@ -11,8 +11,12 @@ $user = current_user($pdo);
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Free Pinterest Pin Preview — See Your Pin Before You Post | <?= e(APP_NAME) ?></title>
-<meta name="description" content="Preview exactly how your Pinterest pin will look in the feed before you post it. Upload your image, type your title and description, and see truncation live.">
+<?php require_once __DIR__ . '/../../includes/seo_functions.php'; seo_render_head($pdo, [
+    'title' => 'Pinterest Pin Preview: See It Before Posting | ' . SITE_BRAND,
+    'description' => 'Preview how your pin looks in the Pinterest feed on desktop and mobile before you post. Check the title, image crop and description for free.',
+    'canonical' => rtrim(APP_URL, '/') . '/free-tools/pinterest-pin-preview/',
+    'breadcrumbs' => [['Free Tools', 'free-tools/'], ['Pinterest Pin Preview', 'free-tools/pinterest-pin-preview/']],
+]); ?>
 <link rel="stylesheet" href="../../assets/css/style.css?v=<?= @filemtime(__DIR__ . '/../../assets/css/style.css') ?: time() ?>">
 <link rel="stylesheet" href="../../assets/css/free-tool.css?v=<?= @filemtime(__DIR__ . '/../../assets/css/free-tool.css') ?: time() ?>">
 </head>

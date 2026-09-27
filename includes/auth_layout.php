@@ -24,7 +24,7 @@ function auth_layout_start(PDO $pdo, string $title, string $mode): void
 <body class="au-body au-<?= e($mode) ?>">
 <div class="au-shell">
     <main class="au-main">
-        <a href="<?= $root ?>/" class="au-brand"><span class="au-logo">📌</span> <?= e(APP_NAME) ?></a>
+        <a href="<?= $root ?>/" class="au-brand"><span class="au-logo">📌</span> <?= e(SITE_BRAND) ?></a>
         <div class="au-card">
 <?php
 }
@@ -39,7 +39,7 @@ function auth_layout_end(string $mode): void
         <p class="au-legal">By continuing you agree to our <a href="<?= $root ?>/terms">Terms</a> and <a href="<?= $root ?>/privacy-policy">Privacy Policy</a>.</p>
     </main>
 
-    <aside class="au-side" aria-label="Why <?= e(APP_NAME) ?>">
+    <aside class="au-side" aria-label="Why <?= e(SITE_BRAND) ?>">
         <div class="au-glow au-glow-1" aria-hidden="true"></div>
         <div class="au-glow au-glow-2" aria-hidden="true"></div>
         <div class="au-side-inner">

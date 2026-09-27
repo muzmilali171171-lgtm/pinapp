@@ -7,7 +7,7 @@ require_once __DIR__ . "/../../includes/seo_functions.php";
 require_once __DIR__ . "/../../includes/use_case_functions.php";
 
 $user = current_user($pdo);
-$app = APP_NAME;
+$app = SITE_BRAND;
 
 $uc = [
     'slug' => 'nails-website',
@@ -46,7 +46,7 @@ $uc = [
         ['icon' => '🗓️', 'label' => 'Schedule', 'title' => 'Beat the Trend Curve', 'alt' => 'Scheduling seasonal nail pins', 'points' => ['Start each season’s pins 6–8 weeks early.', 'Several pins per roundup, spaced out.']],
         ['icon' => '✨', 'label' => 'Approve', 'title' => 'Approve and Polish Off', 'alt' => 'Approving nail pins', 'points' => ['Edit any pin, then approve.', 'Pins publish on autopilot.']],
     ]],
-    'results' => ['title' => 'See the Results: Every Season, a New Wave', 'text' => 'Nail searches reset every season. With pins scheduled ahead, you ride each new wave instead of chasing it.', 'stats' => [[5, 'x', 'more traffic, up to'], [4, '', 'seasons planned ahead'], [70, '', 'pin templates'], [56, '', 'colour palettes']], 'alt' => 'Pinterest traffic growth for a nail art website'],
+    'results' => ['title' => 'See the Results: Every Season, a New Wave', 'text' => 'Nail searches reset every season. With pins scheduled ahead, you ride each new wave instead of chasing it.', 'stats' => [[5, 'x', 'more traffic, up to'], [4, '', 'seasons planned ahead'], [500, '+', 'premium pin templates'], [100, '%', 'free design editor, no Canva Pro']], 'alt' => 'Pinterest traffic growth for a nail art website'],
     'playbook' => ['title' => 'Pinterest Tips for Nail Art Sites', 'text' => 'How nail creators get saved.', 'tips' => [
         ['Lead with the best close-up', 'Sharp, well-lit nail photos get saved more.'],
         ['Include shape and length', '“Short Almond Nails” is how people search.'],

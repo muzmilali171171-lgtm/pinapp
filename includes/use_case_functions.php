@@ -116,7 +116,7 @@ function uc_catalog(): array
 function uc_free_tools(): array
 {
     return [
-        'pinterest-pin-maker' => ['📌', 'Free Pinterest Pin Maker', 'Pins from any page with 70 templates — no sign-up.'],
+        'pinterest-pin-maker' => ['📌', 'Free Pinterest Pin Maker', 'Pins from any page with unlimited templates — no sign-up.'],
         'ai-pinterest-pin-create' => ['✨', 'AI Pinterest Pin Creator', 'Design a single pin with AI from a title or link.'],
         'pinterest-title-description-generator' => ['📝', 'Pin Title & Description Generator', 'Keyword-rich pin titles and descriptions in seconds.'],
         'pinterest-keyword-research-tool' => ['🔎', 'Pinterest Keyword Research', 'Find the words people search on Pinterest.'],
@@ -149,6 +149,18 @@ function uc_tools_for(array $uc): array
         $base = ['pinterest-pin-maker', 'pinterest-title-description-generator', 'pinterest-keyword-research-tool', 'etsy-title-description-generator', 'etsy-tags-generator', 'etsy-keyword-tool', 'etsy-fee-calculator', 'pinterest-image-resizer'];
     }
     return $base;
+}
+
+/** $n items of $list, starting at a place that depends on the page slug — so pages don't all repeat the same set. */
+function uc_rotate(array $list, string $slug, int $n): array
+{
+    $list = array_values($list);
+    if (!$list || $slug === '' || $slug === 'home') return array_slice($list, 0, $n);
+    $k = count($list);
+    $start = abs(crc32($slug)) % $k;
+    $out = [];
+    for ($i = 0; $i < min($n, $k); $i++) $out[] = $list[($start + $i) % $k];
+    return $out;
 }
 
 /** Media shared by every use case (the site's own screenshots, videos and pins). */
@@ -237,6 +249,9 @@ function uc_render_page(PDO $pdo, ?array $user, array $uc): void
 
 <?php
     foreach ($order as $section) {
+        // The full plan table lives on /pricing only; use case pages show a short, page-specific summary
+        // (avoids the same long pricing text on 70 pages).
+        if ($section === 'pricing') $section = 'pricing_teaser';
         $fn = 'uc_section_' . $section;
         if (function_exists($fn)) $fn($pdo, $user, $uc, $base);
     }
@@ -344,7 +359,7 @@ function uc_section_start(PDO $pdo, ?array $user, array $uc, string $base): void
                 <input type="hidden" name="auto" value="1">
                 <button type="submit" class="btn-primary rg-shine">Create Pins Free →</button>
             </form>
-            <div class="uc-start-meta">3 free generations · 70 templates · No sign-up needed</div>
+            <div class="uc-start-meta">3 free generations · Unlimited templates · No sign-up needed</div>
         </div>
     </div>
 </section>
@@ -501,7 +516,7 @@ function uc_section_compare(PDO $pdo, ?array $user, array $uc, string $base): vo
         </div>
         <div class="uc-compare-wrap rg-reveal">
             <table class="uc-compare-table">
-                <thead><tr><th scope="col">Task</th><th scope="col">Doing it by hand</th><th scope="col" class="uc-col-us">With <?= e(APP_NAME) ?></th></tr></thead>
+                <thead><tr><th scope="col">Task</th><th scope="col">Doing it by hand</th><th scope="col" class="uc-col-us">With <?= e(SITE_BRAND) ?></th></tr></thead>
                 <tbody>
                 <?php foreach ($c['rows'] as $r): ?>
                     <tr><th scope="row"><?= e($r[0]) ?></th><td><span class="uc-x">✕</span> <?= e($r[1]) ?></td><td class="uc-col-us"><span class="uc-ok">✓</span> <?= e($r[2]) ?></td></tr>
@@ -622,9 +637,37 @@ function uc_section_pricing(PDO $pdo, ?array $user, array $uc, string $base): vo
 <?php
 }
 
+function uc_section_pricing_teaser(PDO $pdo, ?array $user, array $uc, string $base): void
+{
+    $plans = plan_pricing_tables_ready($pdo) ? get_all_plans($pdo, true) : [];
+    $paid = array_values(array_filter($plans, fn($p) => empty($p['is_free']) && (float)$p['price_monthly'] > 0));
+    $from = $paid ? min(array_map(fn($p) => (float)$p['price_monthly'], $paid)) : 0;
+    $hasFree = (bool)array_filter($plans, fn($p) => !empty($p['is_free']));
+    $name = $uc['name'] ?? 'your site';
+    $noun = $uc['power_noun'] ?? 'pages';
+    ?>
+<section class="uc-pricing" id="pricing">
+    <div class="container">
+        <div class="uc-price-teaser rg-reveal">
+            <div>
+                <div class="uc-eyebrow">// PRICING FOR <?= e(mb_strtoupper($name)) ?></div>
+                <h2>Start Pinning Your <?= e($name) ?> <?= e(ucfirst($noun)) ?> <?= $hasFree ? 'for Free' : 'Today' ?></h2>
+                <p class="uc-muted"><?= $hasFree ? 'Create a free account and schedule your first ' . e($noun) . ' — no card needed.' : 'Pick a plan and schedule your first ' . e($noun) . ' in minutes.' ?>
+                    <?php if ($from > 0): ?> Paid plans start at <strong>$<?= e(rtrim(rtrim(number_format($from, 2), '0'), '.')) ?>/month</strong> when you want more pins, Auto Blog and team seats.<?php endif; ?></p>
+            </div>
+            <div class="uc-price-teaser-actions">
+                <?= uc_cta($user, $base, 'Start Free →', 'btn-primary rg-shine') ?>
+                <a href="<?= $base ?>pricing" class="btn-secondary uc-btn-outline">Compare all plans</a>
+            </div>
+        </div>
+    </div>
+</section>
+<?php
+}
+
 function uc_section_testimonials(PDO $pdo, ?array $user, array $uc, string $base): void
 {
-    $list = $uc['testimonials'] ?? uc_media()['testimonials'];
+    $list = $uc['testimonials'] ?? uc_rotate(uc_media()['testimonials'], $uc['slug'] ?? '', ($uc['slug'] ?? 'home') === 'home' ? 99 : 4);
     ?>
 <section class="uc-testimonials">
     <div class="container">
@@ -655,7 +698,7 @@ function uc_section_real_results(PDO $pdo, ?array $user, array $uc, string $base
         <div class="uc-track-wrap">
             <div class="uc-track">
                 <?php foreach (array_merge($imgs, $imgs) as $img): ?>
-                    <div class="uc-result-card"><img src="<?= e($img) ?>" alt="Real Pinterest results screenshot from a <?= e(APP_NAME) ?> user" width="260" height="320" loading="lazy" decoding="async"></div>
+                    <div class="uc-result-card"><img src="<?= e($img) ?>" alt="Real Pinterest results screenshot from a <?= e(SITE_BRAND) ?> user" width="260" height="320" loading="lazy" decoding="async"></div>
                 <?php endforeach; ?>
             </div>
         </div>
@@ -691,7 +734,7 @@ function uc_section_cta_red(PDO $pdo, ?array $user, array $uc, string $base): vo
 <section class="uc-cta-red">
     <div class="container uc-cta-red-inner rg-reveal">
         <div><h2><?= e($uc['cta_red'][0]) ?></h2><p><?= e($uc['cta_red'][1]) ?></p></div>
-        <?= uc_cta($user, $base, 'Try ' . APP_NAME . ' Free →', 'uc-cta-pill rg-shine') ?>
+        <?= uc_cta($user, $base, 'Try ' . SITE_BRAND . ' Free →', 'uc-cta-pill rg-shine') ?>
     </div>
 </section>
 <?php
@@ -721,7 +764,8 @@ function uc_section_related(PDO $pdo, ?array $user, array $uc, string $base): vo
     unset($all[$uc['slug']]);
     $same = array_filter($all, fn($c) => $c['group'] === $group);
     $other = array_filter($all, fn($c) => $c['group'] !== $group && $c['full']);
-    $pick = array_slice($same, 0, 8, true) + array_slice($other, 0, 4, true);
+    $pick = [];
+    foreach (array_merge(uc_rotate(array_keys($same), $uc['slug'], 6), uc_rotate(array_keys($other), $uc['slug'], 2)) as $k) $pick[$k] = $all[$k];
     $hub = $uc['hub_path'] ?? '../';
     ?>
 <section class="uc-related">
@@ -761,7 +805,7 @@ function uc_section_power(PDO $pdo, ?array $user, array $uc, string $base): void
             <article class="uc-power-card uc-power-green rg-reveal" style="--d: 180ms">
                 <div class="uc-power-ic">♾️</div>
                 <h2>Unlimited AI Pin Designs</h2>
-                <p>70 templates × 56 colour palettes × 130+ fonts, plus your own Canva designs — AI picks the best look for every page, so no two pins look the same.</p>
+                <p>Unlimited templates, colour palettes and fonts, plus a free Canva-style design editor with every premium feature — AI picks the best look for every page, so no two pins look the same.</p>
                 <a href="<?= e(uc_signup_or($user, $base, 'user/classic-wizard')) ?>" class="uc-power-link"><?= $user ? 'Design your pins →' : 'Get started free →' ?></a>
             </article>
         </div>
@@ -786,6 +830,7 @@ function uc_section_autoblog(PDO $pdo, ?array $user, array $uc, string $base): v
             <h2>Create Hundreds of Blog Posts With Images, Publish Them and <span class="uc-grad-anim">Schedule Pins — in 1 Click</span></h2>
             <p>Give AI a list of titles for <?= e($niche) ?>. It writes every article with images, publishes to your website at the pace you choose, and schedules Pinterest pins for each post — all in the background.</p>
         </div>
+        <?php if (($uc['slug'] ?? 'home') === 'home'): ?>
         <ol class="uc-flow">
             <li class="rg-reveal"><span class="uc-flow-n">1</span><div class="uc-flow-ic">📋</div><h3>Paste your titles</h3><p>One title per line — or paste competitor links and let AI turn them into your own original titles.</p></li>
             <li class="rg-reveal" style="--d: 90ms"><span class="uc-flow-n">2</span><div class="uc-flow-ic">🤖</div><h3>AI writes with images</h3><p>Full articles with a featured image and in-post images, categories, authors and optional tags.</p></li>
@@ -798,6 +843,7 @@ function uc_section_autoblog(PDO $pdo, ?array $user, array $uc, string $base): v
             <div><b>Up to 20</b><span>pins per article</span></div>
             <div><b>1</b><span>setup — then autopilot</span></div>
         </div>
+        <?php endif; ?>
         <div class="uc-center">
             <a href="<?= e(uc_signup_or($user, $base, 'user/auto-article-create')) ?>" class="btn-primary rg-shine uc-btn-pulse"><?= $user ? 'Create an Auto Blog Batch →' : 'Sign Up Free & Start Auto Blogging →' ?></a>
             <small class="uc-autoblog-note">Auto Blog is available on plans that include it — see pricing below.</small>
@@ -812,6 +858,10 @@ function uc_section_free_tools(PDO $pdo, ?array $user, array $uc, string $base):
 {
     $tools = uc_free_tools();
     $list = array_values(array_filter(uc_tools_for($uc), fn($t) => isset($tools[$t])));
+    if (($uc['slug'] ?? 'home') !== 'home' && empty($uc['tools'])) {
+        $list = array_merge(array_slice($list, 0, 2), uc_rotate(array_diff(array_merge(array_slice($list, 2), array_keys($tools)), array_slice($list, 0, 2)), $uc['slug'], 4));
+        $list = array_values(array_unique($list));
+    }
     ?>
 <section class="uc-tools">
     <div class="container">
@@ -858,7 +908,7 @@ function uc_section_cta_dark(PDO $pdo, ?array $user, array $uc, string $base): v
 function uc_generic_config(string $slug): array
 {
     $c = uc_catalog()[$slug];
-    $app = APP_NAME;
+    $app = SITE_BRAND;
     $name = $c['title'];
     $lower = mb_strtolower($name);
     $g = $c['group'];
@@ -867,7 +917,7 @@ function uc_generic_config(string $slug): array
         'platforms' => [
             'noun' => 'pages', 'aud' => 'site owners', 'thing' => 'pages, posts and products',
             'bullets' => [['🗺️', 'Reads Your Sitemap — Every Page Found Automatically'], ['🖼️', 'Pins Made From Your Own Photos'], ['🤖', 'AI Writes Titles, Descriptions, Alt Text & Keywords'], ['📅', 'A Year of Pins Scheduled in One Run'], ['🔌', 'Nothing to Install on Your Site']],
-            'features' => [['🗺️', 'Automatic page discovery', 'Paste your site link and every page in your sitemap is listed, ready to select.'], ['🔌', 'No plugin or code', 'We read your public pages — nothing is installed on your site.'], ['🎨', 'On-brand designs', '70 templates, 56 palettes, 130+ fonts and your own Canva designs.'], ['🧠', 'Page-aware copy', 'AI reads each page and writes pin text that matches real searches.'], ['🗂️', 'Smart boards', 'Every pin lands on the best board — or a new one AI creates.'], ['📊', 'Built-in analytics', 'See which pages Pinterest sends traffic to.']],
+            'features' => [['🗺️', 'Automatic page discovery', 'Paste your site link and every page in your sitemap is listed, ready to select.'], ['🔌', 'No plugin or code', 'We read your public pages — nothing is installed on your site.'], ['🎨', 'On-brand designs', 'Unlimited templates and fonts, plus a free Canva-style editor — no Canva Pro needed.'], ['🧠', 'Page-aware copy', 'AI reads each page and writes pin text that matches real searches.'], ['🗂️', 'Smart boards', 'Every pin lands on the best board — or a new one AI creates.'], ['📊', 'Built-in analytics', 'See which pages Pinterest sends traffic to.']],
         ],
         'marketplaces' => [
             'noun' => 'listings', 'aud' => 'sellers and artists', 'thing' => 'listings and designs',
@@ -922,7 +972,7 @@ function uc_generic_config(string $slug): array
         'results' => [
             'title' => 'See the Results: Pins That Keep Working',
             'text' => 'A pin keeps getting saved and clicked for months. Consistent pinning turns your ' . $d['thing'] . ' into steady traffic.',
-            'stats' => [[5, 'x', 'more traffic, up to'], [70, '', 'pin templates'], [365, '', 'days of pins in one run'], [56, '', 'colour palettes']],
+            'stats' => [[5, 'x', 'more traffic, up to'], [500, '+', 'premium pin templates, free'], [365, '', 'days of pins in one run'], [20, '+', 'free Pinterest & Etsy tools']],
             'alt' => "Pinterest traffic growth for $lower",
         ],
         'steps' => [
@@ -930,7 +980,7 @@ function uc_generic_config(string $slug): array
             'text' => 'Scan, design, schedule, approve — AI does the rest.',
             'items' => [
                 ['icon' => '🗺️', 'label' => 'Setup', 'title' => 'Add Your Website', 'alt' => 'Scanning a website for Pinterest pins', 'points' => ["We list your {$d['thing']} automatically.", 'Select in bulk — or everything at once.']],
-                ['icon' => '🎨', 'label' => 'Design', 'title' => 'Pick Your Look', 'alt' => 'Choosing pin templates and colours', 'points' => ['70 templates, 56 palettes, 130+ fonts.', 'Import your own Canva design, or let AI choose.']],
+                ['icon' => '🎨', 'label' => 'Design', 'title' => 'Pick Your Look', 'alt' => 'Choosing pin templates and colours', 'points' => ['Unlimited templates, palettes and fonts.', 'Design your own in the free editor, or let AI choose.']],
                 ['icon' => '⚙️', 'label' => 'Schedule', 'title' => 'Set Your Pace', 'alt' => 'Pin scheduling settings', 'points' => ['Pins per day, or the new-account warm-up.', 'Several pins per page, spaced weeks apart.']],
                 ['icon' => '🚀', 'label' => 'Approve', 'title' => 'Approve and Relax', 'alt' => 'Approving scheduled pins', 'points' => ['Edit anything, then approve.', 'Pins publish on autopilot.']],
             ],
@@ -955,7 +1005,7 @@ function uc_generic_config(string $slug): array
             ["Does this work for $lower?", "Yes. Any site with public pages works — paste your link, select your {$d['thing']} and schedule pins."],
             ['How many pins can I create at once?', 'Hundreds. Select hundreds of pages in one run and AI designs and schedules several pins for each.'],
             ['What is Auto Blog?', 'On plans that include it, AI writes articles with images from your list of titles, publishes them to your site at your daily pace, and schedules pins for every post.'],
-            ['How many pin designs are there?', '70 templates, 56 colour palettes and 130+ fonts — plus your own Canva designs — so the combinations are practically unlimited.'],
+            ['How many pin designs are there?', 'Unlimited: 500+ pin templates and styles, unlimited palettes and fonts, and a free Canva-style editor with thousands of premium designs — no Canva Pro needed.'],
             ['Is it safe for a new Pinterest account?', 'Yes. The warm-up mode starts at 1 pin a day and grows to 20 a day by month five.'],
             ['Is there a free way to try it?', 'Yes — use the free Pin Maker and other free tools with no account, or create a free account.'],
         ],
@@ -972,7 +1022,7 @@ function uc_generic_config(string $slug): array
  */
 function uc_build(array $p): array
 {
-    $app = APP_NAME;
+    $app = SITE_BRAND;
     $noun = $p['noun'];             // what gets pinned: "posts", "products", "listings"
     $site = $p['site'] ?? 'Site';   // "Blog", "Shop", "Website"
     $short = $p['short'];           // "Pet Blog"
@@ -1004,7 +1054,7 @@ function uc_build(array $p): array
         'marquee' => $p['marquee'],
         'results' => [
             'title' => 'See the Results: ' . $p['results'][0], 'text' => $p['results'][1],
-            'stats' => $p['stats'] ?? [[5, 'x', 'more traffic, up to'], [70, '', 'pin templates'], [365, '', 'days of pins in one run'], [56, '', 'colour palettes']],
+            'stats' => $p['stats'] ?? [[5, 'x', 'more traffic, up to'], [500, '+', 'premium pin templates, free'], [365, '', 'days of pins in one run'], [20, '+', 'free Pinterest & Etsy tools']],
             'alt' => "Pinterest traffic growth for a $short",
         ],
         'steps' => [
@@ -1012,7 +1062,7 @@ function uc_build(array $p): array
             'text' => $p['steps_text'] ?? 'Scan, design, schedule, approve — AI handles the rest.',
             'items' => [
                 ['icon' => '🗺️', 'label' => 'Setup', 'title' => "Scan Your $site", 'alt' => "Scanning a $short for Pinterest pins", 'points' => ["Every one of your $noun listed automatically from your sitemap — or paste single links.", 'Search, then select in bulk or select everything.']],
-                ['icon' => '🎨', 'label' => 'Design', 'title' => $p['design_title'] ?? 'Pick Your Pin Style', 'alt' => "Choosing pin templates for a $short", 'points' => [$p['design_point'] ?? '70 templates, 56 palettes and 130+ fonts with a live preview.', 'Import your own Canva design, or let AI pick the template per page.']],
+                ['icon' => '🎨', 'label' => 'Design', 'title' => $p['design_title'] ?? 'Pick Your Pin Style', 'alt' => "Choosing pin templates for a $short", 'points' => [$p['design_point'] ?? 'Unlimited templates, palettes and fonts with a live preview.', 'Design your own in the free Canva-style editor, or let AI pick the template per page.']],
                 ['icon' => '⚙️', 'label' => 'Schedule', 'title' => $p['schedule_title'] ?? 'Set a Safe Pace', 'alt' => "Scheduling pins for a $short", 'points' => [$p['schedule_point'] ?? 'Pins per day with automatic gaps, or the new-account warm-up.', "Several pins per $noun, spaced weeks apart. AI picks or creates the boards."]],
                 ['icon' => '🚀', 'label' => 'Approve', 'title' => 'Approve Once', 'alt' => "Approving pins for a $short", 'points' => ['Edit any pin, then approve the batch.', 'Pins publish on autopilot; anything unapproved waits in Drafts.']],
             ],

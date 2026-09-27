@@ -1389,7 +1389,7 @@ function article_batch_worker_start(int $batchDbId): bool
     $ch = curl_init($url);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT_MS => 1500, CURLOPT_CONNECTTIMEOUT_MS => 1200,
-        CURLOPT_NOSIGNAL => true, CURLOPT_FOLLOWLOCATION => true, CURLOPT_USERAGENT => 'WebToPin-ArticleWorker',
+        CURLOPT_NOSIGNAL => true, CURLOPT_FOLLOWLOCATION => true, CURLOPT_USERAGENT => 'AutomatedPin-ArticleWorker',
     ]);
     curl_exec($ch);   // times out on purpose — the worker keeps working after we hang up
     curl_close($ch);

@@ -7,7 +7,7 @@ require_once __DIR__ . "/../../includes/seo_functions.php";
 require_once __DIR__ . "/../../includes/use_case_functions.php";
 
 $user = current_user($pdo);
-$app = APP_NAME;
+$app = SITE_BRAND;
 
 $uc = [
     'slug' => 'craft-blog',
@@ -46,7 +46,7 @@ $uc = [
         ['icon' => '🗓️', 'label' => 'Schedule', 'title' => 'Plan by Holiday', 'alt' => 'Scheduling holiday craft pins', 'points' => ['Start each holiday 6–8 weeks early.', 'Several pins per tutorial.']],
         ['icon' => '🧵', 'label' => 'Approve', 'title' => 'Approve and Keep Crafting', 'alt' => 'Approving craft pins', 'points' => ['Edit, approve once.', 'Pins publish all season.']],
     ]],
-    'results' => ['title' => 'See the Results: Every Holiday, More Crafters', 'text' => 'Craft searches rise before every holiday and school break — and repeat each year. Pinned ahead, your tutorials catch every wave.', 'stats' => [[5, 'x', 'more traffic, up to'], [70, '', 'pin templates'], [365, '', 'days of pins in one run'], [56, '', 'colour palettes']], 'alt' => 'Pinterest traffic growth for a craft blog'],
+    'results' => ['title' => 'See the Results: Every Holiday, More Crafters', 'text' => 'Craft searches rise before every holiday and school break — and repeat each year. Pinned ahead, your tutorials catch every wave.', 'stats' => [[5, 'x', 'more traffic, up to'], [500, '+', 'premium pin templates'], [365, '', 'days of pins in one run'], [100, '%', 'free design editor, no Canva Pro']], 'alt' => 'Pinterest traffic growth for a craft blog'],
     'playbook' => ['title' => 'Pinterest Tips for Craft Bloggers', 'text' => 'What gets craft pins saved.', 'tips' => [
         ['Show the finished craft big', 'The result is what people save.'],
         ['Say the skill level', '“Beginner”, “easy”, “no-sew” help the right crafters find you.'],

@@ -186,7 +186,7 @@ function ai_generate_text_raw(PDO $pdo, string $provider, string $model, string 
 
         case 'openrouter':
             $result = ai_http_post('https://openrouter.ai/api/v1/chat/completions',
-                ["Authorization: Bearer $apiKey", "HTTP-Referer: " . APP_URL, "X-Title: " . APP_NAME],
+                ["Authorization: Bearer $apiKey", "HTTP-Referer: " . APP_URL, "X-Title: " . SITE_BRAND],
                 ['model' => $model, 'messages' => [
                     ['role' => 'system', 'content' => $systemPrompt],
                     ['role' => 'user', 'content' => $userPrompt],
@@ -301,7 +301,7 @@ function ai_generate_image_raw(PDO $pdo, string $provider, string $model, string
     // model if this doesn't work (their image-output response shape is still evolving).
     if ($provider === 'openrouter') {
         $result = ai_http_post('https://openrouter.ai/api/v1/chat/completions',
-            ["Authorization: Bearer $apiKey", "HTTP-Referer: " . (defined('APP_URL') ? APP_URL : ''), "X-Title: " . (defined('APP_NAME') ? APP_NAME : '')],
+            ["Authorization: Bearer $apiKey", "HTTP-Referer: " . (defined('APP_URL') ? APP_URL : ''), "X-Title: " . (defined('SITE_BRAND') ? SITE_BRAND : '')],
             ['model' => $model ?: 'google/gemini-2.5-flash-image-preview', 'modalities' => ['image', 'text'],
              'messages' => [['role' => 'user', 'content' => $prompt]]], 60);
         $imgUrl = $result['data']['choices'][0]['message']['images'][0]['image_url']['url'] ?? null;

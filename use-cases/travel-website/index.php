@@ -7,7 +7,7 @@ require_once __DIR__ . "/../../includes/seo_functions.php";
 require_once __DIR__ . "/../../includes/use_case_functions.php";
 
 $user = current_user($pdo);
-$app = APP_NAME;
+$app = SITE_BRAND;
 
 $uc = [
     'slug' => 'travel-website',
@@ -31,7 +31,7 @@ $uc = [
     ],
     'start' => ['label' => '✨ FREE PIN MAKER · NO SIGN-UP', 'title' => 'Paste a Destination Guide Link', 'text' => 'We turn your travel photos into pins in seconds.', 'placeholder' => 'https://yourtravelblog.com/3-days-in-lisbon/'],
     'marquee' => ['City guides', 'Itineraries', 'Packing lists', 'Hidden gems', 'Road trips', 'Budget travel', 'Beach getaways', 'Where to stay', 'Food guides', 'Travel hacks'],
-    'results' => ['title' => 'See the Results: Guides That Travel Far', 'text' => 'Travel guides stay useful for years. Pinned consistently, each one keeps sending planners your way, season after season.', 'stats' => [[5, 'x', 'more traffic, up to'], [70, '', 'pin templates'], [365, '', 'days of pins in one run'], [10, '', 'pins per guide, max']], 'alt' => 'Pinterest traffic growth for a travel blog'],
+    'results' => ['title' => 'See the Results: Guides That Travel Far', 'text' => 'Travel guides stay useful for years. Pinned consistently, each one keeps sending planners your way, season after season.', 'stats' => [[5, 'x', 'more traffic, up to'], [500, '+', 'premium pin templates'], [365, '', 'days of pins in one run'], [10, '', 'pins per guide, max']], 'alt' => 'Pinterest traffic growth for a travel blog'],
     'steps' => ['title' => 'From Travel Guide to', 'title_accent' => 'Saved Pin', 'text' => 'Scan your guides, pick a style that shows off your photos, and schedule by season.', 'items' => [
         ['icon' => '🗺️', 'label' => 'Setup', 'title' => 'Scan Your Travel Site', 'alt' => 'Scanning a travel website', 'points' => ['Every guide and itinerary listed from your sitemap.', 'Search by country or city and select in bulk.']],
         ['icon' => '📸', 'label' => 'Design', 'title' => 'Let Your Photos Shine', 'alt' => 'Choosing travel pin templates', 'points' => ['Full-bleed and overlay templates for big scenery.', 'Collages combine several spots from one guide.']],

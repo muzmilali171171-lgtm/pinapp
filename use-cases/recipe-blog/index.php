@@ -7,7 +7,7 @@ require_once __DIR__ . "/../../includes/seo_functions.php";
 require_once __DIR__ . "/../../includes/use_case_functions.php";
 
 $user = current_user($pdo);
-$app = APP_NAME;
+$app = SITE_BRAND;
 
 $uc = [
     'slug' => 'recipe-blog',
@@ -39,7 +39,7 @@ $uc = [
         ['icon' => '🗓️', 'label' => 'Schedule', 'title' => 'Build Your Seasonal Calendar', 'alt' => 'Scheduling recipe pins by season', 'points' => ['Start dates set weeks before each season.', 'Pins per recipe spaced a month apart.']],
         ['icon' => '🍽️', 'label' => 'Approve', 'title' => 'Approve and Get Back to Testing', 'alt' => 'Approving recipe pins', 'points' => ['Edit any title or photo.', 'Approve — pins publish on schedule.']],
     ]],
-    'results' => ['title' => 'See the Results: A Recipe Archive That Earns', 'text' => 'Recipe pins keep getting saved into boards and resurfacing for years. The more recipes you pin, the more cooks find you.', 'stats' => [[5, 'x', 'more traffic, up to'], [365, '', 'days of recipe pins at once'], [70, '', 'pin templates'], [20, '/day', 'pins at full pace']], 'alt' => 'Pinterest traffic growth for a recipe blog'],
+    'results' => ['title' => 'See the Results: A Recipe Archive That Earns', 'text' => 'Recipe pins keep getting saved into boards and resurfacing for years. The more recipes you pin, the more cooks find you.', 'stats' => [[5, 'x', 'more traffic, up to'], [365, '', 'days of recipe pins at once'], [500, '+', 'premium pin templates'], [20, '/day', 'pins at full pace']], 'alt' => 'Pinterest traffic growth for a recipe blog'],
     'features' => ['eyebrow' => 'BUILT FOR RECIPE BLOGGERS', 'title' => 'Everything a Recipe Blog Needs on Pinterest', 'text' => 'Designed around the pins that win in the food category.', 'items' => [
         ['🥪', 'Recipe pin templates', 'Photo-band-photo, framed titles and roundup numbers.'],
         ['🧾', 'Works with recipe cards', 'WP Recipe Maker, Tasty Recipes and others — we read the page like a visitor.'],
