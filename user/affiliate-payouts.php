@@ -17,8 +17,7 @@ if (!affiliate_tables_ready($pdo)) {
     ?>
     <div class="page-header"><h1>Affiliate Payouts</h1></div>
     <div class="card">
-        <div class="alert alert-error">The Affiliate Program's database tables aren't set up yet on this site.
-        Please ask your admin to visit <a href="../migrate.php">migrate.php</a> once, then reload this page.</div>
+        <div class="alert alert-info">The Affiliate Program is not available right now. Please check back soon.</div>
     </div>
     <?php
     include __DIR__ . '/includes/user-footer.php';
@@ -43,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($action === 'request_payout') {
         $result = affiliate_request_payout($pdo, (int)$user['id'], $_POST['method'] ?? '');
         if ($result['ok']) {
-            $success = 'Your payout request was submitted and is pending admin review.';
+            $success = 'Your payout request was submitted and is pending review.';
         } else {
             $errors[] = $result['error'];
         }
@@ -75,10 +74,10 @@ include __DIR__ . '/includes/user-header.php';
 <div class="card">
     <p class="muted">Minimum payout threshold: <strong>$<?= number_format($settings['min_payout_threshold'], 2) ?></strong>.
     "Next Payout Amount" is your available balance you can request now; "Future Payout Amount" is what's already
-    requested and awaiting admin approval/payment.</p>
+    requested and awaiting approval and payment.</p>
 
     <?php if (empty($enabledMethods)): ?>
-        <div class="alert alert-info">The admin hasn't enabled any payout methods yet.</div>
+        <div class="alert alert-info">Payout methods are not available yet. Please check back soon.</div>
     <?php else: ?>
         <h2>Request a Payout</h2>
         <?php if ($balance['to_pay'] < $settings['min_payout_threshold']): ?>

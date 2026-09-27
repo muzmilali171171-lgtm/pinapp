@@ -1287,6 +1287,54 @@
         }
     }
 
+    /* ===================== Bulk Pin "Pin Templates & Styles" ===================== */
+    // The same designs as the Bulk Pin generator. Thumbnails use their cached preview image; real pins are
+    // drawn on the server (proRenderer, set by the wizard) with the page's own images and text.
+    const PRO_TAG = 'styles';
+    const PRO_CAT = [
+        [/food|recipe|baking|dessert|meal|drink/i, 'food'], [/fashion|tattoo|outfit/i, 'fashion'],
+        [/beauty|hair|makeup|skincare|nail/i, 'beauty'], [/wedding|bridal/i, 'wedding'],
+        [/holiday|seasonal|party|gift|christmas/i, 'holiday'], [/pet|animal/i, 'pets'],
+        [/parent|kid|education|baby/i, 'parenting'], [/travel/i, 'travel'],
+        [/health|fitness|workout|wellness/i, 'health'], [/finance|money|business|entrepreneur|marketing|blog/i, 'finance'],
+        [/tech|gadget|gaming|car|photo|movie|music|book/i, 'tech'], [/diy|craft|art|drawing|design/i, 'diy'],
+        [/home|interior|decor|organi|architecture|plant|garden/i, 'home'],
+    ];
+    let proRenderer = null;
+    function setProRenderer(fn) { proRenderer = typeof fn === 'function' ? fn : null; }
+    function setProTemplates(list) {
+        (Array.isArray(list) ? list : []).forEach((t) => {
+            const id = 'pt:' + t.key;
+            if (TEMPLATE_MAP[id]) return;
+            const hit = PRO_CAT.find(([re]) => re.test(t.category || ''));
+            const tpl = { id, name: t.name, tags: [hit ? hit[1] : 'general', PRO_TAG], pt: t.key, photos: Math.max(1, +t.photos || 1), layout: t.layout, preview: t.preview, category: t.category };
+            TEMPLATES.push(tpl);
+            TEMPLATE_MAP[id] = tpl;
+        });
+    }
+    function drawCover(ctx, img, W, H) {
+        const r = Math.max(W / img.width, H / img.height), w = img.width * r, h = img.height * r;
+        ctx.drawImage(img, (W - w) / 2, (H - h) / 2, w, h);
+    }
+    async function renderProTemplate(ctx, d, tpl, spec) {
+        const { W, H } = d;
+        let img = null;
+        if ((spec.scale || 1) < 0.3 || !proRenderer) {
+            img = tpl.preview ? await loadImage(tpl.preview) : null;   // small thumbnails: the ready-made preview
+        } else {
+            let urls = (spec.images || []).slice();
+            const pool = (spec.page_images || []).map((i) => (typeof i === 'string' ? i : i.url));
+            if (tpl.photos > urls.length && pool.length > urls.length) {
+                const rest = pool.filter((u) => !urls.some((x) => x.endsWith(u)));
+                urls = urls.concat(rest).slice(0, tpl.photos);
+            }
+            const url = await proRenderer({ key: tpl.pt, size: spec.size, headline: d.headline, website: d.website, cta: d.cta || 'Read More', images: urls, final: (spec.scale || 1) >= 1 });
+            img = url ? await loadImage(url) : null;
+        }
+        if (img) drawCover(ctx, img, W, H);
+        else FAM.bandCenter(ctx, d, { band: 'primary', upper: true });
+    }
+
     /* ===================== Public API ===================== */
     let customTemplates = [];
     function setCustomTemplates(list) { customTemplates = Array.isArray(list) ? list : []; }
@@ -1324,7 +1372,8 @@
         ctx.fillRect(0, 0, W, H);
         const tpl = getTemplate(spec.template) || TEMPLATES[0];
         try {
-            if (tpl.svg) await renderSvgTemplate(ctx, d, tpl);
+            if (tpl.pt) await renderProTemplate(ctx, d, tpl, spec);
+            else if (tpl.svg) await renderSvgTemplate(ctx, d, tpl);
             else FAM[tpl.fam](ctx, d, tpl.opts || {});
         } catch (e) {
             console.error('Pin render failed', tpl.id, e);
@@ -1374,6 +1423,7 @@
         SIZES, PALETTES, FONT_COMBOS, FONTS, TEMPLATES, CATEGORIES,
         loadFont, loadFonts, ensureFontSheet, loadImage, render, toBlob,
         setCustomTemplates, getTemplate, templateName, pickTemplate, pickMode, pickImages,
+        setProTemplates, setProRenderer, PRO_TAG,
         isScript: (f) => SCRIPTS.has(f),
     };
 })(window);

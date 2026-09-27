@@ -89,7 +89,7 @@ include __DIR__ . '/includes/user-header.php';
             <td>
                 <span class="badge badge-<?= e($p['status']) ?>"><?= e(ucfirst($p['status'])) ?></span>
                 <?php if ($p['status'] === 'failed' && $p['last_error']): ?>
-                    <div class="muted" title="<?= e($p['last_error']) ?>">error ⓘ</div>
+                    <div class="muted" title="<?= e(user_facing_error($p['last_error'])) ?>">error ⓘ</div>
                 <?php endif; ?>
             </td>
             <td>

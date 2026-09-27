@@ -17,8 +17,7 @@ if (!affiliate_tables_ready($pdo)) {
     ?>
     <div class="page-header"><h1>Affiliate Dashboard</h1></div>
     <div class="card">
-        <div class="alert alert-error">The Affiliate Program's database tables aren't set up yet on this site.
-        Please ask your admin to visit <a href="../migrate.php">migrate.php</a> once, then reload this page.</div>
+        <div class="alert alert-info">The Affiliate Program is not available right now. Please check back soon.</div>
     </div>
     <?php
     include __DIR__ . '/includes/user-footer.php';

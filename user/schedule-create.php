@@ -248,7 +248,7 @@ document.addEventListener('DOMContentLoaded', function () {
             <span class="ai-badge">✨ Write with AI</span>
             <div class="credits-note">Text AI balance: <strong id="textCreditsBalance"><?= number_format($myTextCredits, 1) ?></strong> credits <?php if ($myTextCredits <= 0): ?><span class="credits-low-warn">— low! <a href="upgrade">Upgrade your plan</a></span><?php endif; ?></div>
             <?php if (!$hasPinAi): ?>
-                <div class="alert alert-info">No AI text model is configured yet — ask the site admin to set one up under Bulk Pin Scheduler settings.</div>
+                <div class="alert alert-info">AI writing is not available right now. Please check back soon.</div>
             <?php endif; ?>
             <div class="form-row">
                 <label>Topic, Keyword or Link <span class="muted">(what this pin is about — a link's page title is fetched automatically)</span></label>

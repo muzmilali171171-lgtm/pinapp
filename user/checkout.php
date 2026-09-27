@@ -160,10 +160,8 @@ include __DIR__ . '/includes/user-header.php';
 
         <?php foreach (['stripe', 'paypal', 'nowpayments', 'binance'] as $key): if (empty($gateways["{$key}_enabled"])) continue; ?>
             <div class="method-details" id="method-<?= e($key) ?>" style="display:none; margin-top:14px;">
-                <div class="alert alert-info">Redirecting to <?= e(ucfirst($key)) ?> checkout isn't finished being wired up
-                on this install yet — the admin needs to finish connecting live API credentials under Plan Pricing →
-                Payment Gateway Integration. Submitting below will save your request as pending so support can
-                complete it manually in the meantime.</div>
+                <div class="alert alert-info">Online checkout with <?= e(ucfirst($key)) ?> isn't available right now.
+                Submit below to save your request — our team will contact you to complete the payment.</div>
             </div>
         <?php endforeach; ?>
         <?php foreach ($customMethods as $cm): ?>

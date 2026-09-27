@@ -69,9 +69,8 @@ include __DIR__ . '/includes/user-header.php';
         Pin Auto: <strong><?= $batch['publish_mode'] === 'pin_auto' ? 'On' : 'Off' ?></strong>
     </p>
     <?php if ($remaining > 0): ?>
-        <p class="muted">Articles are normally generated automatically by the <code>cron/article-scheduler.php</code>
-        scheduled task. If nothing is publishing and you haven't set that cron job up on your host yet, use
-        <strong>Process Now</strong> above to run due articles immediately from here instead.</p>
+        <p class="muted">Your articles are written and published automatically on schedule. Want to start right away?
+        Click <strong>Process Now</strong> above to run today's articles immediately.</p>
     <?php endif; ?>
 </div>
 
@@ -89,7 +88,7 @@ include __DIR__ . '/includes/user-header.php';
             <td>
                 <span class="badge badge-<?= e($a['status']) ?>"><?= e(ucfirst($a['status'])) ?></span>
                 <?php if ($a['status'] === 'failed' && $a['last_error']): ?>
-                    <button type="button" class="btn-danger btn-small view-error-btn" data-error="<?= e($a['last_error']) ?>" style="margin-left:6px;">View Error</button>
+                    <button type="button" class="btn-danger btn-small view-error-btn" data-error="<?= e(user_facing_error($a['last_error'])) ?>" style="margin-left:6px;">View Error</button>
                 <?php endif; ?>
             </td>
             <td><?= e(ucfirst($a['pin_status'])) ?></td>
@@ -97,7 +96,7 @@ include __DIR__ . '/includes/user-header.php';
         </tr>
         <?php if ($a['status'] === 'failed' && $a['last_error']): ?>
         <tr class="error-detail-row" id="errorRow<?= (int)$a['id'] ?>" style="display:none;">
-            <td colspan="5"><div class="error-detail-box"><?= e($a['last_error']) ?></div></td>
+            <td colspan="5"><div class="error-detail-box"><?= e(user_facing_error($a['last_error'])) ?></div></td>
         </tr>
         <?php endif; ?>
         <?php endforeach; ?>

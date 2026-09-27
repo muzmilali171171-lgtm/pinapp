@@ -363,7 +363,7 @@ function ai_generate_pin_batch(PDO $pdo, array $keywords, bool $withTags, string
         $model = $settings['text_model'] ?? null;
     }
     if (!$provider) {
-        return ['ok' => false, 'items' => [], 'error' => 'No AI text model is configured yet. Ask the site admin to set one up under Bulk Pin Scheduler settings.'];
+        return ['ok' => false, 'items' => [], 'error' => 'AI writing is not available right now. Please try again later.'];
     }
 
     $keywords = array_values(array_filter(array_map('trim', $keywords), fn($k) => $k !== ''));
@@ -561,7 +561,7 @@ function ai_generate_board_suggestion(PDO $pdo, string $keyword): array
     $provider = $settings['pin_text_provider'] ?? ($settings['text_provider'] ?? null);
     $model = $settings['pin_text_model'] ?? ($settings['text_model'] ?? null);
     if (!$provider) {
-        return ['ok' => false, 'name' => '', 'description' => '', 'error' => 'No AI text model is configured yet. Ask the site admin to set one up under Bulk Pin Scheduler settings.'];
+        return ['ok' => false, 'name' => '', 'description' => '', 'error' => 'AI writing is not available right now. Please try again later.'];
     }
     $keyword = trim($keyword);
     if ($keyword === '') {
@@ -612,7 +612,7 @@ function ai_assign_boards_batch(PDO $pdo, array $titles, array $existingBoards):
     $provider = $settings['pin_text_provider'] ?? ($settings['text_provider'] ?? null);
     $model = $settings['pin_text_model'] ?? ($settings['text_model'] ?? null);
     if (!$provider) {
-        return ['ok' => false, 'items' => [], 'error' => 'No AI text model is configured yet. Ask the site admin to set one up under Bulk Pin Scheduler settings.'];
+        return ['ok' => false, 'items' => [], 'error' => 'AI writing is not available right now. Please try again later.'];
     }
 
     $titles = array_values(array_filter(array_map('trim', $titles), fn($t) => $t !== ''));
@@ -816,6 +816,7 @@ function pin_image_size_dims(string $sizeKey): array
         '9:16' => [1080, 1920],
         '1:2.1' => [1000, 2100],
         '1:1' => [1000, 1000],
+        '4:5' => [1000, 1250],
     ];
     return $sizes[$sizeKey] ?? $sizes['2:3'];
 }

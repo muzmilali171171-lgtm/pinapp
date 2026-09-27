@@ -95,7 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $pdo->prepare("UPDATE users SET plan_auto_renew = ? WHERE id = ?")->execute([!empty($_POST['plan_auto_renew']) ? 1 : 0, $user['id']]);
                 $success = 'Auto-renew preference saved.';
             } catch (Throwable $e) {
-                $errors[] = 'Could not save this yet — please run migrate.php first.';
+                $errors[] = 'Could not save this right now. Please try again later.';
             }
             $tab = 'account';
         }
@@ -113,7 +113,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ]);
                 $success = 'AI Api settings saved.';
             } catch (Throwable $e) {
-                $errors[] = 'Could not save this yet — please run migrate.php first.';
+                $errors[] = 'Could not save this right now. Please try again later.';
             }
             $tab = 'ai-api';
         }
@@ -131,7 +131,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ]);
                 $success = 'Image Generation Models settings saved.';
             } catch (Throwable $e) {
-                $errors[] = 'Could not save this yet — please run migrate.php first.';
+                $errors[] = 'Could not save this right now. Please try again later.';
             }
             $tab = 'image-models';
         }
@@ -168,7 +168,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ->execute([$pct, (int)($_POST['row_id'] ?? 0), $user['id']]);
                 $success = 'Team member share updated.';
             } catch (Throwable $e) {
-                $errors[] = 'Could not save this yet — please run migrate.php first.';
+                $errors[] = 'Could not save this right now. Please try again later.';
             }
             $tab = 'team';
         }
@@ -213,7 +213,7 @@ include __DIR__ . '/includes/user-header.php';
 ?>
 <div class="page-header"><h1>Settings</h1></div>
 
-<?php if (!$migrationReady): ?><div class="alert alert-error">Some Settings features need a one-time database update — visit <a href="../migrate.php">migrate.php</a> once, then reload this page.</div><?php endif; ?>
+<?php if (!$migrationReady): ?><div class="alert alert-info">Some settings are not available right now. Please try again later.</div><?php endif; ?>
 <?php foreach ($errors as $err): ?><div class="alert alert-error"><?= e($err) ?></div><?php endforeach; ?>
 <?php if ($success): ?><div class="alert alert-success"><?= e($success) ?></div><?php endif; ?>
 
@@ -303,7 +303,7 @@ include __DIR__ . '/includes/user-header.php';
             <?php elseif ($authSettings['google_enabled']): ?>
                 <a href="<?= e(oauth_build_authorize_url($pdo, 'google', 'connect') ?: '#') ?>" class="btn-secondary btn-small">Connect Google Account</a>
             <?php else: ?>
-                <span class="muted">Not enabled by admin</span>
+                <span class="muted">Not available right now</span>
             <?php endif; ?>
         </div>
     </div>

@@ -763,7 +763,7 @@
         /* ---------- AI text / image ---------- */
         function regenText(i) {
             var it = Q[i];
-            if (!CFG.hasPinAi) return Promise.resolve({ ok: false, error: 'AI writing isn\'t set up yet — ask the site admin to choose a model for the Bulk Pin Scheduler.' });
+            if (!CFG.hasPinAi) return Promise.resolve({ ok: false, error: 'AI writing is not available right now. Please try again later.' });
             it.status = 'busy'; renderQueue();
             return postJSON('ajax-pa-regenerate-text', {
                 title: it.title || it.pin.title || '', description: it.desc || it.pin.description || '', link: it.link,

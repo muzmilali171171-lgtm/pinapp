@@ -62,8 +62,7 @@ include __DIR__ . '/includes/user-header.php';
     </div>
     <button type="button" class="btn-primary" id="scanBtn">🔍 Scan</button>
     <p class="muted">Finds the site's sitemap(s) automatically (via robots.txt or common paths) and imports every
-    page listed. If no sitemap exists, it falls back to a crawler (needs an admin-configured API key under
-    <strong>Page Crawler</strong> settings).</p>
+    page listed. If no sitemap exists, it crawls the site's pages instead.</p>
 </div>
 
 <div class="card">

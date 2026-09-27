@@ -58,7 +58,7 @@ include __DIR__ . '/includes/user-header.php';
 </div>
 
 <?php if ($tablesMissing): ?>
-    <div class="alert alert-error">The design tables are missing — ask the admin to run <code>migrate.php</code> once.</div>
+    <div class="alert alert-info">Designs are not available right now. Please try again later.</div>
 <?php endif; ?>
 
 <div class="card">

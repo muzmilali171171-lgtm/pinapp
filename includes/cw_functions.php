@@ -270,7 +270,7 @@ function cw_ai_page_content(PDO $pdo, int $userId, array $page, int $count, arra
 {
     [$provider, $model] = cw_text_model($pdo);
     if (!$provider) {
-        return ['ok' => false, 'error' => 'No AI text model is set up yet. Ask the site admin to choose one in Classic Wizard settings.'];
+        return ['ok' => false, 'error' => 'AI writing is not available right now. Please try again later.'];
     }
 
     $boardPart = '';

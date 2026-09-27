@@ -43,7 +43,7 @@ include __DIR__ . '/includes/user-header.php';
 <div id="app"></div>
 
 <?php if (!$hasTextModel): ?>
-<div class="alert alert-info">No default text model is configured yet — ask the site admin to set one up under Article Write settings before you can generate articles.</div>
+<div class="alert alert-info">AI article writing is not available right now. Please check back soon.</div>
 <?php endif; ?>
 
 <script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/classic/ckeditor.js"></script>
@@ -75,7 +75,7 @@ async function callApi(formData) {
             return JSON.parse(text);
         } catch (parseErr) {
             console.error('Non-JSON response:', text);
-            return { ok: false, error: 'Unexpected server response (HTTP ' + res.status + '). This usually means the request took too long or hit a server error — check admin > Logs, or try again with fewer AI images.' };
+            return { ok: false, error: 'Unexpected server response (HTTP ' + res.status + '). Please try again, or use fewer AI images.' };
         }
     } catch (networkErr) {
         console.error(networkErr);

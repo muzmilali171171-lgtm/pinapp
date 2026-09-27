@@ -52,7 +52,7 @@ include __DIR__ . '/includes/user-header.php';
 <?php if (empty($websites)): ?>
     <div class="alert alert-info">You need to <a href="websites">connect a website</a> first — WordPress, Shopify, Wix or a custom website — under <strong>Add Websites</strong>.</div>
 <?php elseif (!$hasTextModel): ?>
-    <div class="alert alert-info">No AI text model is configured yet — ask the site admin to set one up under <strong>Article Write</strong> settings.</div>
+    <div class="alert alert-info">AI article writing is not available right now. Please check back soon.</div>
 <?php else: ?>
 
 <div class="wizard-steps">

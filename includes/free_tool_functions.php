@@ -507,7 +507,7 @@ function free_tool_generate_title_description(PDO $pdo, string $topic, string $t
         return ['ok' => false, 'error' => 'Please enter a topic or URL.', 'title' => '', 'description' => ''];
     }
     if (empty($settings['text_provider'])) {
-        return ['ok' => false, 'error' => 'This tool needs an AI model configured by the site admin. Please try again later.', 'title' => '', 'description' => ''];
+        return ['ok' => false, 'error' => 'This tool is not available right now. Please try again later.', 'title' => '', 'description' => ''];
     }
 
     $audienceLine = trim($audience) !== '' ? "Target audience: $audience." : '';
@@ -539,7 +539,7 @@ function free_tool_generate_bio(PDO $pdo, string $niche, string $tone, string $l
         return ['ok' => false, 'error' => 'Please enter your account topic or niche.', 'bio' => ''];
     }
     if (empty($settings['text_provider'])) {
-        return ['ok' => false, 'error' => 'This tool needs an AI model configured by the site admin. Please try again later.', 'bio' => ''];
+        return ['ok' => false, 'error' => 'This tool is not available right now. Please try again later.', 'bio' => ''];
     }
 
     $systemPrompt = 'You are a Pinterest branding copywriter. Respond with ONLY a JSON object, no markdown, no commentary. '
@@ -569,7 +569,7 @@ function free_tool_generate_board_names(PDO $pdo, string $topic, string $tone, s
         return ['ok' => false, 'error' => 'Please enter a board topic or theme.', 'names' => []];
     }
     if (empty($settings['text_provider'])) {
-        return ['ok' => false, 'error' => 'This tool needs an AI model configured by the site admin. Please try again later.', 'names' => []];
+        return ['ok' => false, 'error' => 'This tool is not available right now. Please try again later.', 'names' => []];
     }
     $systemPrompt = 'You are a Pinterest branding expert. Respond with ONLY a JSON array of strings, no markdown, no commentary. '
         . "Generate exactly 8 catchy Pinterest board names for the given topic, in $language, in a $tone tone. "
@@ -598,7 +598,7 @@ function free_tool_generate_usernames(PDO $pdo, string $niche, string $style, ar
         return ['ok' => false, 'error' => 'Please enter your account topic or niche.', 'usernames' => []];
     }
     if (empty($settings['text_provider'])) {
-        return ['ok' => false, 'error' => 'This tool needs an AI model configured by the site admin. Please try again later.', 'usernames' => []];
+        return ['ok' => false, 'error' => 'This tool is not available right now. Please try again later.', 'usernames' => []];
     }
     $systemPrompt = 'You are a branding expert. Respond with ONLY a JSON array of strings, no markdown, no commentary. '
         . "Generate exactly 10 Pinterest username ideas for the given niche, in a $style style. "
@@ -705,7 +705,7 @@ function ai_generate_vision_text(PDO $pdo, string $provider, string $model, stri
 function free_tool_generate_alt_text(PDO $pdo, string $imageBinary, string $mimeType, array $settings): array
 {
     if (empty($settings['text_provider'])) {
-        return ['ok' => false, 'error' => 'This tool needs a vision-capable AI model configured by the site admin. Please try again later.', 'alt_text' => ''];
+        return ['ok' => false, 'error' => 'This tool is not available right now. Please try again later.', 'alt_text' => ''];
     }
     $base64 = base64_encode($imageBinary);
     $systemPrompt = 'You write SEO-optimized, accessible alt text for Pinterest images. Respond with ONLY the alt text itself, '
@@ -736,7 +736,7 @@ function free_tool_generate_keywords(PDO $pdo, string $topic, array $settings): 
         return ['ok' => false, 'error' => 'Please enter a keyword or URL.', 'keywords' => []];
     }
     if (empty($settings['text_provider'])) {
-        return ['ok' => false, 'error' => 'This tool needs an AI model configured by the site admin. Please try again later.', 'keywords' => []];
+        return ['ok' => false, 'error' => 'This tool is not available right now. Please try again later.', 'keywords' => []];
     }
     $systemPrompt = 'You are a Pinterest SEO strategist. Respond with ONLY a JSON array, no markdown, no commentary. '
         . 'Shape: [{"keyword": "...", "interest": "High"|"Medium"|"Low", "trend": "Rising"|"Steady"|"Seasonal"}, ...] — '
@@ -787,7 +787,7 @@ function free_tool_generate_etsy_keywords(PDO $pdo, string $product, string $aud
         return ['ok' => false, 'error' => 'Please describe your Etsy product.', 'keywords' => []];
     }
     if (empty($settings['text_provider'])) {
-        return ['ok' => false, 'error' => 'This tool needs an AI model configured by the site admin. Please try again later.', 'keywords' => []];
+        return ['ok' => false, 'error' => 'This tool is not available right now. Please try again later.', 'keywords' => []];
     }
     $context = "Product: $product.";
     if (trim($audience) !== '') $context .= " Ideal customer: $audience.";
@@ -828,7 +828,7 @@ function free_tool_generate_etsy_bio(PDO $pdo, string $shopInfo, string $tone, a
         return ['ok' => false, 'error' => 'Please tell us about your shop.', 'bio' => ''];
     }
     if (empty($settings['text_provider'])) {
-        return ['ok' => false, 'error' => 'This tool needs an AI model configured by the site admin. Please try again later.', 'bio' => ''];
+        return ['ok' => false, 'error' => 'This tool is not available right now. Please try again later.', 'bio' => ''];
     }
     $systemPrompt = 'You are an Etsy branding copywriter. Respond with ONLY a JSON object, no markdown, no commentary. '
         . 'Shape: {"bio": "..."}. '
@@ -857,7 +857,7 @@ function free_tool_generate_etsy_announcement(PDO $pdo, string $shopName, string
         return ['ok' => false, 'error' => 'Please fill in your shop name, what you sell, and what you\'re announcing.', 'variants' => []];
     }
     if (empty($settings['text_provider'])) {
-        return ['ok' => false, 'error' => 'This tool needs an AI model configured by the site admin. Please try again later.', 'variants' => []];
+        return ['ok' => false, 'error' => 'This tool is not available right now. Please try again later.', 'variants' => []];
     }
     $systemPrompt = 'You are an Etsy shop copywriter. Respond with ONLY a JSON array of 3 strings, no markdown, no commentary. '
         . 'Each string is a shop announcement banner (the text at the top of an Etsy shop page), STRICTLY under 500 characters '
@@ -884,7 +884,7 @@ function free_tool_generate_etsy_shop_names(PDO $pdo, string $category, array $s
         return ['ok' => false, 'error' => 'Please tell us what your store will sell.', 'names' => []];
     }
     if (empty($settings['text_provider'])) {
-        return ['ok' => false, 'error' => 'This tool needs an AI model configured by the site admin. Please try again later.', 'names' => []];
+        return ['ok' => false, 'error' => 'This tool is not available right now. Please try again later.', 'names' => []];
     }
     $systemPrompt = 'You are a branding expert for Etsy sellers. Respond with ONLY a JSON array of strings, no markdown, no commentary. '
         . 'Generate exactly 8 Etsy shop name ideas for the given product category. Each name should ideally be under 20 characters '
@@ -914,7 +914,7 @@ function free_tool_generate_etsy_tags(PDO $pdo, string $product, array $settings
         return ['ok' => false, 'error' => 'Please describe your product.', 'tags' => []];
     }
     if (empty($settings['text_provider'])) {
-        return ['ok' => false, 'error' => 'This tool needs an AI model configured by the site admin. Please try again later.', 'tags' => []];
+        return ['ok' => false, 'error' => 'This tool is not available right now. Please try again later.', 'tags' => []];
     }
     $systemPrompt = 'You are an Etsy SEO expert. Respond with ONLY a JSON array of strings, no markdown, no commentary. '
         . 'Generate exactly 30 Etsy listing tags for the given product. Each tag STRICTLY under 20 characters (Etsy\'s hard '
@@ -940,7 +940,7 @@ function free_tool_generate_etsy_title_description(PDO $pdo, string $product, st
         return ['ok' => false, 'error' => 'Please describe what you\'re selling.', 'title' => '', 'description' => ''];
     }
     if (empty($settings['text_provider'])) {
-        return ['ok' => false, 'error' => 'This tool needs an AI model configured by the site admin. Please try again later.', 'title' => '', 'description' => ''];
+        return ['ok' => false, 'error' => 'This tool is not available right now. Please try again later.', 'title' => '', 'description' => ''];
     }
     $context = "Product: $product.";
     if (trim($keywords) !== '') $context .= " Target keywords: $keywords.";

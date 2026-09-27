@@ -80,7 +80,7 @@ include __DIR__ . '/includes/user-header.php';
             <td>
                 <span class="badge badge-<?= e($p['status'] === 'scheduled' ? 'published' : ($p['status'] === 'failed' ? 'failed' : 'pending')) ?>"><?= e(ucfirst(str_replace('_', ' ', $p['status']))) ?></span>
                 <?php if ($p['status'] === 'failed' && $p['last_error']): ?>
-                    <button type="button" class="btn-danger btn-small view-error-btn" data-error="<?= e($p['last_error']) ?>" style="margin-left:6px;">View Error</button>
+                    <button type="button" class="btn-danger btn-small view-error-btn" data-error="<?= e(user_facing_error($p['last_error'])) ?>" style="margin-left:6px;">View Error</button>
                 <?php endif; ?>
             </td>
             <td class="muted"><?= e($p['board_name'] ?: '—') ?></td>
@@ -97,7 +97,7 @@ include __DIR__ . '/includes/user-header.php';
         </tr>
         <?php if ($p['status'] === 'failed' && $p['last_error']): ?>
         <tr class="error-detail-row" id="errorRow<?= (int)$p['id'] ?>" style="display:none;">
-            <td colspan="4"><div class="error-detail-box"><?= e($p['last_error']) ?></div></td>
+            <td colspan="4"><div class="error-detail-box"><?= e(user_facing_error($p['last_error'])) ?></div></td>
         </tr>
         <?php endif; ?>
         <?php endforeach; ?>

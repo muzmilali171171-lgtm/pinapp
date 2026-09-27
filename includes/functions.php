@@ -1020,3 +1020,72 @@ require_once __DIR__ . '/pin_publisher.php';
 require_once __DIR__ . '/storage_functions.php';
 require_once __DIR__ . '/external_storage.php';
 require_once __DIR__ . '/template_tracking_functions.php';
+
+/* ===================== User-facing error messages ===================== */
+
+/**
+ * The site is used by the public, so users must never see technical or admin-side details
+ * (admin settings, cron jobs, migrate.php, API keys, AI provider names, raw HTTP/database errors).
+ * Turns such a message into a short, friendly one. Normal messages are returned unchanged.
+ * The original message is still stored (articles.last_error, logs) for the admin.
+ */
+function user_facing_error(?string $msg): string
+{
+    $msg = trim((string)$msg);
+    if ($msg === '') return '';
+    $tech = '/site admin|\badmin(istrator)?\b|\bcron\b|crontab|cyberpanel|migrate(\.php)?\b|\.php\b|sqlstate|pdoexception|\bmysql|'
+        . 'stack trace|uncaught|fatal error|allowed memory|maximum execution time|config\.php|exec\(\)|'
+        . 'api key|api_key|openrouter|cloudflare|deepinfra|replicate|fal\.ai|together\.ai|groq|gemini|openai|anthropic|'
+        . '\bprovider\b|\bmodel\b|worker returned|no endpoints|\bcurl\b|\bhttp \d{3}\b|\bjson\b|[{}]/i';
+    $pinterest = stripos($msg, 'pinterest') !== false;
+    if ($pinterest && preg_match('/\b401\b|unauthori[sz]ed|access token|token (has )?expired|invalid token|reconnect/i', $msg)) {
+        return 'Your Pinterest connection has expired. Please reconnect your Pinterest account and try again.';
+    }
+    if (!preg_match($tech, $msg)) return $msg;
+    if (preg_match('/credit|quota|insufficient|balance/i', $msg) && !preg_match('/openrouter|api key/i', $msg)) {
+        return 'Not enough credits for this. Upgrade your plan or try again later.';
+    }
+    $retry = stripos($msg, 'retrying') === 0;
+    $out = $retry
+        ? 'A temporary problem happened — it is being retried automatically.'
+        : 'Something went wrong on our side. Please try again in a few minutes. If it keeps happening, contact support.';
+    if (!empty($_SESSION['user_id']) && preg_match('/openrouter|api key|\b401\b|\b402\b/i', $msg)) {
+        $out .= ' If you use your own AI key (Settings), check that it is valid and has credit.';
+    }
+    return $out;
+}
+
+/**
+ * For the user area and the free tools: every JSON reply passes its error / notice / message fields
+ * through user_facing_error(), so no endpoint can show technical or admin-side details.
+ */
+function user_json_error_filter(string $buf): string
+{
+    $t = ltrim($buf);
+    if ($t === '' || $t[0] !== '{') return $buf;
+    $data = json_decode($t, true);
+    if (!is_array($data)) return $buf;
+    $changed = false;
+    $walk = function (&$node) use (&$walk, &$changed) {
+        foreach ($node as $k => &$v) {
+            if (is_array($v)) { $walk($v); continue; }
+            if (is_string($v) && in_array((string)$k, ['error', 'last_error', 'notice', 'warning', 'message', 'msg', 'reason'], true)) {
+                $clean = user_facing_error($v);
+                if ($clean !== $v) { $v = $clean; $changed = true; }
+            }
+        }
+    };
+    $walk($data);
+    return $changed ? json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) : $buf;
+}
+
+(function () {
+    if (PHP_SAPI === 'cli') return;
+    $script = realpath((string)($_SERVER['SCRIPT_FILENAME'] ?? '')) ?: '';
+    $root = realpath(__DIR__ . '/..') ?: '';
+    if ($script === '' || $root === '') return;
+    if (preg_match('/download|export|csv/i', basename($script))) return;   // file downloads: never buffer
+    foreach (['/user/', '/free-tools/', '/auth/'] as $area) {
+        if (strpos($script, $root . $area) === 0) { ob_start('user_json_error_filter'); return; }
+    }
+})();

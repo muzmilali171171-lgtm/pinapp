@@ -201,7 +201,7 @@ function crawl_site_via_firecrawl(PDO $pdo, int $crawlSiteId, string $siteUrl): 
     $stmt->execute();
     $apiKey = $stmt->fetchColumn();
     if (!$apiKey) {
-        return ['ok' => false, 'pages_added' => 0, 'error' => 'No crawler API key configured — ask the site admin to set one up under Page Crawler settings.'];
+        return ['ok' => false, 'pages_added' => 0, 'error' => 'This site has no sitemap and could not be crawled right now. Please try again later.'];
     }
 
     $ch = curl_init('https://api.firecrawl.dev/v1/map');

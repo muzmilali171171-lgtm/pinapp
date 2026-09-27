@@ -56,7 +56,7 @@ function fmt_storage($bytes) {
 <p class="muted upgrade-tagline">Choose a plan to start creating AI pins, auto article publish, auto daily
 scheduled publish, and grow your Pinterest traffic.</p>
 
-<?php if (!$migrationReady): ?><div class="alert alert-error">Plan Pricing needs a one-time database update before plans can show here — visit <a href="../migrate.php">migrate.php</a> once, then reload this page.</div><?php endif; ?>
+<?php if (!$migrationReady): ?><div class="alert alert-info">Plans are not available right now. Please check back soon.</div><?php endif; ?>
 <?php if ($couponExpiredNotice): ?><div class="alert alert-error">This coupon has expired.</div><?php endif; ?>
 
 <!-- ===================== Your Usage ===================== -->

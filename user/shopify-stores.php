@@ -101,8 +101,7 @@ include __DIR__ . '/includes/user-header.php';
         <button type="submit" class="btn-primary">Connect with Shopify</button>
     </form>
     <?php else: ?>
-        <p class="muted">One-click connect is not switched on yet (the site admin has not added the Shopify app under Admin → All Websites → Settings).
-        You can still connect with your own credentials below.</p>
+        <p class="muted">One-click connect isn't available right now. You can connect with your own store credentials below.</p>
     <?php endif; ?>
 
     <details style="margin-top:20px;" <?= (!$oauthReady || $errors) ? 'open' : '' ?>>

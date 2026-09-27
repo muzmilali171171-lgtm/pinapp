@@ -95,7 +95,7 @@ function team_invite_member(PDO $pdo, int $ownerId, string $email): array
         $stmt->execute([$ownerId, $memberUserId, $email, $status]);
         return ['ok' => true, 'error' => null, 'status' => $status];
     } catch (Throwable $e) {
-        return ['ok' => false, 'error' => 'Could not save this invite yet — please run migrate.php first.'];
+        return ['ok' => false, 'error' => 'Could not save this invite right now. Please try again later.'];
     }
 }
 

@@ -14,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $settings = email_settings_get($pdo);
 
     if (!$settings['password_reset_enabled']) {
-        $errors[] = 'Password-reset emails are currently disabled by the site admin. Please contact support to regain access.';
+        $errors[] = 'Password reset by email is not available right now. Please contact support to regain access.';
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $errors[] = 'Please enter a valid email address.';
     } else {

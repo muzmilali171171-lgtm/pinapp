@@ -281,7 +281,7 @@ function pexels_search(PDO $pdo, string $query, int $page = 1, int $perPage = 10
     $stmt = $pdo->query("SELECT api_key FROM pexels_settings LIMIT 1");
     $apiKey = $stmt->fetchColumn();
     if (!$apiKey) {
-        return ['ok' => false, 'results' => [], 'error' => 'No Pexels API key configured — ask the site admin to set one up under Storage Settings.'];
+        return ['ok' => false, 'results' => [], 'error' => 'Photo search is not available right now. Please try again later.'];
     }
     $url = 'https://api.pexels.com/v1/search?' . http_build_query(['query' => $query, 'per_page' => $perPage, 'page' => $page]);
     $ch = curl_init($url);

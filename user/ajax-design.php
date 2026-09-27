@@ -238,5 +238,5 @@ try {
     out(['ok' => false, 'error' => 'Unknown action.']);
 } catch (Throwable $e) {
     error_log('ajax-design: ' . $e->getMessage());
-    out(['ok' => false, 'error' => 'Something went wrong. If this is a new install, run migrate.php once to create the design tables.']);
+    out(['ok' => false, 'error' => 'Something went wrong. Please try again in a few minutes.']);
 }

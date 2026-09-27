@@ -1018,3 +1018,43 @@ body.nav-lock { overflow: hidden; }
 [data-theme="dark"] .hamburger-btn, [data-theme="dark"] .sidebar-close { background: #1f2025; border-color: #33353c; }
 [data-theme="dark"] .hamburger-btn span { background: #e5e7eb; }
 [data-theme="dark"] .topbar-brand { color: #e5e7eb !important; }
+
+/* ===================== User sidebar colours =====================
+   Menu: deep navy background, white text. Category labels: their own soft band with low-contrast text.
+   (Admin sidebar keeps its own look — only .user-sidebar is styled here.) */
+.sidebar.user-sidebar,
+[data-theme="dark"] .sidebar.user-sidebar {
+    --us-bg: #17203a;          /* menu background */
+    --us-sub: #111831;         /* open submenu background */
+    --us-hover: rgba(255, 255, 255, .08);
+    --us-cat-bg: #222d4d;      /* category label band */
+    --us-cat-text: #8d9cc4;    /* category label text (soft) */
+    --us-active: rgba(230, 0, 35, .22);
+    background: var(--us-bg); border-right-color: var(--us-bg); color: #fff;
+}
+.sidebar.user-sidebar .brand { color: #fff; border-bottom-color: rgba(255, 255, 255, .1); }
+.sidebar.user-sidebar .brand span { color: #ff4d6a; }
+.sidebar.user-sidebar a,
+[data-theme="dark"] .sidebar.user-sidebar a,
+.sidebar.user-sidebar .admin-nav-group-toggle,
+[data-theme="dark"] .sidebar.user-sidebar .admin-nav-group-toggle { color: #fff; }
+.sidebar.user-sidebar a:hover,
+.sidebar.user-sidebar .admin-nav-group-toggle:hover,
+.sidebar.user-sidebar .admin-nav-group-toggle.open,
+[data-theme="dark"] .sidebar.user-sidebar a:hover,
+[data-theme="dark"] .sidebar.user-sidebar .admin-nav-group-toggle:hover,
+[data-theme="dark"] .sidebar.user-sidebar .admin-nav-group-toggle.open { background: var(--us-hover); }
+.sidebar.user-sidebar a.active,
+[data-theme="dark"] .sidebar.user-sidebar a.active { background: var(--us-active); border-left-color: #ff4d6a; color: #fff; }
+.sidebar.user-sidebar .admin-nav-caret { color: rgba(255, 255, 255, .6); }
+.sidebar.user-sidebar .admin-nav-submenu,
+[data-theme="dark"] .sidebar.user-sidebar .admin-nav-submenu { background: var(--us-sub); }
+.sidebar.user-sidebar .admin-nav-submenu a { color: rgba(255, 255, 255, .88); }
+.sidebar.user-sidebar .admin-nav-submenu a.active,
+.sidebar.user-sidebar .admin-nav-submenu a:hover { color: #fff; }
+.sidebar.user-sidebar .sidebar-section-label {
+    margin: 14px 12px 6px; padding: 6px 10px; border-radius: 6px;
+    background: var(--us-cat-bg); color: var(--us-cat-text);
+}
+.sidebar.user-sidebar .sidebar-close,
+[data-theme="dark"] .sidebar.user-sidebar .sidebar-close { background: rgba(255, 255, 255, .08); border-color: rgba(255, 255, 255, .18); color: #fff; }

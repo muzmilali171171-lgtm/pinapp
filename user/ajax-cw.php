@@ -72,6 +72,48 @@ switch ($action) {
         cw_out(['ok' => true, 'title' => $page['title'], 'images' => $imgs['images'], 'skipped' => $imgs['skipped']]);
     }
 
+    case 'pt_render': {
+        // A Bulk Pin "Pin Templates & Styles" design, drawn on the server with the same code the Bulk Pin
+        // generator uses, on this page's own images. The wizard draws the finished image on its canvas.
+        require_once __DIR__ . '/../includes/pin_template_registry.php';
+        $key = (string)($_POST['key'] ?? '');
+        $reg = pin_template_registry();
+        if (!isset($reg[$key])) cw_out(['ok' => false, 'error' => 'Unknown template.']);
+        $size = (string)($_POST['size'] ?? '2:3');
+        if (!in_array($size, ['2:3', '9:16', '1:2.1', '1:1', '4:5'], true)) $size = '2:3';
+        $headline = mb_substr(trim((string)($_POST['headline'] ?? '')), 0, 200) ?: 'Your pin title';
+        $website = mb_substr(trim((string)($_POST['website'] ?? '')), 0, 100);
+        $cta = mb_substr(trim((string)($_POST['cta'] ?? '')), 0, 40) ?: 'Read More';
+        // Only the wizard's own downloaded / uploaded images (uploads/cw-src/…), never arbitrary paths.
+        $files = [];
+        foreach (array_slice((array)json_decode((string)($_POST['images'] ?? '[]'), true), 0, 9) as $u) {
+            $name = basename(preg_replace('#^(\.\./)+#', '', (string)$u));
+            if ($name === '' || strpos((string)$u, CW_SRC_DIR . '/') === false) continue;
+            $abs = cw_src_abs_dir() . $name;
+            if (is_file($abs)) $files[] = $abs;
+        }
+        if (!$files) cw_out(['ok' => false, 'error' => 'No image for this pin.']);
+        $final = !empty($_POST['final']);
+
+        $cacheDir = __DIR__ . '/../uploads/cw-pt/';
+        if (!is_dir($cacheDir)) @mkdir($cacheDir, 0755, true);
+        $hash = md5(json_encode([$key, $size, $headline, $website, $cta, array_map('basename', $files), pin_template_preview_version()]));
+        $out = $cacheDir . $hash . '.jpg';
+        if (!is_file($out)) {
+            if (mt_rand(1, 50) === 1) {   // tidy up: renders older than 3 days
+                foreach (glob($cacheDir . '*.jpg') ?: [] as $old) if (filemtime($old) < time() - 3 * 86400) @unlink($old);
+            }
+            $bytes = array_map('file_get_contents', $files);
+            $need = max(1, (int)($reg[$key]['photos'] ?? 1));
+            for ($i = 0; count($bytes) < $need; $i++) $bytes[] = $bytes[$i % count($files)];
+            if (!$final) $GLOBALS['TT_SKIP'] = true;   // previews are not pins
+            $img = compose_pin_image($bytes, $headline, $website, $cta, $size, $key);
+            if (!$img) cw_out(['ok' => false, 'error' => 'This template could not be drawn — try another one.']);
+            file_put_contents($out, $img);
+        }
+        cw_out(['ok' => true, 'url' => 'uploads/cw-pt/' . $hash . '.jpg']);
+    }
+
     case 'custom_templates':
         $stmt = $pdo->prepare("SELECT id, name, svg_content, text_position FROM cw_custom_templates WHERE user_id = ? ORDER BY id DESC");
         $stmt->execute([$userId]);

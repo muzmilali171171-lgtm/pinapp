@@ -76,6 +76,25 @@
         return E.toBlob(c, 0.9);
     }
 
+    /* ===================== Bulk Pin "Pin Templates & Styles" ===================== */
+    async function loadProTemplates() {
+        try {
+            const res = await fetch(BASE + 'pin-templates?t=' + Date.now(), { credentials: 'same-origin', cache: 'no-store' });
+            const j = await res.json();
+            return j && j.ok && Array.isArray(j.templates) ? j.templates : [];
+        } catch (e) { return []; }
+    }
+    // Same designs as Bulk Pin, drawn on the server on this pin's images. Same inputs → same cached file.
+    const proCache = new Map();
+    function renderProOnServer(o) {
+        const k = JSON.stringify(o);
+        if (!proCache.has(k)) {
+            proCache.set(k, api('pt_render', { key: o.key, size: o.size, headline: o.headline, website: o.website, cta: o.cta, images: o.images, final: o.final ? 1 : '' })
+                .then((r) => (r.ok ? BASE + r.url : null)));
+        }
+        return proCache.get(k);
+    }
+
     /* ===================== Stepper ===================== */
     function goto(step) {
         if (step === 2 && !validateDesign()) return;
@@ -216,8 +235,10 @@
         $$('.cw-tpl').forEach((tile) => { tile.dataset.ver = -1; thumbObserver.observe(tile); });
     }
     function renderFilters() {
-        const cats = ['all'].concat(E.CATEGORIES.filter((c) => c !== 'general'));
-        $('#cwTplFilters').innerHTML = cats.map((c) => `<button type="button" class="${c === S.tplFilter ? 'is-on' : ''}" data-cat="${c}">${c === 'all' ? 'All' : c === 'diy' ? 'DIY' : c[0].toUpperCase() + c.slice(1)}</button>`).join('');
+        const hasPro = E.TEMPLATES.some((t) => t.pt);
+        const cats = ['all'].concat(hasPro ? [E.PRO_TAG] : [], E.CATEGORIES.filter((c) => c !== 'general'));
+        const label = (c) => (c === 'all' ? 'All' : c === E.PRO_TAG ? 'Pin Templates &amp; Styles' : c === 'diy' ? 'DIY' : c[0].toUpperCase() + c.slice(1));
+        $('#cwTplFilters').innerHTML = cats.map((c) => `<button type="button" class="${c === S.tplFilter ? 'is-on' : ''}" data-cat="${c}">${label(c)}</button>`).join('');
     }
     function toggleTemplate(id) {
         const i = S.selectedTpls.indexOf(id);
@@ -1046,7 +1067,12 @@
         initFontPickers();
         bind();
         syncUi();
-        const [sample, customs] = await Promise.all([api('sample'), api('custom_templates')]);
+        const [sample, customs, pros] = await Promise.all([api('sample'), api('custom_templates'), loadProTemplates()]);
+        if (pros.length) {
+            E.setProTemplates(pros.map((t) => Object.assign({}, t, { preview: BASE + t.preview })));
+            E.setProRenderer(renderProOnServer);
+            renderFilters();
+        }
         if (sample.ok) S.sample = BASE + sample.url;
         if (customs.ok) { S.customTpls = customs.templates; E.setCustomTemplates(S.customTpls); }
         if (S.projectId) await loadDraft();

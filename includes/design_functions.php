@@ -59,7 +59,7 @@ function design_check_upload(array $f): array
     if ($f['size'] > DESIGN_MAX_UPLOAD_BYTES) return [false, 'File is too large (max 15 MB).'];
     $info = @getimagesize($f['tmp_name']);
     $ext = strtolower(pathinfo($f['name'], PATHINFO_EXTENSION));
-    if ($ext === 'svg') return [false, 'SVG uploads are only allowed for admin elements.'];
+    if ($ext === 'svg') return [false, 'SVG files can\'t be uploaded here — use a PNG, JPG or WebP image.'];
     if (!$info || !in_array($info[2], [IMAGETYPE_JPEG, IMAGETYPE_PNG, IMAGETYPE_WEBP, IMAGETYPE_GIF], true)) return [false, 'Please upload a JPG, PNG, WEBP or GIF image.'];
     $map = [IMAGETYPE_JPEG => 'jpg', IMAGETYPE_PNG => 'png', IMAGETYPE_WEBP => 'webp', IMAGETYPE_GIF => 'gif'];
     return [true, $map[$info[2]]];

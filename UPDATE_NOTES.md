@@ -1,3 +1,22 @@
+# Update — Classic Wizard gets all Pin Templates & Styles, cleaner user side, new user menu colours
+
+1. Classic Wizard: every Bulk Pin "Pin Templates & Styles" design (500+) is now in the template list too,
+   under the new "Pin Templates & Styles" filter (plus the normal category filters, AI template picking,
+   the per-page and per-pin template pickers). These pins are drawn on the server with the same code as
+   Bulk Pin, on the page's own images (all sizes incl. 4:5). Renders are cached in uploads/cw-pt/.
+2. User side audit: no admin / cron / migrate.php / API-key / server wording is shown to users any more.
+   Texts were rewritten, and every JSON error in the user area, free tools and login pages now passes
+   through user_facing_error() (includes/functions.php), which turns technical errors (AI provider,
+   HTTP, database, admin settings) into a short friendly message. Pin / article error details on the
+   user pages use the same function. The full original error is still stored and shown in Admin.
+3. User sidebar colours: dark navy menu with white text; category labels (Pin Scheduling, Automation, …)
+   on their own soft band with low-contrast text. Admin sidebar unchanged.
+Changed files: assets/css/style.css, assets/js/cw-engine.js, assets/js/cw-wizard.js,
+assets/js/pinterest-analytics.js, includes/functions.php, includes/ai_functions.php, includes/cw_functions.php,
+includes/free_tool_functions.php, includes/page_crawler_functions.php, includes/storage_functions.php,
+includes/team_functions.php, includes/design_functions.php, auth/forgot-password.php, user/ajax-cw.php,
+user/includes/user-header.php and several user/*.php pages (texts only).
+
 # Update — Auto Article batches run in parallel
 
 Every Auto Article batch now runs on its own: a new batch starts writing / publishing the moment it

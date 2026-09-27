@@ -55,7 +55,7 @@ require_once __DIR__ . '/../../includes/pricing_functions.php';
 </div>
 <div class="app-shell">
     <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
-    <aside class="sidebar" id="mainSidebar">
+    <aside class="sidebar user-sidebar" id="mainSidebar">
         <div class="brand">Web To <span>Pin</span><button type="button" class="sidebar-close" id="sidebarCloseBtn" aria-label="Close menu">&times;</button></div>
         <?php
         // Sidebar, grouped by what the user is doing. Each group: [id, label, active pages, items[href, page, label]]

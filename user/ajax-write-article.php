@@ -79,7 +79,7 @@ if ($action === 'get_state') {
 /* ---------------- generate_outline ---------------- */
 if ($action === 'generate_outline') {
     if (!$articleSettings || !$articleSettings['text_provider']) {
-        respond(['ok' => false, 'error' => 'No default text model is configured yet. Ask the site admin to set one up under Article Write settings.']);
+        respond(['ok' => false, 'error' => 'AI writing is not available right now. Please try again later.']);
     }
 
     $sourceType = ($_POST['source_type'] ?? 'keyword') === 'competitor_url' ? 'competitor_url' : 'keyword';
