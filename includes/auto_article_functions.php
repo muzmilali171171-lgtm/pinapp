@@ -1130,49 +1130,197 @@ function step_publish_article(PDO $pdo, array $article, array $batch): array
 /* ===================== Shared step-loop (used by cron, the manual button, and the background ticks) ===================== */
 
 /**
- * Runs up to $maxSteps pipeline steps across ALL users' due/in-progress
- * articles (brand-new due ones, plus anything already mid-pipeline in any
- * active batch), system-wide — this is the one place that logic lives, used
- * by cron/article-scheduler.php, the "Process Now" button, and the
- * background "tick" endpoint alike, so all three stay in sync.
+ * Every batch runs on its own: one batch's articles never wait for another batch to finish.
+ *   - Each active batch with due work gets its own background worker (cron/article-worker.php),
+ *     so several users' batches are written / illustrated / published at the same time.
+ *   - A per-batch lock file makes sure only one process ever works on a batch at once
+ *     (the worker, the cron fallback loop, or the "Process Now" button).
+ *   - The cron / runner fallback loop (run_due_article_steps) goes round-robin across batches,
+ *     one step per batch in turn, so even without workers no batch is stuck behind another.
+ */
+if (!defined('ARTICLE_MAX_PARALLEL_BATCHES')) define('ARTICLE_MAX_PARALLEL_BATCHES', 10);
+
+/** SQL condition for "this article has work to do right now" (table alias a). */
+function article_due_condition_sql(): string
+{
+    return "(
+            (a.status = 'queued' AND a.scheduled_for <= ?)
+            OR a.status IN ('drafting', 'drafted', 'imaging', 'ready', 'publishing', 'draft')
+        )
+        AND NOT (a.status = 'drafting' AND a.updated_at > NOW() - INTERVAL 6 MINUTE)   -- being written right now
+        AND NOT (COALESCE(a.last_error, '') LIKE 'Retrying%' AND a.updated_at > NOW() - INTERVAL 3 MINUTE)";   // short pause between retries (COALESCE: a NULL here used to hide every article for 3 min after each step)
+}
+
+/** Active batches that have an article due right now, oldest work first. */
+function due_article_batch_ids(PDO $pdo): array
+{
+    $stmt = $pdo->prepare("SELECT a.batch_id, MIN(a.scheduled_for) AS first_due, MIN(a.id) AS first_id FROM articles a
+        JOIN article_batches b ON b.id = a.batch_id
+        WHERE b.status = 'active' AND " . article_due_condition_sql() . "
+        GROUP BY a.batch_id
+        ORDER BY first_due ASC, first_id ASC");
+    $stmt->execute([date('Y-m-d')]);
+    return array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
+}
+
+/** The next article to step in one batch (articles already mid-pipeline first, then the oldest due one). */
+function next_due_article_for_batch(PDO $pdo, int $batchDbId, array $skipIds = []): ?array
+{
+    $skip = $skipIds ? ' AND a.id NOT IN (' . implode(',', array_map('intval', $skipIds)) . ')' : '';
+    $stmt = $pdo->prepare("SELECT a.* FROM articles a
+        WHERE a.batch_id = ? AND " . article_due_condition_sql() . "
+        $skip
+        ORDER BY (a.status = 'queued') ASC, a.scheduled_for ASC, a.id ASC
+        LIMIT 1");
+    $stmt->execute([$batchDbId, date('Y-m-d')]);
+    $row = $stmt->fetch();
+    return $row ?: null;
+}
+
+function article_batch_lock_path(int $batchDbId): string
+{
+    $dir = __DIR__ . '/../uploads';
+    if (!is_dir($dir)) @mkdir($dir, 0755, true);
+    return $dir . '/.article_batch_' . $batchDbId . '.lock';
+}
+
+/** Takes this batch's lock without waiting. Returns the handle, or null if someone else is working on the batch. */
+function article_batch_lock_try(int $batchDbId)
+{
+    $h = @fopen(article_batch_lock_path($batchDbId), 'c');
+    if (!$h) return null;
+    if (!flock($h, LOCK_EX | LOCK_NB)) { fclose($h); return null; }
+    return $h;
+}
+
+function article_batch_lock_release($h): void
+{
+    if (!$h) return;
+    flock($h, LOCK_UN);
+    fclose($h);
+}
+
+/** Is a process working on this batch right now? */
+function article_batch_busy(int $batchDbId): bool
+{
+    $h = article_batch_lock_try($batchDbId);
+    if (!$h) return true;
+    article_batch_lock_release($h);
+    return false;
+}
+
+/** Runs one step for one article and returns its log entry. */
+function article_run_one_step(PDO $pdo, array $article): ?array
+{
+    $batchStmt = $pdo->prepare("SELECT * FROM article_batches WHERE id = ?");
+    $batchStmt->execute([$article['batch_id']]);
+    $batch = $batchStmt->fetch();
+    if (!$batch || $batch['status'] !== 'active') return null;
+
+    $GLOBALS['currentArticleId'] = (int)$article['id'];
+    $result = process_article_step($pdo, $article, $batch);
+    $GLOBALS['currentArticleId'] = null;
+    return ['article_id' => $article['id'], 'title' => $article['title'], 'ok' => $result['ok'], 'more' => $result['more'], 'error' => $result['error'] ?? null];
+}
+
+/**
+ * Runs up to $maxSteps pipeline steps across ALL users' due/in-progress articles, system-wide,
+ * going round-robin over the batches (one step for batch A, one for batch B, …) so no batch
+ * waits for another batch to finish. Batches that a background worker is already running are
+ * skipped here (the worker handles them). Used by cron/article-scheduler.php, the built-in runner
+ * and Admin → Articles Schedule.
  */
 function run_due_article_steps(PDO $pdo, int $maxSteps = 10): array
 {
-    $today = date('Y-m-d');
     $processed = 0;
     $log = [];
-
     $seenFail = [];   // an article that failed a step this run waits for the next run (so retries are spread out)
-    for ($i = 0; $i < $maxSteps; $i++) {
+    $doneBatches = []; // batches with nothing more to do in this run (or busy in a worker)
+
+    while ($processed < $maxSteps) {
         ensure_db_connection($pdo);
+        $batchIds = array_values(array_diff(due_article_batch_ids($pdo), $doneBatches));
+        if (!$batchIds) break;
 
-        $skip = $seenFail ? ' AND a.id NOT IN (' . implode(',', array_map('intval', $seenFail)) . ')' : '';
-        $stmt = $pdo->prepare("SELECT a.* FROM articles a
-            JOIN article_batches b ON b.id = a.batch_id
-            WHERE b.status = 'active'
-            AND (
-                (a.status = 'queued' AND a.scheduled_for <= ?)
-                OR a.status IN ('drafting', 'drafted', 'imaging', 'ready', 'publishing', 'draft')
-            )
-            AND NOT (a.status = 'drafting' AND a.updated_at > NOW() - INTERVAL 6 MINUTE)   -- being written right now
-            AND NOT (COALESCE(a.last_error, '') LIKE 'Retrying%' AND a.updated_at > NOW() - INTERVAL 3 MINUTE)   -- short pause between retries (COALESCE: a NULL here used to hide every article for 3 min after each step)
-            $skip
-            ORDER BY a.scheduled_for ASC, a.id ASC
-            LIMIT 1");
-        $stmt->execute([$today]);
-        $article = $stmt->fetch();
-        if (!$article) break;
-
-        $batchStmt = $pdo->prepare("SELECT * FROM article_batches WHERE id = ?");
-        $batchStmt->execute([$article['batch_id']]);
-        $batch = $batchStmt->fetch();
-        if (!$batch || $batch['status'] !== 'active') continue;
-
-        $result = process_article_step($pdo, $article, $batch);
-        $processed++;
-        if (!$result['ok']) $seenFail[] = (int)$article['id'];
-        $log[] = ['article_id' => $article['id'], 'title' => $article['title'], 'ok' => $result['ok'], 'more' => $result['more'], 'error' => $result['error'] ?? null];
+        foreach ($batchIds as $batchDbId) {
+            if ($processed >= $maxSteps) break;
+            $lock = article_batch_lock_try($batchDbId);
+            if (!$lock) { $doneBatches[] = $batchDbId; continue; }   // its own worker is on it
+            try {
+                $article = next_due_article_for_batch($pdo, $batchDbId, $seenFail);
+                if (!$article) { $doneBatches[] = $batchDbId; continue; }
+                $entry = article_run_one_step($pdo, $article);
+                if (!$entry) { $doneBatches[] = $batchDbId; continue; }
+                $processed++;
+                if (!$entry['ok']) $seenFail[] = (int)$article['id'];
+                $log[] = $entry;
+            } finally {
+                article_batch_lock_release($lock);
+            }
+        }
     }
 
     return ['steps_run' => $processed, 'log' => $log];
+}
+
+/**
+ * Works through ONE batch until it has nothing due right now or $seconds run out.
+ * The caller must already hold this batch's lock (see cron/article-worker.php).
+ * Returns ['steps_run', 'log', 'more' => bool (time ran out with work still waiting)].
+ */
+function run_batch_article_steps(PDO $pdo, int $batchDbId, int $seconds = 540): array
+{
+    $end = time() + $seconds;
+    $processed = 0;
+    $log = [];
+    $seenFail = [];
+    while (true) {
+        ensure_db_connection($pdo);
+        $article = next_due_article_for_batch($pdo, $batchDbId, $seenFail);
+        if (!$article) return ['steps_run' => $processed, 'log' => $log, 'more' => false];
+        if (time() >= $end) return ['steps_run' => $processed, 'log' => $log, 'more' => true];
+        $entry = article_run_one_step($pdo, $article);
+        if (!$entry) return ['steps_run' => $processed, 'log' => $log, 'more' => false];   // batch stopped
+        $processed++;
+        if (!$entry['ok']) $seenFail[] = (int)$article['id'];
+        $log[] = $entry;
+    }
+}
+
+/** Starts the background worker for one batch (returns right away; the worker keeps going on the server). */
+function article_batch_worker_start(int $batchDbId): bool
+{
+    if (!function_exists('curl_init') || !function_exists('scheduler_web_key')) return false;
+    $url = rtrim(APP_URL, '/') . '/cron/article-worker.php?batch=' . $batchDbId . '&key=' . scheduler_web_key() . '&t=' . time();
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT_MS => 1500, CURLOPT_CONNECTTIMEOUT_MS => 1200,
+        CURLOPT_NOSIGNAL => true, CURLOPT_FOLLOWLOCATION => true, CURLOPT_USERAGENT => 'WebToPin-ArticleWorker',
+    ]);
+    curl_exec($ch);   // times out on purpose — the worker keeps working after we hang up
+    curl_close($ch);
+    return true;
+}
+
+/**
+ * Makes sure every batch with due work has its own worker running (up to ARTICLE_MAX_PARALLEL_BATCHES
+ * at once), so all batches — from every user — are written and published at the same time.
+ * $onlyBatch: start just this batch (e.g. right after it was created).
+ * Returns how many workers were started.
+ */
+function article_batch_workers_kick(PDO $pdo, ?int $onlyBatch = null): int
+{
+    if (function_exists('scheduler_runner_enabled') && !scheduler_runner_enabled()) return 0;
+    $ids = $onlyBatch ? [$onlyBatch] : due_article_batch_ids($pdo);
+    $running = 0;
+    $idle = [];
+    foreach ($ids as $id) {
+        if (article_batch_busy($id)) $running++; else $idle[] = $id;
+    }
+    $started = 0;
+    foreach ($idle as $id) {
+        if ($running + $started >= max(1, (int)ARTICLE_MAX_PARALLEL_BATCHES)) break;
+        if (article_batch_worker_start($id)) $started++;
+    }
+    return $started;
 }

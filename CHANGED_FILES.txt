@@ -499,3 +499,4 @@ user/settings.php
 user/storage.php
 user/template-tracking.php
 user/website-action.php
+cron/article-worker.php

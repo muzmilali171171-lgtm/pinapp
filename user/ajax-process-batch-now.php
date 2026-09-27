@@ -64,27 +64,26 @@ if ($batch['status'] !== 'active') {
     exit;
 }
 
-$today = date('Y-m-d');
-// Pick up brand-new due articles, but also RESUME any article already mid-pipeline
-// (drafting/imaging/ready/publishing, or a legacy stuck 'draft' row) regardless of
-// its scheduled_for date, since once started it should be finished.
-$stmt = $pdo->prepare("SELECT * FROM articles
-    WHERE batch_id = ? AND user_id = ?
-    AND (
-        (status = 'queued' AND scheduled_for <= ?)
-        OR status IN ('drafting', 'drafted', 'imaging', 'ready', 'publishing', 'draft')
-    )
-    ORDER BY scheduled_for ASC, id ASC LIMIT 1");
-$stmt->execute([$batch['id'], $user['id'], $today]);
-$article = $stmt->fetch();
+// Only one process works on a batch at a time. If its background worker is already on it,
+// there is nothing to do here — the worker keeps going on its own.
+$batchLock = article_batch_lock_try((int)$batch['id']);
+if (!$batchLock) {
+    echo json_encode(['ok' => true, 'done' => true, 'message' => 'This batch is already being written and published in the background — refresh in a minute to see progress.']);
+    exit;
+}
+
+// Resume any article already mid-pipeline first, then the next due one.
+$article = next_due_article_for_batch($pdo, (int)$batch['id']);
 
 if (!$article) {
+    article_batch_lock_release($batchLock);
     echo json_encode(['ok' => true, 'done' => true, 'message' => 'No due articles right now.']);
     exit;
 }
 
 $currentArticleId = $article['id'];
 $result = process_article_step($pdo, $article, $batch);
+article_batch_lock_release($batchLock);
 
 echo json_encode([
     'ok' => $result['ok'],

@@ -108,15 +108,21 @@ if (empty($titleRows)) {
 $result = create_article_batch($pdo, $user['id'], $batch, $titleRows);
 log_event($pdo, 'system', "Auto Article batch created: {$result['count']} articles queued", $user['id']);
 
-// Respond right away, then detach from this connection and start processing
-// immediately (rather than waiting for the next "tick" or a manual click) —
-// this survives the browser navigating to the batch view page or closing.
+// Respond right away, then start THIS batch's own background worker so its articles begin
+// writing / publishing immediately — it never waits for other batches (yours or other users')
+// to finish. If the worker can't be started (no curl), work on this batch here instead.
 ignore_user_abort(true);
-@set_time_limit(90);
-if (function_exists('fastcgi_finish_request')) {
-    echo json_encode($result);
-    fastcgi_finish_request();
-    run_due_article_steps($pdo, 6);
-} else {
-    echo json_encode($result);
+@set_time_limit(0);
+echo json_encode($result);
+if (function_exists('litespeed_finish_request')) litespeed_finish_request();
+elseif (function_exists('fastcgi_finish_request')) fastcgi_finish_request();
+else { @ob_end_flush(); @flush(); }
+
+$batchDbId = (int)$result['batch_db_id'];
+if (!article_batch_workers_kick($pdo, $batchDbId)) {
+    $lock = article_batch_lock_try($batchDbId);
+    if ($lock) {
+        try { run_batch_article_steps($pdo, $batchDbId, 240); } catch (Throwable $e) { /* cron / runner will continue */ }
+        article_batch_lock_release($lock);
+    }
 }

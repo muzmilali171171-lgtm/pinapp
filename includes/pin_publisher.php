@@ -544,6 +544,12 @@ function article_scheduler_run(PDO $pdo, string $source = 'cron', int $steps = 8
     }
     $out['ran'] = true;
     try {
+        // Every batch with due work gets its own background worker, so batches run side by side.
+        try {
+            $kicked = article_batch_workers_kick($pdo);
+            if ($kicked) $out['messages'][] = "Started $kicked batch worker(s).";
+        } catch (Throwable $e) { scheduler_log("[articles/$source] worker kick: " . $e->getMessage()); }
+        // Batches without a worker are stepped here, round-robin (one step per batch in turn).
         $result = run_due_article_steps($pdo, $steps);
         if ($result['steps_run'] === 0) $out['messages'][] = 'No due articles.';
         foreach ($result['log'] as $entry) {

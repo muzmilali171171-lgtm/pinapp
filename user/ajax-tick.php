@@ -58,6 +58,8 @@ try { scheduler_runner_kick(); } catch (Throwable $e) { /* optional */ }
 // (a killed request left articles stuck in "Writing" / "Imaging"). So page loads no longer do that
 // work themselves: they only make sure the background article runner is going (when cron isn't).
 try { scheduler_runner_kick(false, 'articles'); } catch (Throwable $e) { /* optional */ }
+// Each Auto Article batch has its own worker, so no batch waits for another one to finish.
+try { article_batch_workers_kick($pdo); } catch (Throwable $e) { /* optional */ }
 
 if (!function_exists('fastcgi_finish_request') && !function_exists('litespeed_finish_request')) {
     echo json_encode(['ok' => true, 'steps_run' => 0]);

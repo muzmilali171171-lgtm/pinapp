@@ -1,3 +1,19 @@
+# Update — Auto Article batches run in parallel
+
+Every Auto Article batch now runs on its own: a new batch starts writing / publishing the moment it
+is created, and never waits for older batches (the same user's or other users') to finish.
+
+1. New cron/article-worker.php: one background worker per batch (started automatically on batch
+   create, by cron/article-scheduler.php, the built-in runner and page-load ticks). Up to 10 batches
+   run at the same time (define ARTICLE_MAX_PARALLEL_BATCHES in config.php to change it).
+2. A per-batch lock (uploads/.article_batch_ID.lock) makes sure only one process works on a batch.
+3. The cron / runner fallback loop now goes round-robin across batches (one step per batch in turn)
+   instead of always finishing the oldest batch first.
+4. "Process Now" uses the same lock; if the batch's worker is already on it, it just says so.
+Upload the changed files: includes/auto_article_functions.php, includes/pin_publisher.php,
+cron/article-worker.php, user/ajax-create-article-batch.php, user/ajax-process-batch-now.php,
+user/ajax-tick.php. No database changes.
+
 # Update — boards, overdue pins, gaps, publisher
 
 After uploading, open /migrate.php once (new columns are also added automatically on first use).
