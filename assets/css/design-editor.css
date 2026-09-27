@@ -312,3 +312,14 @@ a.de-btn { text-decoration: none; display: inline-flex; align-items: center; }
     .de-tbtn { padding: 6px 6px; }
     #deUse .de-lbl-short { display: none; }
 }
+
+/* ---------- infinite lists & font search ---------- */
+.de-more-sentinel { height: 1px; }
+.de-loadmore-note { text-align: center; margin-top: 10px; }
+.de-fontmenu { width: 260px; padding: 10px; }
+.de-fontmenu .de-input { margin-bottom: 8px; }
+.de-fontlist { max-height: 320px; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; }
+.de-fontlist button { text-align: left; border: none; background: none; padding: 8px 10px; border-radius: 8px; font-size: 17px; cursor: pointer; color: #1f2937; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.de-fontlist button:hover { background: #f3f0ff; }
+.de-fontlist button.on { background: #ede9fe; color: #5b21b6; }
+@media (max-width: 768px) { .de-fontmenu { width: auto; } .de-fontlist { max-height: 45vh; } }

@@ -1,3 +1,15 @@
+# Update — endless photos & templates, font search, "Blog → AutomatedPin → Pinterest → 5x" section, security
+
+1. Design editor: photo search keeps loading more photos as you scroll (next Pexels page each time);
+   Templates show 20 at first and load 20 more as you scroll; new 🔎 font search next to the font list
+   (type to filter all fonts, each shown in its own font; Enter picks the first).
+2. Home page: new animated section "Your Blog ➝ AutomatedPin ➝ Pinterest ➝ 5x Money" — moving
+   connectors, pins publishing, a 5x counter, rising chart and falling dollars (calm for visitors who
+   prefer reduced motion), with a CTA.
+3. Security review of all changes: access checks (own designs / batches only, admin pages, cron key),
+   no path traversal in pin rendering, output escaping, redirect whitelist after login — all verified.
+   .htaccess now also blocks database/, includes/, wp-plugin/, *.md/*.sql/*.log/*.lock and hidden files.
+
 # Update — AutomatedPin brand, new home page sections, full SEO (live indexing, sitemaps, meta)
 
 IMPORTANT for the new domain: in config/config.php set

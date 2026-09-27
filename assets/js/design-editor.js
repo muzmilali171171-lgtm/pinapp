@@ -667,6 +667,31 @@
         + '<optgroup label="More fonts (100)">' + EXTRA_FONTS.slice().sort().map((f) => `<option value="${esc(f)}" style="font-family:'${esc(f)}'">${esc(f)}</option>`).join('') + '</optgroup>';
     fontSel.addEventListener('focus', () => requireFontCss(EXTRA_FONTS.slice(0, 50)).then(() => requireFontCss(EXTRA_FONTS.slice(50))), { once: true });
     fontSel.addEventListener('change', () => { const f = fontSel.value; loadFont(f).then(() => eachText((o) => o.set('fontFamily', f))); });
+    // Font search: type to filter every font; each name is shown in its own font.
+    const ALL_FONTS = FONTS.concat(EXTRA_FONTS.slice().sort());
+    function renderFontList() {
+        const q = ($('deFontQ').value || '').trim().toLowerCase();
+        const list = ALL_FONTS.filter((f) => !q || f.toLowerCase().includes(q));
+        $('deFontList').innerHTML = list.length
+            ? list.map((f) => `<button type="button" role="option" data-font="${esc(f)}" class="${f === fontSel.value ? 'on' : ''}" style="font-family:'${esc(f)}'">${esc(f)}</button>`).join('')
+            : '<p class="de-muted">No fonts match “' + esc(q) + '”.</p>';
+    }
+    $('deFontSearchBtn').addEventListener('click', () => {
+        requireFontCss(EXTRA_FONTS);
+        $('deFontQ').value = '';
+        renderFontList();
+        setTimeout(() => $('deFontQ').focus(), 30);
+    });
+    $('deFontQ').addEventListener('input', renderFontList);
+    $('deFontQ').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); const b = $('deFontList').querySelector('[data-font]'); if (b) b.click(); }
+    });
+    $('deFontList').addEventListener('click', (e) => {
+        const b = e.target.closest('[data-font]'); if (!b) return;
+        fontSel.value = b.dataset.font;
+        fontSel.dispatchEvent(new Event('change'));
+        b.closest('.de-ddmenu').classList.remove('open');
+    });
     $('deFontSize').addEventListener('input', (e) => eachText((o) => o.set({ fontSize: Math.max(4, +e.target.value / (o.scaleY || 1)) })));
     $('deTextColor').addEventListener('input', (e) => eachText((o) => { if (o.fxName === 'hollow') { o.deFill = e.target.value; o.set('stroke', e.target.value); } else o.set('fill', e.target.value); }));
     $('deBold').addEventListener('click', () => eachText((o) => o.set('fontWeight', (+o.fontWeight >= 600 || o.fontWeight === 'bold') ? 400 : 700)) || updateCtx());
@@ -1305,15 +1330,41 @@
         const t = e.target.closest('.de-photo'); if (t) useImage(t.dataset.src);
     });
 
-    // stock photos
+    // stock photos — keep scrolling and the next page of results loads by itself
+    const photoState = { q: '', page: 0, loading: false, done: true, seen: new Set() };
+    const stockHTML = (p) => `<div class="de-photo de-stock" draggable="true" data-stock="${esc(p.full)}" title="${esc(p.photographer ? 'Photo by ' + p.photographer : '')}"><img loading="lazy" src="${esc(p.thumb)}" alt=""></div>`;
+    function loadMorePhotos() {
+        const st = photoState;
+        if (st.loading || st.done || !st.q) return;
+        st.loading = true;
+        const q = st.q;
+        $('dePhotoNote').hidden = false; $('dePhotoNote').textContent = st.page ? 'Loading more photos…' : '';
+        post({ action: 'stock_search', query: q, page: st.page + 1 }).then((r) => {
+            if (q !== st.q) return;              // a newer search started
+            st.loading = false;
+            if (!r.ok) {
+                if (!st.page) $('dePhotoGrid').innerHTML = `<p class="de-muted">${esc(r.error || 'Search failed.')}</p>`;
+                st.done = true; $('dePhotoNote').hidden = true; return;
+            }
+            const fresh = (r.results || []).filter((p) => !st.seen.has(p.id));
+            fresh.forEach((p) => st.seen.add(p.id));
+            if (!st.page) $('dePhotoGrid').innerHTML = '';
+            st.page++;
+            $('dePhotoGrid').insertAdjacentHTML('beforeend', fresh.map(stockHTML).join(''));
+            if (!st.seen.size) $('dePhotoGrid').innerHTML = '<p class="de-muted">No photos found.</p>';
+            st.done = !(r.results || []).length || st.seen.size >= (r.total_results || 0) || st.page >= 40;
+            $('dePhotoNote').hidden = !st.done || !st.seen.size;
+            $('dePhotoNote').textContent = st.done && st.seen.size ? 'That’s all the photos for “' + q + '”.' : '';
+            setTimeout(checkSentinels, 50);   // still room on screen → load the next page too
+        });
+    }
     $('dePhotoForm').addEventListener('submit', (e) => {
         e.preventDefault();
         const q = $('dePhotoQ').value.trim(); if (!q) return;
+        Object.assign(photoState, { q, page: 0, loading: false, done: false, seen: new Set() });
         $('dePhotoGrid').innerHTML = '<p class="de-muted">Searching…</p>';
-        post({ action: 'stock_search', query: q }).then((r) => {
-            if (!r.ok) { $('dePhotoGrid').innerHTML = `<p class="de-muted">${esc(r.error || 'Search failed.')}</p>`; return; }
-            $('dePhotoGrid').innerHTML = (r.results || []).map((p) => `<div class="de-photo de-stock" draggable="true" data-stock="${esc(p.full)}"><img loading="lazy" src="${esc(p.thumb)}" alt=""></div>`).join('') || '<p class="de-muted">No photos found.</p>';
-        });
+        $('dePanel').scrollTop = 0;
+        loadMorePhotos();
     });
     function importStock(full) {
         toast('Adding photo…', 30000);
@@ -1375,11 +1426,37 @@
         if (tplCache[tplSrc]) return renderTemplates();
         post({ action: tplSrc === 'pub' ? 'templates' : 'list' }).then((r) => { tplCache[tplSrc] = r.templates || r.designs || []; renderTemplates(); });
     }
+    // Templates show 20 at a time; scrolling down adds the next 20.
+    const TPL_STEP = 20;
+    let tplList = [], tplShown = 0;
+    const tplHTML = (t) => `<button type="button" class="de-tpl" data-tpl="${t.id}" title="${esc(t.title)}">${t.thumb_path ? `<img loading="lazy" src="${esc(url(t.thumb_path))}" alt="">` : '<span>No preview</span>'}<em>${esc(t.title)}</em></button>`;
     function renderTemplates() {
         const q = ($('deTplSearch').value || '').toLowerCase();
-        const list = (tplCache[tplSrc] || []).filter((t) => !q || (t.title + ' ' + (t.template_category || '')).toLowerCase().includes(q));
-        $('deTplGrid').innerHTML = list.length ? list.map((t) => `<button type="button" class="de-tpl" data-tpl="${t.id}" title="${esc(t.title)}">${t.thumb_path ? `<img loading="lazy" src="${esc(url(t.thumb_path))}" alt="">` : '<span>No preview</span>'}<em>${esc(t.title)}</em></button>`).join('')
-            : `<p class="de-muted">${tplSrc === 'pub' ? 'No published templates yet.' : 'No saved designs yet.'}</p>`;
+        tplList = (tplCache[tplSrc] || []).filter((t) => !q || (t.title + ' ' + (t.template_category || '')).toLowerCase().includes(q));
+        tplShown = 0;
+        $('deTplGrid').innerHTML = tplList.length ? '' : `<p class="de-muted">${tplSrc === 'pub' ? 'No published templates yet.' : 'No saved designs yet.'}</p>`;
+        moreTemplates();
+    }
+    function moreTemplates() {
+        if (tplShown >= tplList.length) return;
+        $('deTplGrid').insertAdjacentHTML('beforeend', tplList.slice(tplShown, tplShown + TPL_STEP).map(tplHTML).join(''));
+        tplShown += TPL_STEP;
+        setTimeout(checkSentinels, 50);
+    }
+    // One observer for both lists: when the end of a list scrolls into view, load more.
+    const moreIO = new IntersectionObserver((ents) => ents.forEach((en) => {
+        if (!en.isIntersecting) return;
+        if (en.target.id === 'deTplMore') moreTemplates();
+        if (en.target.id === 'dePhotoMore') loadMorePhotos();
+    }), { root: $('dePanel'), rootMargin: '0px 0px 400px 0px' });
+    ['deTplMore', 'dePhotoMore'].forEach((id) => moreIO.observe($(id)));
+    function checkSentinels() {
+        const panel = $('dePanel').getBoundingClientRect();
+        ['deTplMore', 'dePhotoMore'].forEach((id) => {
+            const el = $(id); if (!el.offsetParent) return;
+            const r = el.getBoundingClientRect();
+            if (r.top < panel.bottom + 400) (id === 'deTplMore' ? moreTemplates : loadMorePhotos)();
+        });
     }
     document.querySelectorAll('[data-tplsrc]').forEach((b) => b.addEventListener('click', () => {
         tplSrc = b.dataset.tplsrc;

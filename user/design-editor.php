@@ -100,6 +100,7 @@ $v = function (string $rel) { return @filemtime(__DIR__ . '/../' . $rel) ?: time
             <input type="search" class="de-input" id="deTplSearch" placeholder="Search templates…">
             <div class="de-subtabs"><button type="button" data-tplsrc="pub" class="on">Published</button><button type="button" data-tplsrc="mine">My designs</button></div>
             <div class="de-thumbgrid" id="deTplGrid"><p class="de-muted">Loading…</p></div>
+            <div class="de-more-sentinel" id="deTplMore" aria-hidden="true"></div>
         </section>
 
         <!-- Layouts (collage frames) -->
@@ -152,6 +153,8 @@ $v = function (string $rel) { return @filemtime(__DIR__ . '/../' . $rel) ?: time
             <h3>Free photos</h3>
             <form id="dePhotoForm" class="de-inline"><input type="search" class="de-input" id="dePhotoQ" placeholder="Search photos… e.g. cozy living room"><button type="submit" class="de-btn">Go</button></form>
             <div class="de-thumbgrid de-photogrid" id="dePhotoGrid"><p class="de-muted">Search millions of free photos (Pexels).</p></div>
+            <div class="de-more-sentinel" id="dePhotoMore" aria-hidden="true"></div>
+            <p class="de-muted de-loadmore-note" id="dePhotoNote" hidden></p>
         </section>
 
         <!-- Colour panel (opens beside the canvas when any colour is clicked) -->
@@ -203,6 +206,13 @@ $v = function (string $rel) { return @filemtime(__DIR__ . '/../' . $rel) ?: time
 
             <div class="de-ctx-group" data-ctx="text" hidden>
                 <select id="deFont" class="de-fontsel" title="Font"></select>
+                <div class="de-dd de-fontdd">
+                    <button type="button" class="de-ib" id="deFontSearchBtn" title="Search fonts" aria-label="Search fonts">🔎</button>
+                    <div class="de-ddmenu de-ddpad de-fontmenu">
+                        <input type="search" id="deFontQ" class="de-input" placeholder="Search fonts…" autocomplete="off" spellcheck="false">
+                        <div id="deFontList" class="de-fontlist" role="listbox" aria-label="Fonts"></div>
+                    </div>
+                </div>
                 <input type="number" id="deFontSize" class="de-num" min="6" max="600" title="Font size">
                 <input type="color" id="deTextColor" title="Text colour">
                 <button type="button" class="de-ib" id="deBold" title="Bold"><b>B</b></button>

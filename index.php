@@ -243,6 +243,72 @@ $hpV = fn($f) => @filemtime(__DIR__ . '/' . $f) ?: time();
     </div>
 </section>
 
+<!-- ===================== BLOG → AUTOMATEDPIN → PINTEREST → 5X ===================== -->
+<section class="hp-5x" id="blog-to-money" aria-labelledby="hp5xTitle">
+    <div class="hp-5x-rain" aria-hidden="true">
+        <?php for ($i = 0; $i < 26; $i++): $l = ($i * 37) % 100; $d = ($i * 0.53) % 7; $t = 6 + ($i * 1.7) % 6; $sz = 18 + ($i * 7) % 22; ?>
+            <span style="left: <?= $l ?>%; animation-delay: -<?= number_format($d, 2) ?>s; animation-duration: <?= number_format($t, 2) ?>s; font-size: <?= $sz ?>px;"><?= $i % 3 === 0 ? '💵' : ($i % 3 === 1 ? '$' : '💰') ?></span>
+        <?php endfor; ?>
+    </div>
+    <div class="container">
+        <div class="uc-head hp-rv" data-rv="up">
+            <div class="uc-eyebrow hp-5x-eyebrow">// HOW YOUR BLOG MAKES MORE MONEY</div>
+            <h2 id="hp5xTitle">Your Blog <span class="hp-5x-arrow">➝</span> <?= e(SITE_BRAND) ?> <span class="hp-5x-arrow">➝</span> Pinterest <span class="hp-5x-arrow">➝</span> <span class="hp-5x-gold">5x Money</span></h2>
+            <p class="uc-muted">Every post you publish becomes a stream of fresh pins. <?= e(SITE_BRAND) ?> designs them, writes the copy and publishes them to Pinterest every day — and those pins send readers back to your blog for months, turning into ad, affiliate and product revenue.</p>
+        </div>
+
+        <ol class="hp-5x-flow">
+            <li class="hp-5x-node hp-rv" data-rv="up">
+                <div class="hp-5x-card hp-5x-blog">
+                    <div class="hp-5x-browser" aria-hidden="true"><i></i><i></i><i></i><b>yourblog.com</b></div>
+                    <div class="hp-5x-post" aria-hidden="true"><span class="hp-5x-thumb"></span><span class="hp-5x-line w90"></span><span class="hp-5x-line w70"></span><span class="hp-5x-line w80"></span></div>
+                </div>
+                <h3>📝 Your Blog</h3>
+                <p>New and old posts, products and pages — your content, as it is.</p>
+            </li>
+            <li class="hp-5x-link" aria-hidden="true"><span class="hp-5x-pipe"><i></i><i></i><i></i></span></li>
+            <li class="hp-5x-node hp-rv" data-rv="up" style="--d: 120ms">
+                <div class="hp-5x-card hp-5x-core">
+                    <div class="hp-5x-orbit" aria-hidden="true"></div>
+                    <div class="hp-5x-logo">Automated<span>Pin</span></div>
+                    <div class="hp-5x-tags" aria-hidden="true"><span>🎨 Design</span><span>✍️ Copy</span><span>🗂️ Boards</span><span>📅 Schedule</span></div>
+                </div>
+                <h3>⚡ <?= e(SITE_BRAND) ?></h3>
+                <p>AI designs pins, writes titles and descriptions, picks boards and schedules everything.</p>
+            </li>
+            <li class="hp-5x-link" aria-hidden="true"><span class="hp-5x-pipe"><i></i><i></i><i></i></span></li>
+            <li class="hp-5x-node hp-rv" data-rv="up" style="--d: 240ms">
+                <div class="hp-5x-card hp-5x-pins" aria-hidden="true">
+                    <?php foreach (array_slice($hpHeroUp, 0, 6) as $k => $img): ?><img src="<?= e($img) ?>" alt="" width="70" height="105" loading="lazy" decoding="async" style="animation-delay: <?= $k * 0.35 ?>s"><?php endforeach; ?>
+                    <span class="hp-5x-badge">📌 Published</span>
+                </div>
+                <h3>📌 Pinterest</h3>
+                <p>Pins go live on your account every day — on autopilot, a year at a time.</p>
+            </li>
+            <li class="hp-5x-link" aria-hidden="true"><span class="hp-5x-pipe hp-5x-pipe-gold"><i></i><i></i><i></i></span></li>
+            <li class="hp-5x-node hp-rv" data-rv="up" style="--d: 360ms">
+                <div class="hp-5x-card hp-5x-money">
+                    <div class="hp-5x-big"><span data-count="5">5</span>x</div>
+                    <div class="hp-5x-cash" aria-hidden="true"><span>💵</span><span>💵</span><span>💵</span></div>
+                    <svg class="hp-5x-chart" viewBox="0 0 120 50" aria-hidden="true"><polyline points="0,46 20,42 40,38 60,28 80,20 100,10 120,3" /></svg>
+                </div>
+                <h3>💰 5x More Money</h3>
+                <p>Up to 5x more visitors from Pinterest — more ad views, affiliate clicks and sales.</p>
+            </li>
+        </ol>
+
+        <div class="hp-5x-stats">
+            <div class="hp-rv" data-rv="up"><b>Up to 5x</b><span>more blog traffic</span></div>
+            <div class="hp-rv" data-rv="up" style="--d: 90ms"><b>24/7</b><span>pins published for you</span></div>
+            <div class="hp-rv" data-rv="up" style="--d: 180ms"><b>Months</b><span>of clicks from every pin</span></div>
+        </div>
+        <div class="uc-center">
+            <?= $hpCta('Turn My Blog Into Pinterest Money →', 'btn-primary rg-shine uc-btn-pulse hp-btn-lg hp-5x-cta') ?>
+            <p class="uc-graph-note">Illustrative — actual traffic and earnings depend on your niche, content and consistency.</p>
+        </div>
+    </div>
+</section>
+
 <!-- ===================== SEE THE RESULTS ===================== -->
 <section class="uc-graph" id="results">
     <div class="container">
@@ -1081,6 +1147,79 @@ uc_section_real_results($pdo, $user, $hpUc, '');
     .hp-tfeatures { grid-template-columns: 1fr; }
     .hp-colors li { grid-template-columns: 22px 54px 1fr 70px; }
     .hp-canva-table { font-size: 13px; }
+}
+/* ---------- Blog → AutomatedPin → Pinterest → 5x money ---------- */
+.hp-5x { position: relative; overflow: hidden; padding: 90px 0 70px; color: #e5e7eb;
+    background: radial-gradient(900px 420px at 15% 0%, rgba(230,0,35,.28), transparent 60%), radial-gradient(900px 420px at 90% 100%, rgba(250,204,21,.22), transparent 60%), linear-gradient(160deg, #0b0c1d 0%, #151735 55%, #1c1405 100%); }
+.hp-5x .container { position: relative; z-index: 2; }
+.hp-5x h2 { color: #fff; font-size: 40px; line-height: 1.2; }
+.hp-5x .uc-muted, .hp-5x .uc-graph-note { color: #b8bbd6; }
+.hp-5x-eyebrow { color: #fbbf24 !important; }
+.hp-5x-arrow { color: #fbbf24; display: inline-block; animation: hp5xNudge 1.6s ease-in-out infinite; }
+.hp-5x-gold { background: linear-gradient(90deg, #fde047, #f59e0b, #fde047); background-size: 200% auto; -webkit-background-clip: text; background-clip: text; color: transparent; animation: hp5xShine 3s linear infinite; }
+.hp-5x-rain { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+.hp-5x-rain span { position: absolute; top: -60px; opacity: .55; animation: hp5xFall linear infinite; color: #22c55e; font-weight: 800; text-shadow: 0 0 12px rgba(34,197,94,.5); }
+.hp-5x-flow { list-style: none; margin: 40px 0 0; padding: 0; display: grid; grid-template-columns: 1fr 56px 1fr 56px 1fr 56px 1fr; align-items: start; }
+.hp-5x-node { text-align: center; }
+.hp-5x-node h3 { color: #fff; margin: 16px 0 6px; font-size: 18px; }
+.hp-5x-node p { margin: 0; font-size: 14px; color: #b8bbd6; }
+.hp-5x-card { height: 190px; border-radius: 20px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); backdrop-filter: blur(6px); position: relative; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,.35); transition: transform .35s ease; }
+.hp-5x-node:hover .hp-5x-card { transform: translateY(-6px) scale(1.02); }
+.hp-5x-browser { display: flex; align-items: center; gap: 5px; padding: 8px 10px; background: rgba(255,255,255,.08); font-size: 11px; }
+.hp-5x-browser i { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.4); }
+.hp-5x-browser b { margin-left: 6px; color: #cbd5e1; font-weight: 600; }
+.hp-5x-post { padding: 12px; display: grid; gap: 8px; }
+.hp-5x-thumb { height: 64px; border-radius: 10px; background: linear-gradient(135deg, #f472b6, #fb923c); }
+.hp-5x-line { height: 8px; border-radius: 4px; background: rgba(255,255,255,.22); animation: hp5xType 2.4s ease-in-out infinite; transform-origin: left; }
+.hp-5x-line.w90 { width: 90%; } .hp-5x-line.w70 { width: 70%; animation-delay: .3s; } .hp-5x-line.w80 { width: 80%; animation-delay: .6s; }
+.hp-5x-core { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; background: linear-gradient(145deg, rgba(230,0,35,.35), rgba(124,58,237,.3)); }
+.hp-5x-orbit { position: absolute; left: 50%; top: 50%; width: 230px; height: 230px; border-radius: 50%; background: conic-gradient(from 0deg, transparent, rgba(255,255,255,.35), transparent 30%); animation: hpSpin 4s linear infinite; }
+.hp-5x-logo { position: relative; font-size: 26px; font-weight: 900; color: #fff; letter-spacing: -.5px; background: rgba(11,12,29,.85); padding: 10px 18px; border-radius: 14px; }
+.hp-5x-logo span { color: #ff4d6a; }
+.hp-5x-tags { position: relative; display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; padding: 0 10px; }
+.hp-5x-tags span { font-size: 11px; background: rgba(11,12,29,.7); color: #fff; padding: 4px 8px; border-radius: 99px; }
+.hp-5x-pins { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 10px; }
+.hp-5x-pins img { width: 100%; height: 78px; object-fit: cover; border-radius: 8px; animation: hp5xPop 3.2s ease-in-out infinite; }
+.hp-5x-badge { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); background: #e60023; color: #fff; font-size: 12px; font-weight: 700; padding: 5px 12px; border-radius: 99px; box-shadow: 0 6px 20px rgba(230,0,35,.5); white-space: nowrap; }
+.hp-5x-money { display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(145deg, rgba(250,204,21,.3), rgba(34,197,94,.25)); border-color: rgba(250,204,21,.45); box-shadow: 0 0 50px rgba(250,204,21,.25), 0 20px 50px rgba(0,0,0,.35); }
+.hp-5x-big { font-size: 74px; font-weight: 900; line-height: 1; background: linear-gradient(180deg, #fff7ae, #f59e0b); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 4px 18px rgba(250,204,21,.55)); animation: hp5xPulse 2s ease-in-out infinite; }
+.hp-5x-cash { display: flex; gap: 10px; font-size: 24px; margin-top: 4px; }
+.hp-5x-cash span { animation: hp5xBounce 1.4s ease-in-out infinite; } .hp-5x-cash span:nth-child(2) { animation-delay: .2s; } .hp-5x-cash span:nth-child(3) { animation-delay: .4s; }
+.hp-5x-chart { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 50px; opacity: .6; }
+.hp-5x-chart polyline { fill: none; stroke: #22c55e; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 200; stroke-dashoffset: 200; animation: hp5xDraw 3s ease-out infinite; }
+.hp-5x-link { display: flex; align-items: center; justify-content: center; height: 190px; }
+.hp-5x-pipe { position: relative; width: 100%; height: 4px; border-radius: 4px; background: rgba(255,255,255,.15); overflow: visible; }
+.hp-5x-pipe::after { content: '➝'; position: absolute; right: -6px; top: 50%; transform: translateY(-52%); color: #fbbf24; font-size: 20px; }
+.hp-5x-pipe i { position: absolute; top: -3px; width: 10px; height: 10px; border-radius: 50%; background: #ff4d6a; box-shadow: 0 0 12px #ff4d6a; animation: hp5xFlow 1.8s linear infinite; }
+.hp-5x-pipe i:nth-child(2) { animation-delay: .6s; } .hp-5x-pipe i:nth-child(3) { animation-delay: 1.2s; }
+.hp-5x-pipe-gold i { background: #fbbf24; box-shadow: 0 0 12px #fbbf24; }
+.hp-5x-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 44px auto 26px; max-width: 820px; }
+.hp-5x-stats div { text-align: center; padding: 18px; border-radius: 16px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); }
+.hp-5x-stats b { display: block; font-size: 28px; color: #fde047; }
+.hp-5x-stats span { font-size: 14px; color: #cbd5e1; }
+.hp-5x-cta { box-shadow: 0 10px 40px rgba(250,204,21,.35); }
+@keyframes hp5xFall { 0% { transform: translateY(-60px) rotate(0deg); } 100% { transform: translateY(1100px) rotate(360deg); } }
+@keyframes hp5xFlow { 0% { left: 0; opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { left: calc(100% - 10px); opacity: 0; } }
+@keyframes hp5xNudge { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(5px); } }
+@keyframes hp5xShine { to { background-position: 200% center; } }
+@keyframes hp5xType { 0%, 100% { transform: scaleX(.35); } 50% { transform: scaleX(1); } }
+@keyframes hp5xPop { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+@keyframes hp5xPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+@keyframes hp5xBounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+@keyframes hp5xDraw { 0% { stroke-dashoffset: 200; } 70%, 100% { stroke-dashoffset: 0; } }
+@media (max-width: 980px) {
+    .hp-5x h2 { font-size: 30px; }
+    .hp-5x-flow { grid-template-columns: 1fr; max-width: 360px; margin-left: auto; margin-right: auto; }
+    .hp-5x-link { height: 56px; }
+    .hp-5x-pipe { width: 4px; height: 100%; }
+    .hp-5x-pipe::after { content: '▼'; right: auto; left: 50%; top: auto; bottom: -14px; transform: translateX(-50%); font-size: 14px; }
+    .hp-5x-pipe i { left: -3px; animation-name: hp5xFlowV; }
+    .hp-5x-stats { grid-template-columns: 1fr; }
+}
+@keyframes hp5xFlowV { 0% { top: 0; opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { top: calc(100% - 10px); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+    .hp-5x-rain, .hp-5x-pipe i { display: none; }
+    .hp-5x *, .hp-5x-arrow { animation: none !important; }
 }
 </style>
 

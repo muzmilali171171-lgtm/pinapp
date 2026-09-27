@@ -39,6 +39,9 @@ AddType font/woff2 .woff2
 RewriteEngine On
 RewriteBase /
 
+# 00) Private folders are never served: database schema/seed files, PHP includes, plugin source.
+RewriteRule ^(database|includes|wp-plugin)(/|$) - [F,L]
+
 # 0) SEO files: robots.txt and the XML sitemaps are generated live (Admin → SEO Setting).
 RewriteRule ^robots\.txt$ robots.php [L]
 RewriteRule ^sitemap\.xml$ sitemap.php [L]
@@ -98,3 +101,8 @@ RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ 404.php [L]
 </IfModule>
+
+# Notes, SQL dumps, logs and hidden lock/heartbeat files (e.g. uploads/.article_batch_1.lock) are private.
+<FilesMatch "(\.(md|sql|log|lock)$|^CHANGED_FILES\.txt$|^\.(?!well-known))">
+    Require all denied
+</FilesMatch>
