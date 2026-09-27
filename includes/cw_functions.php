@@ -431,6 +431,10 @@ function cw_daily_quota(array $sched, DateTime $start, DateTime $day): int
  */
 function cw_compute_schedule(PDO $pdo, int $accountId, array $pins, array $sched): array
 {
+    // The start day/time is picked in the user's own time zone.
+    if (function_exists('user_start_to_server')) {
+        [$sched['start_date'], $sched['start_time']] = user_start_to_server($sched['start_date'] ?? null, $sched['start_time'] ?? null);
+    }
     $tz = new DateTimeZone(date_default_timezone_get());
     $now = new DateTime('now', $tz);
     $today = (clone $now)->setTime(0, 0);

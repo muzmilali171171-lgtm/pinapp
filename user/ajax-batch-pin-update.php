@@ -37,9 +37,9 @@ $link = trim($_POST['link'] ?? '');
 $alt = trim($_POST['alt'] ?? '');
 $keywords = trim($_POST['keywords'] ?? '');
 $productLink = trim($_POST['product_link'] ?? '');
-$publishAt = trim($_POST['publish_at'] ?? '');
+$publishAt = user_input_to_server($_POST['publish_at'] ?? '');   // user's own time zone → server time
 
-if ($publishAt === '' || strtotime($publishAt) === false) {
+if ($publishAt === '') {
     echo json_encode(['ok' => false, 'error' => 'Please provide a valid publish date/time.']);
     exit;
 }
@@ -48,7 +48,7 @@ $stmt = $pdo->prepare("UPDATE scheduled_pins SET title = ?, description = ?, des
 $stmt->execute([
     $title ?: null, $description ?: null, $link ?: null, $alt ?: null,
     $keywords ?: null, $productLink ?: null,
-    date('Y-m-d H:i:s', strtotime($publishAt)), $pinId,
+    $publishAt, $pinId,
 ]);
 
 log_event($pdo, 'system', "Pin #{$pinId} edited in batch view", $user['id']);

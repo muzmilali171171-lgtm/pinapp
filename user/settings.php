@@ -245,6 +245,23 @@ include __DIR__ . '/includes/user-header.php';
         </form>
     </div>
 
+    <div class="card" id="timezone">
+        <h2>Time zone</h2>
+        <?php $setTz = user_tz(); ?>
+        <p class="muted">All pin times are shown and scheduled in your time zone. It was set automatically from your location —
+            change it here any time. Now: <strong><?= e((new DateTime('now', new DateTimeZone($setTz)))->format('d M Y, h:i A')) ?></strong>
+            (<?= e(str_replace('_', ' ', $setTz)) ?>, <?= e(tz_offset_label($setTz)) ?>)</p>
+        <div class="tz-field" data-tz-picker>
+            <input type="search" data-tz-search placeholder="Search city or region…" autocomplete="off">
+            <select data-tz-select size="6" aria-label="Time zone"><?= tz_options_html($setTz) ?></select>
+            <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
+                <button type="button" class="btn-primary" data-tz-save>Save Time Zone</button>
+                <button type="button" class="btn-secondary" data-tz-detect>📍 Detect my time zone</button>
+            </div>
+            <div class="muted" data-tz-msg style="margin-top:8px; font-size:13px;"></div>
+        </div>
+    </div>
+
     <div class="card">
         <h2>Update Email</h2>
         <form method="POST">

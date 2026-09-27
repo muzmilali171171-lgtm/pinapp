@@ -320,6 +320,7 @@ add_column_if_missing($pdo, 'crawl_sites', 'source', "source ENUM('scan','csv') 
 add_column_if_missing($pdo, 'users', 'affiliate_code', 'affiliate_code VARCHAR(30) DEFAULT NULL UNIQUE', $errors);
 add_column_if_missing($pdo, 'users', 'referred_by_user_id', 'referred_by_user_id INT DEFAULT NULL', $errors);
 add_column_if_missing($pdo, 'users', 'referred_by_code', 'referred_by_code VARCHAR(30) DEFAULT NULL', $errors);
+add_column_if_missing($pdo, 'users', 'timezone', 'timezone VARCHAR(64) DEFAULT NULL', $errors);
 // Custom Design → Share design (public link)
 add_column_if_missing($pdo, 'user_designs', 'share_token', 'share_token VARCHAR(32) DEFAULT NULL UNIQUE', $errors);
 add_column_if_missing($pdo, 'user_designs', 'shared_at', 'shared_at DATETIME DEFAULT NULL', $errors);
@@ -377,6 +378,11 @@ try {
 } catch (Throwable $e) {
     $planCount = null; // pricing_plans table doesn't exist yet somehow — schema.sql above should have created it; skip seeding safely.
 }
+
+// Pinterest accounts, websites and uploaded pins are Unlimited on every plan.
+try {
+    $pdo->exec("UPDATE pricing_plans SET pinterest_accounts_limit = NULL, websites_limit = NULL, upload_pins_limit = NULL");
+} catch (Throwable $e) { /* table missing */ }
 
 if ($planCount === '0' || $planCount === 0) {
     $planCols = "(name, is_free, price_monthly, discount_monthly, discount_yearly, short_description, tag, tag_color,

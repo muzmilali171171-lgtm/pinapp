@@ -81,6 +81,8 @@ $cfg = [
     'website_text' => trim($payload['website_text'] ?? ''),
     'content_source' => $contentSource,
 ];
+// Start day/time were picked in the user's own time zone — stored in server time.
+[$cfg['start_date'], $cfg['start_time']] = user_start_to_server($cfg['start_date'], $cfg['start_time']);
 
 $pageRows = [];
 foreach ($pages as $p) {

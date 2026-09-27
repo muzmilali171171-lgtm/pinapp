@@ -619,10 +619,170 @@ function activate_batch(PDO $pdo, int $userId, ?string $batchId, string $name, i
     return $batchId;
 }
 
+/* ===================== User time zone =====================
+ * Times are stored in the server time zone. On the user side they are shown in the user's own
+ * time zone (users.timezone — auto-detected from the browser/location on first visit, changeable
+ * from the header or Account Settings) and times the user types are read in that zone too. */
+
+function user_tz_ensure_column(PDO $pdo): void
+{
+    static $done = false;
+    if ($done) return;
+    $done = true;
+    try {
+        $pdo->query("SELECT timezone FROM users LIMIT 1");
+    } catch (Throwable $e) {
+        try { $pdo->exec("ALTER TABLE users ADD COLUMN timezone VARCHAR(64) DEFAULT NULL"); } catch (Throwable $e2) { /* no rights */ }
+    }
+}
+
+function tz_valid(?string $tz): bool
+{
+    return $tz !== null && $tz !== '' && in_array($tz, DateTimeZone::listIdentifiers(), true);
+}
+
+/** Time zone the current viewer sees times in: the logged-in user's own zone on the user side, else the server's. */
+function user_tz(): string
+{
+    $server = date_default_timezone_get();
+    if (PHP_SAPI === 'cli' || empty($_SESSION['user_id'])) return $server;
+    if (strpos((string)($_SERVER['SCRIPT_NAME'] ?? ''), '/admin/') !== false) return $server;
+    if (!array_key_exists('user_tz', $_SESSION) || ($_SESSION['user_tz_uid'] ?? 0) !== (int)$_SESSION['user_id']) {
+        $tz = null;
+        global $pdo;
+        if (isset($pdo) && $pdo instanceof PDO) {
+            user_tz_ensure_column($pdo);
+            try {
+                $st = $pdo->prepare("SELECT timezone FROM users WHERE id = ?");
+                $st->execute([(int)$_SESSION['user_id']]);
+                $tz = $st->fetchColumn() ?: null;
+            } catch (Throwable $e) { $tz = null; }
+        }
+        $_SESSION['user_tz'] = tz_valid($tz) ? $tz : null;
+        $_SESSION['user_tz_uid'] = (int)$_SESSION['user_id'];
+    }
+    return $_SESSION['user_tz'] ?: $server;
+}
+
+/** True once the user has a saved time zone (else the browser detects and saves one). */
+function user_tz_is_set(): bool
+{
+    user_tz();
+    return !empty($_SESSION['user_tz']);
+}
+
+function user_tz_save(PDO $pdo, int $userId, string $tz): bool
+{
+    if (!tz_valid($tz)) return false;
+    user_tz_ensure_column($pdo);
+    try {
+        $pdo->prepare("UPDATE users SET timezone = ? WHERE id = ?")->execute([$tz, $userId]);
+    } catch (Throwable $e) { return false; }
+    if ((int)($_SESSION['user_id'] ?? 0) === $userId) { $_SESSION['user_tz'] = $tz; $_SESSION['user_tz_uid'] = $userId; }
+    return true;
+}
+
+/** Server-time DATETIME string → DateTime in the user's zone (null for empty/invalid). */
+function server_to_user_dt(?string $dt): ?DateTime
+{
+    if (!$dt || strpos($dt, '0000-00-00') === 0) return null;
+    try {
+        $d = new DateTime($dt, new DateTimeZone(date_default_timezone_get()));
+        $d->setTimezone(new DateTimeZone(user_tz()));
+        return $d;
+    } catch (Throwable $e) { return null; }
+}
+
+/** A time the user typed (their zone, e.g. "2026-10-02T18:00") → 'Y-m-d H:i:s' in server time; '' if invalid. */
+function user_input_to_server(?string $local): string
+{
+    $local = trim((string)$local);
+    if ($local === '') return '';
+    try {
+        $d = new DateTime(str_replace('T', ' ', $local), new DateTimeZone(user_tz()));
+        $d->setTimezone(new DateTimeZone(date_default_timezone_get()));
+        return $d->format('Y-m-d H:i:s');
+    } catch (Throwable $e) { return ''; }
+}
+
+/** Server-time DATETIME → value for an <input type="datetime-local"> in the user's zone. */
+function server_to_user_input(?string $dt): string
+{
+    $d = server_to_user_dt($dt);
+    return $d ? $d->format('Y-m-d\TH:i') : '';
+}
+
+/** Server-time DATETIME range (inclusive start, exclusive end) for a user-zone calendar date 'Y-m-d' + $days. */
+function user_day_range_server(string $ymd, int $days = 1): array
+{
+    $tz = new DateTimeZone(user_tz());
+    $srv = new DateTimeZone(date_default_timezone_get());
+    $a = new DateTime($ymd . ' 00:00:00', $tz);
+    $b = (clone $a)->modify('+' . max(1, $days) . ' day');
+    return [$a->setTimezone($srv)->format('Y-m-d H:i:s'), $b->setTimezone($srv)->format('Y-m-d H:i:s')];
+}
+
+/** A start day + time the user picked (their zone) → [server 'Y-m-d' or null, server 'H:i' or null]. */
+function user_start_to_server(?string $date, ?string $time): array
+{
+    $hasDate = preg_match('/^\d{4}-\d{2}-\d{2}$/', (string)$date);
+    $hasTime = preg_match('/^\d{1,2}:\d{2}$/', (string)$time);
+    if (!$hasTime || user_tz() === date_default_timezone_get()) return [$hasDate ? $date : null, $hasTime ? $time : null];
+    try {
+        $tz = new DateTimeZone(user_tz());
+        $day = $hasDate ? $date : (new DateTime('now', $tz))->format('Y-m-d');
+        $d = new DateTime($day . ' ' . $time, $tz);
+        $d->setTimezone(new DateTimeZone(date_default_timezone_get()));
+        return [$hasDate ? $d->format('Y-m-d') : null, $d->format('H:i')];
+    } catch (Throwable $e) { return [$hasDate ? $date : null, $time]; }
+}
+
+/** Time zone of the visitor's IP address (Cloudflare's visitor-location header, else a free IP lookup); null if unknown. */
+function visitor_ip_timezone(): ?string
+{
+    $cf = trim((string)($_SERVER['HTTP_CF_TIMEZONE'] ?? ''));
+    if (tz_valid($cf)) return $cf;
+    $ip = (string)($_SERVER['HTTP_CF_CONNECTING_IP'] ?? $_SERVER['REMOTE_ADDR'] ?? '');
+    if (!filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) return null;
+    if (!function_exists('curl_init')) return null;
+    $ch = curl_init('https://ipwho.is/' . rawurlencode($ip) . '?fields=success,timezone');
+    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 4, CURLOPT_CONNECTTIMEOUT => 3, CURLOPT_FOLLOWLOCATION => false]);
+    $body = curl_exec($ch);
+    curl_close($ch);
+    $j = is_string($body) ? json_decode($body, true) : null;
+    $tz = is_array($j) ? (string)($j['timezone']['id'] ?? '') : '';
+    return tz_valid($tz) ? $tz : null;
+}
+
+/** Short label like "GMT+5" for a zone. */
+function tz_offset_label(string $tz): string
+{
+    try {
+        $o = (new DateTime('now', new DateTimeZone($tz)))->getOffset();
+    } catch (Throwable $e) { return ''; }
+    $sign = $o < 0 ? '-' : '+';
+    $o = abs($o);
+    return 'GMT' . $sign . intdiv($o, 3600) . ($o % 3600 ? ':' . str_pad((string)intdiv($o % 3600, 60), 2, '0', STR_PAD_LEFT) : '');
+}
+
+/** <option> list of every time zone, grouped by region, with $selected chosen. */
+function tz_options_html(string $selected): string
+{
+    $out = '';
+    $group = '';
+    foreach (DateTimeZone::listIdentifiers() as $id) {
+        $g = strpos($id, '/') !== false ? strstr($id, '/', true) : 'Other';
+        if ($g !== $group) { if ($group !== '') $out .= '</optgroup>'; $out .= '<optgroup label="' . e($g) . '">'; $group = $g; }
+        $out .= '<option value="' . e($id) . '"' . ($id === $selected ? ' selected' : '') . '>' . e(str_replace('_', ' ', $id)) . ' (' . tz_offset_label($id) . ')</option>';
+    }
+    return $out . ($group !== '' ? '</optgroup>' : '');
+}
+
 function format_datetime(?string $dt): string
 {
     if (!$dt) return '-';
-    return date('d M Y, h:i A', strtotime($dt));
+    $d = server_to_user_dt($dt);
+    return $d ? $d->format('d M Y, h:i A') : date('d M Y, h:i A', strtotime($dt));
 }
 
 function redirect(string $path): void

@@ -112,7 +112,7 @@ include __DIR__ . '/includes/user-header.php';
                     </div>
                     <div class="two-col">
                         <div class="form-row"><label>Product Link</label><input type="url" data-f="product_link" value="<?= e((string)$p['product_link']) ?>"></div>
-                        <div class="form-row"><label>Publish At</label><input type="datetime-local" data-f="publish_at" value="<?= e(str_replace(' ', 'T', substr($p['publish_at'], 0, 16))) ?>"></div>
+                        <div class="form-row"><label>Publish At</label><input type="datetime-local" data-f="publish_at" value="<?= e(server_to_user_input($p['publish_at'])) ?>"></div>
                     </div>
                     <button type="button" class="btn-primary btn-small" data-save-pin="<?= (int)$p['id'] ?>">Save Changes</button>
                     <button type="button" class="btn-secondary btn-small" data-cancel-edit="<?= (int)$p['id'] ?>">Cancel</button>

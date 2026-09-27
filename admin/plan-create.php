@@ -182,20 +182,20 @@ include __DIR__ . '/includes/admin-header.php';
         <div class="two-col">
             <div class="form-row">
                 <label>Pinterest accounts</label>
-                <input type="number" name="pinterest_accounts_limit" value="<?= (int)($f['pinterest_accounts_limit'] ?? 0) ?>" <?= is_null($f['pinterest_accounts_limit'] ?? 0) ? 'disabled' : '' ?>>
-                <label class="checkbox-row"><input type="checkbox" name="pinterest_accounts_unlimited" value="1" <?= is_null($f['pinterest_accounts_limit'] ?? 0) ? 'checked' : '' ?> onchange="this.closest('.form-row').querySelector('input[type=number]').disabled=this.checked;"> Unlimited</label>
+                <input type="text" value="Unlimited" disabled>
+                <small class="muted">Unlimited on every plan.</small>
             </div>
             <div class="form-row">
                 <label>Websites</label>
-                <input type="number" name="websites_limit" value="<?= (int)($f['websites_limit'] ?? 0) ?>" <?= is_null($f['websites_limit'] ?? 0) ? 'disabled' : '' ?>>
-                <label class="checkbox-row"><input type="checkbox" name="websites_unlimited" value="1" <?= is_null($f['websites_limit'] ?? 0) ? 'checked' : '' ?> onchange="this.closest('.form-row').querySelector('input[type=number]').disabled=this.checked;"> Unlimited</label>
+                <input type="text" value="Unlimited" disabled>
+                <small class="muted">Unlimited on every plan.</small>
             </div>
         </div>
         <div class="two-col">
             <div class="form-row">
                 <label>Uploaded pins</label>
-                <input type="number" name="upload_pins_limit" value="<?= (int)($f['upload_pins_limit'] ?? 0) ?>" <?= is_null($f['upload_pins_limit'] ?? 0) ? 'disabled' : '' ?>>
-                <label class="checkbox-row"><input type="checkbox" name="upload_pins_unlimited" value="1" <?= is_null($f['upload_pins_limit'] ?? 0) ? 'checked' : '' ?> onchange="this.closest('.form-row').querySelector('input[type=number]').disabled=this.checked;"> Unlimited</label>
+                <input type="text" value="Unlimited" disabled>
+                <small class="muted">Unlimited on every plan.</small>
             </div>
             <div class="form-row">
                 <label>Invite team members (0 = can't invite)</label>

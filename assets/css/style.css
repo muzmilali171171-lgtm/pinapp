@@ -1104,3 +1104,22 @@ body.tp-lock { overflow: hidden; }
 [data-theme="dark"] .tp-aff, [data-theme="dark"] .tp-searchrow input { background: #17181c; border-color: #33353c; color: #e5e7eb; }
 [data-theme="dark"] .tp-tabs button { color: #e5e7eb; }
 [data-theme="dark"] .tp-tabs button.on { background: #e5e7eb; color: #111827; }
+
+/* ---------- Time zone chip + picker (user topbar; on phones it lives in Account Settings only) ---------- */
+.tz-chip-wrap { position: relative; }
+.tz-chip { display: inline-flex; align-items: center; gap: 6px; height: 38px; padding: 0 12px; border: 1px solid var(--border); border-radius: 999px; background: #fff; color: var(--dark); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.tz-chip:hover { background: var(--light); }
+.tz-chip-zone { color: var(--gray); font-weight: 500; max-width: 190px; overflow: hidden; text-overflow: ellipsis; }
+.tz-pop { position: absolute; right: 0; top: calc(100% + 8px); z-index: 1200; width: 320px; background: #fff; border: 1px solid var(--border); border-radius: 14px; box-shadow: 0 18px 50px rgba(17,24,39,.18); padding: 14px; }
+.tz-pop[hidden] { display: none; }
+.tz-pop-head { font-weight: 800; font-size: 15px; }
+.tz-pop-note { margin: 4px 0 10px; font-size: 12px; color: var(--gray); }
+.tz-pop input[type=search], .tz-field input[type=search] { width: 100%; padding: 9px 11px; border: 1px solid var(--border); border-radius: 10px; font: inherit; font-size: 13px; margin-bottom: 8px; box-sizing: border-box; }
+.tz-pop select, .tz-field select { width: 100%; border: 1px solid var(--border); border-radius: 10px; font: inherit; font-size: 13px; padding: 4px; box-sizing: border-box; }
+.tz-pop-actions { display: flex; justify-content: space-between; gap: 8px; margin-top: 10px; }
+.tz-pop-msg { font-size: 12px; color: var(--gray); margin-top: 8px; min-height: 16px; }
+[data-theme="dark"] .tz-chip, [data-theme="dark"] .tz-pop { background: #1e2025; border-color: #33353c; color: #e5e7eb; }
+[data-theme="dark"] .tz-pop input[type=search], [data-theme="dark"] .tz-pop select,
+[data-theme="dark"] .tz-field input[type=search], [data-theme="dark"] .tz-field select { background: #15171b; border-color: #33353c; color: #e5e7eb; }
+@media (max-width: 1180px) { .tz-chip-zone { display: none; } }
+@media (max-width: 768px) { .tz-chip-wrap { display: none; } }

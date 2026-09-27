@@ -34,7 +34,7 @@ if ($mode === 'publish') {
     $ts = (int)($_POST['publish_ts'] ?? 0);
     if ($ts <= 0) {
         $raw = trim((string)($_POST['publish_at'] ?? ''));
-        $ts = $raw !== '' ? strtotime($raw) : false;
+        $ts = $raw !== '' ? strtotime(user_input_to_server($raw)) : false;
     }
     if (!$ts) pa_json(['ok' => false, 'error' => 'Please pick a date and time to schedule this pin.']);
     if ($ts < time() - 60) pa_json(['ok' => false, 'error' => 'The scheduled time is in the past — pick a future time or choose Publish now.']);

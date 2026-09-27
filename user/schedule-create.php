@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $link = trim($_POST['dest_link'] ?? '');
     $altText = trim($_POST['alt_text'] ?? '');
     $keywords = trim($_POST['keywords'] ?? '');
-    $publishAt = trim($_POST['publish_at'] ?? '');
+    $publishAt = user_input_to_server($_POST['publish_at'] ?? '');   // typed in the user's own time zone
     $aiImagePath = trim($_POST['ai_image_path'] ?? '');
     // "Schedule Pin" queues it for publish_at; "Publish Now" sends it to Pinterest immediately.
     $action = ($_POST['action'] ?? 'schedule') === 'publish' ? 'publish' : 'schedule';

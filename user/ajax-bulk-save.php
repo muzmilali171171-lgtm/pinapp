@@ -99,7 +99,7 @@ if ($batchDefaultUsable) {
 $uploadsDir = realpath(__DIR__ . '/../uploads/pins/');
 foreach ($pins as $i => $p) {
     $imagePath = trim($p['image_path'] ?? '');
-    $publishAt = trim($p['publish_at'] ?? '');
+    $publishAt = user_input_to_server($p['publish_at'] ?? '');   // user's own time zone → server time
     if ($imagePath === '') {
         echo json_encode(['ok' => false, 'error' => 'Pin #' . ($i + 1) . ' is missing an image.']);
         exit;
@@ -110,7 +110,7 @@ foreach ($pins as $i => $p) {
         echo json_encode(['ok' => false, 'error' => 'Pin #' . ($i + 1) . ' has an invalid image.']);
         exit;
     }
-    if ($publishAt === '' || strtotime($publishAt) === false) {
+    if ($publishAt === '') {
         echo json_encode(['ok' => false, 'error' => 'Pin #' . ($i + 1) . ' is missing a valid publish time.']);
         exit;
     }
@@ -168,7 +168,7 @@ $batchLabel = $boardResolved['board_name'] ?: ($distinctBoards > 1 ? $distinctBo
 $batchId = activate_batch($pdo, $user['id'], $draftBatchId ?: null, $batchName, $accountId, $boardResolved['board_row_id'] ?: $labelBoard['board_row_id'], $batchLabel);
 
 foreach ($pins as $i => $p) {
-    $publishAt = date('Y-m-d H:i:s', strtotime(trim($p['publish_at'])));
+    $publishAt = user_input_to_server($p['publish_at']);
     $rowKeywords = trim($p['keywords'] ?? '') ?: $globalKeywords;
     $pinBoard = $resolvedBoards[$i];
     $stmt->execute([
@@ -197,7 +197,7 @@ log_event($pdo, 'system', "Bulk-scheduled $count pins to board '{$batchLabel}' (
 $overdue = ['published' => 0, 'failed' => 0, 'left' => 0];
 $nowTs = time();
 $hasOverdue = false;
-foreach ($pins as $p) { if (strtotime(trim($p['publish_at'])) <= $nowTs) { $hasOverdue = true; break; } }
+foreach ($pins as $p) { if (strtotime(user_input_to_server($p['publish_at'])) <= $nowTs) { $hasOverdue = true; break; } }
 if ($hasOverdue) {
     ignore_user_abort(true);
     $overdue = publish_overdue_pins_now($pdo, ['ids' => $insertedIds, 'user_id' => (int)$user['id']], 10);

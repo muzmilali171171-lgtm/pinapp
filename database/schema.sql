@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS users (
     affiliate_code VARCHAR(30) DEFAULT NULL UNIQUE,
     referred_by_user_id INT DEFAULT NULL,
     referred_by_code VARCHAR(30) DEFAULT NULL,
+    timezone VARCHAR(64) DEFAULT NULL,          -- user's own time zone (times are stored in server time)
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

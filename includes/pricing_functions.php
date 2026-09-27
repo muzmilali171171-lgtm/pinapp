@@ -18,11 +18,38 @@
 
 // ===================== Plans =====================
 
+/** Limits that are Unlimited on every plan (Pinterest accounts, websites, uploaded pins). */
+const PLAN_ALWAYS_UNLIMITED = ['pinterest_accounts_limit', 'websites_limit', 'upload_pins_limit'];
+
+/** Every plan row: the always-unlimited limits read as NULL (= Unlimited). */
+function plan_apply_unlimited(?array $plan): ?array
+{
+    if (!$plan) return $plan;
+    foreach (PLAN_ALWAYS_UNLIMITED as $k) $plan[$k] = null;
+    return $plan;
+}
+
+/** One time: store NULL (Unlimited) for those limits on every plan already in the database. */
+function plans_unlimited_migrate_once(PDO $pdo): void
+{
+    static $done = false;
+    if ($done) return;
+    $done = true;
+    $flag = __DIR__ . '/../uploads/.plans_unlimited_v1';
+    if (is_file($flag)) return;
+    try {
+        $pdo->exec("UPDATE pricing_plans SET pinterest_accounts_limit = NULL, websites_limit = NULL, upload_pins_limit = NULL
+            WHERE pinterest_accounts_limit IS NOT NULL OR websites_limit IS NOT NULL OR upload_pins_limit IS NOT NULL");
+        @file_put_contents($flag, date('c'));
+    } catch (Throwable $e) { /* table missing — retried next request */ }
+}
+
 function get_all_plans(PDO $pdo, bool $activeOnly = false): array
 {
+    plans_unlimited_migrate_once($pdo);
     try {
         $sql = "SELECT * FROM pricing_plans" . ($activeOnly ? " WHERE status = 'active'" : "") . " ORDER BY sort_order ASC, price_monthly ASC";
-        return $pdo->query($sql)->fetchAll();
+        return array_map('plan_apply_unlimited', $pdo->query($sql)->fetchAll());
     } catch (Throwable $e) {
         return [];
     }
@@ -31,9 +58,10 @@ function get_all_plans(PDO $pdo, bool $activeOnly = false): array
 function get_plan(PDO $pdo, int $planId): ?array
 {
     try {
+        plans_unlimited_migrate_once($pdo);
         $stmt = $pdo->prepare("SELECT * FROM pricing_plans WHERE id = ?");
         $stmt->execute([$planId]);
-        return $stmt->fetch() ?: null;
+        return plan_apply_unlimited($stmt->fetch() ?: null);
     } catch (Throwable $e) {
         return null;
     }
@@ -93,9 +121,9 @@ function save_plan(PDO $pdo, ?int $planId, array $f): int
         'image_ai_credits_monthly' => (int)($f['image_ai_credits_monthly'] ?? 0), 'text_ai_credits_monthly' => (int)($f['text_ai_credits_monthly'] ?? 0),
         'pin_scheduling_monthly_limit' => $f['pin_scheduling_monthly_unlimited'] ?? false ? null : (int)($f['pin_scheduling_monthly_limit'] ?? 0),
         'pin_scheduling_daily_limit' => $f['pin_scheduling_daily_unlimited'] ?? false ? null : (int)($f['pin_scheduling_daily_limit'] ?? 0),
-        'pinterest_accounts_limit' => $f['pinterest_accounts_unlimited'] ?? false ? null : (int)($f['pinterest_accounts_limit'] ?? 0),
-        'websites_limit' => $f['websites_unlimited'] ?? false ? null : (int)($f['websites_limit'] ?? 0),
-        'upload_pins_limit' => $f['upload_pins_unlimited'] ?? false ? null : (int)($f['upload_pins_limit'] ?? 0),
+        'pinterest_accounts_limit' => null,   // always Unlimited
+        'websites_limit' => null,   // always Unlimited
+        'upload_pins_limit' => null,   // always Unlimited
         'bulk_scheduling_enabled' => !empty($f['bulk_scheduling_enabled']) ? 1 : 0,
         'invite_team_members_limit' => (int)($f['invite_team_members_limit'] ?? 0),
         'auto_website_daily_pin_enabled' => !empty($f['auto_website_daily_pin_enabled']) ? 1 : 0,
@@ -485,9 +513,9 @@ function get_user_plan_usage_summary(PDO $pdo, int $userId): array
         'text_credits' => $mk(max(0, $textTotal - $textRemaining), $plan ? $textTotal : null),
         'pin_monthly' => $mk($pinMonthlyUsed, $plan['pin_scheduling_monthly_limit'] ?? null),
         'pin_daily' => $mk($pinDailyUsed, $plan['pin_scheduling_daily_limit'] ?? null),
-        'upload_pins' => $mk($uploadPinsUsed, $plan['upload_pins_limit'] ?? null),
-        'pinterest_accounts' => $mk($accountsUsed, $plan['pinterest_accounts_limit'] ?? null),
-        'websites' => $mk($websitesUsed, $plan['websites_limit'] ?? null),
+        'upload_pins' => $mk($uploadPinsUsed, null),
+        'pinterest_accounts' => $mk($accountsUsed, null),
+        'websites' => $mk($websitesUsed, null),
         'team_invites' => $mk($teamUsed, plan_limit_value($plan, 'invite_team_members_limit')),
         'storage' => $mk($storageUsed, $storageTotal),
         'features' => [
@@ -505,6 +533,7 @@ function get_user_plan_usage_summary(PDO $pdo, int $userId): array
  */
 function plan_limit_value(?array $plan, string $key): ?int
 {
+    if (in_array($key, PLAN_ALWAYS_UNLIMITED, true)) return null;
     if (!$plan) return 0;
     if (!array_key_exists($key, $plan)) return 0;
     return $plan[$key] === null ? null : (int)$plan[$key];

@@ -90,7 +90,7 @@ include __DIR__ . '/includes/user-header.php';
                 <?php foreach ($list as $i => $pin): ?>
                     <div title="<?= e(ucfirst($pin['status'])) ?>">
                         <?= $pin['status'] === 'published' ? '✅' : ($pin['status'] === 'failed' ? '❌' : '🕒') ?>
-                        Pin <?= $i + 1 ?>: <?= e(date('M j, Y · g:i A', strtotime($pin['status'] === 'published' && $pin['published_at'] ? $pin['published_at'] : $pin['publish_at']))) ?>
+                        Pin <?= $i + 1 ?>: <?= e(server_to_user_dt($pin['status'] === 'published' && $pin['published_at'] ? $pin['published_at'] : $pin['publish_at'])?->format('M j, Y · g:i A') ?? '-') ?>
                     </div>
                 <?php endforeach; ?>
             </td>

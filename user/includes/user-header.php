@@ -22,6 +22,7 @@ require_once __DIR__ . '/../../includes/pricing_functions.php';
 </script>
 </head>
 <body>
+<script>window.USER_TZ = <?= json_encode(['tz' => user_tz(), 'set' => user_tz_is_set(), 'csrf' => csrf_token()]) ?>;</script>
 <div class="topbar">
     <div class="topbar-left">
         <button type="button" class="hamburger-btn" id="mobileMenuBtn" aria-label="Open menu" aria-controls="mainSidebar" aria-expanded="false"><span></span><span></span><span></span></button>
@@ -30,6 +31,24 @@ require_once __DIR__ . '/../../includes/pricing_functions.php';
         <button type="button" class="topbar-icon-btn" id="sidebarToggleBtn" title="Toggle sidebar">⇤</button>
     </div>
     <div class="topbar-right">
+        <?php $uTz = user_tz(); $uTzNow = new DateTime('now', new DateTimeZone($uTz)); ?>
+        <div class="tz-chip-wrap" id="tzWrap">
+            <button type="button" class="tz-chip" id="tzChipBtn" title="Your time zone — click to change" aria-haspopup="true" aria-expanded="false">
+                🕒 <span id="tzClock"><?= e($uTzNow->format('h:i A')) ?></span>
+                <span class="tz-chip-zone"><span id="tzChipName"><?= e(str_replace('_', ' ', $uTz)) ?></span> · <span id="tzChipOff"><?= e(tz_offset_label($uTz)) ?></span></span>
+            </button>
+            <div class="tz-pop" id="tzPop" data-tz-picker hidden>
+                <div class="tz-pop-head">Your time zone</div>
+                <p class="tz-pop-note">All pin times are shown and scheduled in this time zone.</p>
+                <input type="search" id="tzSearch" data-tz-search placeholder="Search city or region…" autocomplete="off">
+                <select id="tzSelect" data-tz-select size="8" aria-label="Time zone"><?= tz_options_html($uTz) ?></select>
+                <div class="tz-pop-actions">
+                    <button type="button" class="btn-secondary btn-small" id="tzDetect" data-tz-detect>📍 Detect</button>
+                    <button type="button" class="btn-primary btn-small" id="tzSave" data-tz-save>Save</button>
+                </div>
+                <div class="tz-pop-msg" id="tzMsg" data-tz-msg></div>
+            </div>
+        </div>
         <a href="upgrade" class="btn-upgrade">✨ Upgrade Now</a>
         <button type="button" class="topbar-icon-btn" id="notifBellBtn" title="Notifications">🔔<?php if (isset($user['id']) && count_unread_notifications($pdo, (int)$user['id']) > 0): ?><span class="notif-badge"><?= count_unread_notifications($pdo, (int)$user['id']) ?></span><?php endif; ?></button>
         <a href="../tutorials" target="_blank" rel="noopener" class="btn-secondary btn-small">Tutorials</a>
