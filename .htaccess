@@ -57,7 +57,7 @@ RewriteRule ^index\.php$ / [R=301,L]
 #    Shopify etc.), cron, and the one-time install/migrate scripts.
 # ---------------------------------------------------------------------------
 RewriteCond %{THE_REQUEST} ^[A-Z]+\s[^\s?]*\.php[\s?/] [NC]
-RewriteCond %{REQUEST_URI} !^/(oauth|cron)/ [NC]
+RewriteCond %{REQUEST_URI} !^/(oauth|cron|webhooks)/ [NC]
 RewriteCond %{REQUEST_URI} !^/(install|migrate|update-pricing-plans|404)\.php$ [NC]
 RewriteRule ^ 404.php [L]
 

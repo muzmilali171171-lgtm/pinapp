@@ -523,29 +523,54 @@ include __DIR__ . '/includes/user-header.php';
     </div>
 </div>
 
-<!-- PER-PIN PRODUCT TAG MODAL -->
-<div class="modal-overlay" id="productModalOverlay" style="display:none;">
-    <div class="modal-box" style="max-width:420px;">
-        <div class="modal-header">
-            <h2>🏷️ Product Tags</h2>
-            <button type="button" class="modal-close" id="productModalClose">✕</button>
+<!-- PER-PIN "TAG PRODUCTS" SIDE PANEL (like Pinterest) -->
+<div class="tp-backdrop" id="tpBackdrop" hidden></div>
+<aside class="tp-panel" id="tpPanel" aria-labelledby="tpTitle" aria-hidden="true">
+    <div class="tp-head">
+        <h2 id="tpTitle">Tag products</h2>
+        <button type="button" class="tp-close" id="tpClose" aria-label="Close">✕</button>
+    </div>
+    <div class="tp-pinpreview" id="tpPinPreview"></div>
+    <div class="tp-tabs" role="tablist">
+        <button type="button" role="tab" data-tp-tab="search" class="on">Search</button>
+        <button type="button" role="tab" data-tp-tab="link">Use a link</button>
+    </div>
+    <div class="tp-body">
+        <div data-tp-pane="search">
+            <form id="tpSearchForm" class="tp-searchrow">
+                <input type="search" id="tpSearchQ" placeholder="Search your products" autocomplete="off">
+            </form>
+            <p class="tp-hint">Products and pages from your scanned websites and Shopify stores.</p>
+            <div class="tp-results" id="tpResults"></div>
+            <div class="tp-more" id="tpMore" aria-hidden="true"></div>
         </div>
-        <div class="board-mode-toggle">
-            <button type="button" class="board-mode-btn" data-product-tab="search">Search Pins</button>
-            <button type="button" class="board-mode-btn active" data-product-tab="link">Use a Link</button>
+        <div data-tp-pane="link" hidden>
+            <form id="tpLinkForm" class="tp-searchrow" novalidate>
+                <input type="text" inputmode="url" id="tpLinkInput" placeholder="Paste a product link" autocomplete="off" spellcheck="false">
+                <button type="submit" class="btn-primary btn-small" id="tpLinkBtn">Add</button>
+            </form>
+            <p class="tp-hint">Paste a link to a product page on a retailer site — we show its photo and name.</p>
+            <div id="tpLinkPreview"></div>
         </div>
-        <div id="productSearchTab" style="display:none;">
-            <div class="form-row"><input type="text" placeholder="Search your pins..." disabled></div>
-            <p class="muted">Searching your existing pins for products isn't available yet — use "Use a Link" to tag a product by URL instead.</p>
+
+        <div class="tp-section">
+            <div class="tp-section-title">Your tagged products <span id="tpCount">0</span></div>
+            <div id="tpTagged" class="tp-tagged"></div>
         </div>
-        <div id="productLinkTab">
-            <div class="form-row"><input type="url" id="productLinkInput" placeholder="Add a product link"></div>
-            <p class="muted">Enter a link to a product page on a retailer site. It's tagged as this pin's outbound link.</p>
-            <button type="button" class="btn-primary btn-small" id="productLinkSaveBtn">Add</button>
-            <button type="button" class="btn-secondary btn-small" id="productLinkRemoveBtn">Remove Tag</button>
+
+        <div class="tp-aff">
+            <div>
+                <b>Affiliate link or sponsored product</b>
+                <p>You're required to disclose if you may receive compensation for including this product.</p>
+            </div>
+            <label class="ft-switch"><input type="checkbox" id="tpAffiliate"><span></span></label>
         </div>
     </div>
-</div>
+    <div class="tp-foot">
+        <span class="tp-foot-note">The first product is used as the pin's link when the pin has no link of its own.</span>
+        <button type="button" class="btn-primary" id="tpDone">Done</button>
+    </div>
+</aside>
 
 <script>
 const BOARDS_BY_ACCOUNT = <?= json_encode($boardsByAccount, JSON_HEX_TAG) ?>;
@@ -1081,7 +1106,7 @@ function renderRows() {
                 </div>
 
                 <button type="button" class="row-product-btn ${r.product_link ? 'has-product' : ''}" data-product-id="${r.id}" title="${escapeHtml(r.product_link)}">
-                    ${r.product_link ? '✓ Product Tagged' : 'Tag Product'} <span class="caret">▾</span>
+                    ${(() => { const n = rowProducts(r).length; return n ? '✓ ' + n + ' Product' + (n > 1 ? 's' : '') + ' Tagged' + (r.affiliate ? ' · Affiliate' : '') : 'Tag Products'; })()} <span class="caret">▸</span>
                 </button>
             </div>
 
@@ -1117,40 +1142,126 @@ function renderSummaryOnly() {
     scheduleAutosave();
 }
 
-/* ---------------- Per-pin product tag modal ---------------- */
-const productModalOverlay = document.getElementById('productModalOverlay');
-let currentProductRowId = null;
+/* ---------------- Per-pin "Tag products" side panel ---------------- */
+const TP_URL = 'ajax-product-tag';
+const tp = { rowId: null, q: '', offset: 0, more: false, loading: false };
+function rowProducts(row) {
+    if (!Array.isArray(row.products)) row.products = row.product_link ? [{ url: row.product_link, title: '', image: '' }] : [];
+    return row.products;
+}
+function syncProductLink(row) { const list = rowProducts(row); row.product_link = list.length ? list[0].url : ''; }
+function tpHost(u) { try { return new URL(u).hostname.replace(/^www\./, ''); } catch (e) { return u; } }
+function tpCard(p, action) {
+    const img = p.image ? `<img src="${escapeHtml(p.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'tp-noimg',textContent:'🛍️'}))">` : '<span class="tp-noimg">🛍️</span>';
+    return `<div class="tp-item">${img}<div class="tp-item-txt"><b>${escapeHtml(p.title || tpHost(p.url))}</b><small>${escapeHtml(tpHost(p.url))}</small></div>${action}</div>`;
+}
+function tpRenderTagged() {
+    const row = getRow(tp.rowId); if (!row) return;
+    const list = rowProducts(row);
+    document.getElementById('tpCount').textContent = list.length;
+    document.getElementById('tpTagged').innerHTML = list.length
+        ? list.map((p, i) => tpCard(p, `<button type="button" class="tp-remove" data-tp-remove="${i}" title="Remove">✕</button>`)).join('')
+        : '<p class="tp-hint">No products tagged yet — search or paste a link above.</p>';
+    document.getElementById('tpAffiliate').checked = !!row.affiliate;
+}
+function tpAdd(p) {
+    const row = getRow(tp.rowId); if (!row || !p || !p.url) return;
+    const list = rowProducts(row);
+    if (list.some(x => x.url === p.url)) { showAlert('That product is already tagged on this pin.', 'info'); return; }
+    if (list.length >= 25) { showAlert('A pin can have up to 25 tagged products.', 'error'); return; }
+    list.push({ url: p.url, title: p.title || '', image: p.image || '' });
+    syncProductLink(row);
+    tpRenderTagged();
+}
+function tpSetTab(tab) {
+    document.querySelectorAll('[data-tp-tab]').forEach(b => b.classList.toggle('on', b.dataset.tpTab === tab));
+    document.querySelectorAll('[data-tp-pane]').forEach(p => { p.hidden = p.dataset.tpPane !== tab; });
+    setTimeout(() => document.getElementById(tab === 'search' ? 'tpSearchQ' : 'tpLinkInput').focus(), 50);
+}
+async function tpSearch(reset) {
+    if (tp.loading) return;
+    if (reset) { tp.offset = 0; tp.q = document.getElementById('tpSearchQ').value.trim(); document.getElementById('tpResults').innerHTML = '<p class="tp-hint">Searching…</p>'; }
+    tp.loading = true;
+    const fd = new FormData(); fd.append('action', 'search'); fd.append('q', tp.q); fd.append('offset', tp.offset);
+    let r;
+    try { r = await (await fetch(TP_URL, { method: 'POST', body: fd })).json(); } catch (e) { r = { ok: false }; }
+    tp.loading = false;
+    const box = document.getElementById('tpResults');
+    if (reset) box.innerHTML = '';
+    if (!r.ok) { box.innerHTML = '<p class="tp-hint">Search is not available right now.</p>'; return; }
+    box.insertAdjacentHTML('beforeend', r.items.map((p, i) => tpCard(p, `<button type="button" class="tp-add" data-tp-add='${escapeHtml(JSON.stringify(p))}'>Add</button>`)).join(''));
+    if (!box.children.length) box.innerHTML = `<p class="tp-hint">${tp.q ? 'No products match “' + escapeHtml(tp.q) + '”. Try another word, or use a link.' : 'No products yet — scan your website under Websites, or use a link.'}</p>`;
+    tp.offset += r.items.length; tp.more = r.more;
+}
 function openProductModal(rowId) {
-    currentProductRowId = rowId;
-    const row = getRow(rowId);
-    document.getElementById('productLinkInput').value = row ? (row.product_link || '') : '';
-    setProductTab('link');
-    productModalOverlay.style.display = 'flex';
+    tp.rowId = rowId;
+    const row = getRow(rowId); if (!row) return;
+    rowProducts(row);
+    document.getElementById('tpPinPreview').innerHTML = row.image_path ? `<img src="../${escapeHtml(row.image_path)}" alt=""><span>${escapeHtml(row.title || 'Pin ' + rowId)}</span>` : '';
+    document.getElementById('tpLinkInput').value = '';
+    document.getElementById('tpLinkPreview').innerHTML = '';
+    tpRenderTagged();
+    tpSetTab('search');
+    if (!document.getElementById('tpResults').children.length) tpSearch(true);
+    document.getElementById('tpPanel').classList.add('open');
+    document.getElementById('tpPanel').setAttribute('aria-hidden', 'false');
+    document.getElementById('tpBackdrop').hidden = false;
+    document.body.classList.add('tp-lock');
 }
-function setProductTab(tab) {
-    document.querySelectorAll('[data-product-tab]').forEach(b => b.classList.toggle('active', b.dataset.productTab === tab));
-    document.getElementById('productSearchTab').style.display = tab === 'search' ? 'block' : 'none';
-    document.getElementById('productLinkTab').style.display = tab === 'link' ? 'block' : 'none';
+function closeProductPanel() {
+    document.getElementById('tpPanel').classList.remove('open');
+    document.getElementById('tpPanel').setAttribute('aria-hidden', 'true');
+    document.getElementById('tpBackdrop').hidden = true;
+    document.body.classList.remove('tp-lock');
+    renderRows();
 }
-document.querySelectorAll('[data-product-tab]').forEach(btn => {
-    btn.addEventListener('click', () => setProductTab(btn.dataset.productTab));
+document.querySelectorAll('[data-tp-tab]').forEach(b => b.addEventListener('click', () => tpSetTab(b.dataset.tpTab)));
+document.getElementById('tpClose').addEventListener('click', closeProductPanel);
+document.getElementById('tpDone').addEventListener('click', closeProductPanel);
+document.getElementById('tpBackdrop').addEventListener('click', closeProductPanel);
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && document.getElementById('tpPanel').classList.contains('open')) closeProductPanel(); });
+let tpTimer = null;
+document.getElementById('tpSearchQ').addEventListener('input', () => { clearTimeout(tpTimer); tpTimer = setTimeout(() => tpSearch(true), 350); });
+document.getElementById('tpSearchForm').addEventListener('submit', (e) => { e.preventDefault(); tpSearch(true); });
+document.querySelector('.tp-body').addEventListener('scroll', (e) => {
+    const b = e.target; if (tp.more && !tp.loading && b.scrollTop + b.clientHeight > b.scrollHeight - 300 && !document.querySelector('[data-tp-pane="search"]').hidden) tpSearch(false);
 });
-document.getElementById('productModalClose').addEventListener('click', () => productModalOverlay.style.display = 'none');
-productModalOverlay.addEventListener('click', (e) => { if (e.target === productModalOverlay) productModalOverlay.style.display = 'none'; });
-document.getElementById('productLinkSaveBtn').addEventListener('click', () => {
-    const row = getRow(currentProductRowId);
-    if (!row) return;
-    row.product_link = document.getElementById('productLinkInput').value.trim();
-    productModalOverlay.style.display = 'none';
-    renderRows();
+document.getElementById('tpResults').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-tp-add]'); if (!b) return;
+    try { tpAdd(JSON.parse(b.dataset.tpAdd)); b.textContent = 'Added ✓'; b.disabled = true; } catch (err) {}
 });
-document.getElementById('productLinkRemoveBtn').addEventListener('click', () => {
-    const row = getRow(currentProductRowId);
-    if (!row) return;
-    row.product_link = '';
-    productModalOverlay.style.display = 'none';
-    renderRows();
+document.getElementById('tpLinkForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    let url = document.getElementById('tpLinkInput').value.trim(); if (!url) return;
+    if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+    const btn = document.getElementById('tpLinkBtn'); btn.disabled = true; btn.textContent = 'Loading…';
+    const box = document.getElementById('tpLinkPreview');
+    box.innerHTML = '<p class="tp-hint">Fetching the product…</p>';
+    const fd = new FormData(); fd.append('action', 'preview'); fd.append('url', url);
+    let r;
+    try { r = await (await fetch(TP_URL, { method: 'POST', body: fd })).json(); } catch (err) { r = { ok: false, error: 'Network error — try again.' }; }
+    btn.disabled = false; btn.textContent = 'Add';
+    if (!r.ok) { box.innerHTML = `<p class="tp-hint tp-err">${escapeHtml(r.error || 'Could not read that link.')}</p>`; return; }
+    tpAdd({ url: r.url, title: r.title, image: r.image });
+    box.innerHTML = `<p class="tp-hint tp-ok">✓ Added “${escapeHtml(r.title || tpHost(r.url))}”</p>`;
+    document.getElementById('tpLinkInput').value = '';
 });
+document.getElementById('tpTagged').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-tp-remove]'); if (!b) return;
+    const row = getRow(tp.rowId); if (!row) return;
+    rowProducts(row).splice(parseInt(b.dataset.tpRemove, 10), 1);
+    syncProductLink(row);
+    tpRenderTagged();
+    document.querySelectorAll('#tpResults [data-tp-add]').forEach(x => { x.disabled = false; x.textContent = 'Add'; });
+});
+/** Affiliate / sponsored pins get a clear disclosure in the description (Pinterest requires it). */
+function withDisclosure(desc, row) {
+    desc = desc || '';
+    if (!row || !row.affiliate || !rowProducts(row).length || /#(affiliate|ad|sponsored)\b/i.test(desc)) return desc;
+    const tag = ' #affiliate';
+    return (desc.length + tag.length > 500 ? desc.slice(0, 500 - tag.length).replace(/\s+\S*$/, '') : desc) + tag;
+}
+document.getElementById('tpAffiliate').addEventListener('change', (e) => { const row = getRow(tp.rowId); if (row) row.affiliate = e.target.checked; });
 
 /* ---------------- Drag to reorder ---------------- */
 function attachDragHandlers(container) {
@@ -1342,9 +1453,9 @@ document.getElementById('applyProductTagsBtn').addEventListener('click', () => {
     if (!rows.length) { showAlert('Add pins first before applying product tags.', 'error'); return; }
     const applyToAll = document.getElementById('productApplyToAll').checked;
     if (applyToAll) {
-        rows.forEach(r => { r.product_link = lines[0]; });
+        rows.forEach(r => { r.products = [{ url: lines[0], title: '', image: '' }]; r.product_link = lines[0]; });
     } else {
-        rows.forEach((r, i) => { if (lines[i]) r.product_link = lines[i]; });
+        rows.forEach((r, i) => { if (lines[i]) { r.products = [{ url: lines[i], title: '', image: '' }]; r.product_link = lines[i]; } });
     }
     renderRows();
     showAlert('Product tags applied.', 'success');
@@ -2013,14 +2124,14 @@ document.getElementById('scheduleAllBtn').addEventListener('click', async () => 
         pins: rows.map(r => ({
             image_path: r.image_path,
             title: r.title || globalTitle,
-            description: r.description || globalDescription,
+            description: withDisclosure(r.description || globalDescription, r),
             link: r.link || globalLink,
             alt: r.alt,
             keywords: r.keywords || '',
             board_choice: r.board_choice || '',
             new_board_name: r.new_board_name || '',
             new_board_description: r.new_board_description || '',
-            product_link: r.product_link || '',
+            product_link: rowProducts(r)[0] ? rowProducts(r)[0].url : '',
             publish_at: r.publish_at,
         })),
     };

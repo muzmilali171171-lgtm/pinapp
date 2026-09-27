@@ -4,6 +4,7 @@ require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/../includes/platform_functions.php';
 require_once __DIR__ . '/../includes/pricing_functions.php';
 require_once __DIR__ . '/../includes/team_functions.php';
+require_once __DIR__ . '/../includes/payment_gateways.php';
 require_once __DIR__ . '/../includes/auth.php';
 require_login();
 
@@ -63,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $customMethodId = null;
     $screenshotPath = null;
 
-    $validGateway = in_array($method, ['stripe', 'paypal', 'nowpayments', 'binance'], true) && !empty($gateways["{$method}_enabled"]);
+    $validGateway = in_array($method, ['stripe', 'paypal', 'nowpayments', 'binance'], true) && pg_ready($gateways, $method);
     if (strpos($method, 'custom:') === 0) {
         $customMethodId = (int)substr($method, 7);
         $validCustom = false;
@@ -101,8 +102,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $user['id'], $plan['id'], $billingCycle, $finalAmount, $coupon['id'] ?? null,
                 $validCustom ? 'custom:' . $customMethodId : $method, $customMethodId, $screenshotPath,
             ]);
+            $newPaymentId = (int)$pdo->lastInsertId();
             log_event($pdo, 'system', "User requested plan '{$plan['name']}' via " . ($validCustom ? 'custom payment method' : $method), $user['id']);
-            $done = true;
+            if ($validGateway) {
+                // Online gateway: open its secure payment page; the plan activates when the payment is confirmed.
+                $payment = pg_payment($pdo, $newPaymentId);
+                $start = $payment ? pg_create_checkout($pdo, $payment, $user, $method) : ['ok' => false, 'error' => 'Could not start the payment.'];
+                if ($start['ok']) redirect($start['url']);
+                $errors[] = $start['error'];
+            } else {
+                $done = true;
+            }
         }
     }
 }
@@ -148,8 +158,9 @@ include __DIR__ . '/includes/user-header.php';
     <div class="card">
         <h2>Payment Method</h2>
         <?php $anyMethod = false; ?>
-        <?php foreach (['stripe' => 'Stripe', 'paypal' => 'PayPal', 'nowpayments' => 'NOWPayments (Crypto)', 'binance' => 'Binance Pay'] as $key => $label): ?>
-            <?php if (!empty($gateways["{$key}_enabled"])): $anyMethod = true; ?>
+        <?php if (!empty($_GET['cancelled'])): ?><div class="alert alert-info">Payment was cancelled — nothing was charged. You can try again below.</div><?php endif; ?>
+        <?php foreach (PG_LABELS as $key => $label): ?>
+            <?php if (pg_ready($gateways, $key)): $anyMethod = true; ?>
                 <label class="checkbox-row"><input type="radio" name="payment_method" value="<?= e($key) ?>" onchange="showMethodDetails('<?= e($key) ?>')"> <?= e($label) ?></label>
             <?php endif; ?>
         <?php endforeach; ?>
@@ -158,10 +169,11 @@ include __DIR__ . '/includes/user-header.php';
         <?php endforeach; ?>
         <?php if (!$anyMethod): ?><p class="muted">No payment methods are configured yet — please contact support.</p><?php endif; ?>
 
-        <?php foreach (['stripe', 'paypal', 'nowpayments', 'binance'] as $key): if (empty($gateways["{$key}_enabled"])) continue; ?>
+        <?php foreach (array_keys(PG_LABELS) as $key): if (!pg_ready($gateways, $key)) continue; ?>
             <div class="method-details" id="method-<?= e($key) ?>" style="display:none; margin-top:14px;">
-                <div class="alert alert-info">Online checkout with <?= e(ucfirst($key)) ?> isn't available right now.
-                Submit below to save your request — our team will contact you to complete the payment.</div>
+                <div class="alert alert-info">🔒 You'll be taken to the secure <?= e(PG_LABELS[$key]) ?> payment page to pay
+                <strong>$<?= number_format($finalAmount, 2) ?></strong><?= $key === 'nowpayments' ? ' in the crypto coin you choose' : ($key === 'binance' ? ' (USDT)' : '') ?>.
+                Your plan activates automatically as soon as the payment is confirmed<?= $key === 'nowpayments' ? ' on the blockchain (usually a few minutes)' : '' ?>.</div>
             </div>
         <?php endforeach; ?>
         <?php foreach ($customMethods as $cm): ?>
@@ -175,7 +187,7 @@ include __DIR__ . '/includes/user-header.php';
         <?php endforeach; ?>
     </div>
 
-    <?php if ($anyMethod): ?><button type="submit" class="btn-primary">Submit Payment Request</button><?php endif; ?>
+    <?php if ($anyMethod): ?><button type="submit" class="btn-primary" id="payBtn">Continue to Payment →</button><?php endif; ?>
 </form>
 <script>
 function showMethodDetails(key) {

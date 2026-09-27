@@ -505,3 +505,9 @@ design-share.php
 sitemap.php
 includes/sitemap_functions.php
 assets/img/template-sky.jpg
+includes/payment_gateways.php
+user/payment-return.php
+user/ajax-product-tag.php
+webhooks/stripe.php
+webhooks/nowpayments.php
+webhooks/binance.php

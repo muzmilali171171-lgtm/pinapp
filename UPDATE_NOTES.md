@@ -1,3 +1,19 @@
+# Update — real online checkout (Stripe, PayPal, NOWPayments, Binance Pay) + Pinterest-style product tags
+
+1. Payments: choosing Stripe / PayPal / NOWPayments / Binance Pay at checkout now opens that gateway's
+   secure payment page. When the buyer comes back (user/payment-return) the payment is confirmed with the
+   gateway itself and the plan activates automatically — same steps as an admin approval (plan, coupon,
+   affiliate commission, notification), exactly once. Webhooks: /webhooks/stripe.php (signed),
+   /webhooks/nowpayments.php (IPN signature), /webhooks/binance.php (order re-checked with Binance).
+   A gateway shows at checkout only when it's switched on AND its keys are filled in.
+   Admin → Payment Gateways has updated setup steps for each.
+2. Bulk Pin Scheduler → Tag products: a side panel like Pinterest's — Search your products (scanned
+   websites & Shopify stores), Use a link (shows the product's photo and name), several products per pin,
+   "Your tagged products" with remove, and the "Affiliate link or sponsored product" switch (adds an
+   #affiliate disclosure to the pin description). The first product is the pin's link when it has none.
+   Note: Pinterest's public API doesn't let apps place shopping tags on a pin, so tags are used as the
+   pin's link + disclosure.
+
 # Update — sky-blue template previews
 
 Template previews (Pin Templates & Styles, free tools, Bulk Pin) and the Classic Wizard's template

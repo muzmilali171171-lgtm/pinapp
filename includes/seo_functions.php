@@ -459,7 +459,7 @@ function seo_robots_txt(PDO $pdo): string
     $base = defined('APP_URL') ? rtrim(APP_URL, '/') : '';
     $txt  = "User-agent: *\n";
     $txt .= "Allow: /\n";
-    foreach (['/admin/', '/user/', '/auth/', '/config/', '/oauth/', '/cron/', '/includes/', '/database/', '/wp-plugin/', '/uploads/cw-src/', '/uploads/cw-pt/'] as $p) $txt .= "Disallow: $p\n";
+    foreach (['/admin/', '/user/', '/auth/', '/config/', '/oauth/', '/cron/', '/webhooks/', '/includes/', '/database/', '/wp-plugin/', '/uploads/cw-src/', '/uploads/cw-pt/'] as $p) $txt .= "Disallow: $p\n";
     foreach (['/install.php', '/migrate.php', '/update-pricing-plans.php', '/robots.php', '/media.php', '/pin-template-preview', '/pin-templates', '/image-categories', '/sitemap.php'] as $p) $txt .= "Disallow: $p\n";
     if ($base !== '') $txt .= "\nSitemap: $base/sitemap.xml\n";
     return $txt;

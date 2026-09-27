@@ -626,18 +626,19 @@ function payment_gateway_settings_get(PDO $pdo): array
 
 function payment_gateway_guide(string $which): string
 {
+    $base = rtrim(defined('APP_URL') ? APP_URL : '', '/');
     if ($which === 'stripe') {
-        return '<p>Go to <a href="https://dashboard.stripe.com/apikeys" target="_blank" rel="noopener">dashboard.stripe.com/apikeys</a>, copy your <strong>Publishable key</strong> and <strong>Secret key</strong> into the fields below.</p>'
-            . '<p>For subscription renewals, add a webhook endpoint at <code>' . rtrim(defined('APP_URL') ? APP_URL : '', '/') . '/webhooks/stripe.php</code> listening for <code>checkout.session.completed</code> and <code>invoice.paid</code>, then paste its Signing secret below.</p>';
+        return '<p>Go to <a href="https://dashboard.stripe.com/apikeys" target="_blank" rel="noopener">dashboard.stripe.com/apikeys</a> and copy your <strong>Publishable key</strong> and <strong>Secret key</strong> into the fields below.</p>'
+            . '<p>Then add a webhook at <a href="https://dashboard.stripe.com/webhooks" target="_blank" rel="noopener">dashboard.stripe.com/webhooks</a>: endpoint <code>' . $base . '/webhooks/stripe.php</code>, events <code>checkout.session.completed</code> and <code>checkout.session.async_payment_succeeded</code>, and paste its <strong>Signing secret</strong> below. Buyers are sent to Stripe Checkout and the plan activates automatically when they pay.</p>';
     }
     if ($which === 'paypal') {
-        return '<p>Create an app at <a href="https://developer.paypal.com/dashboard/applications" target="_blank" rel="noopener">developer.paypal.com</a> and copy its <strong>Client ID</strong> and <strong>Secret</strong> below. Use Sandbox mode to test before switching to Live.</p>';
+        return '<p>Create an app at <a href="https://developer.paypal.com/dashboard/applications" target="_blank" rel="noopener">developer.paypal.com</a> and copy its <strong>Client ID</strong> and <strong>Secret</strong> below (Live app for real payments; Sandbox mode + a Sandbox app to test). Buyers approve the payment on PayPal and it is captured and activated when they come back — no webhook needed.</p>';
     }
     if ($which === 'nowpayments') {
-        return '<p>NOWPayments accepts crypto payments. Get your API key from <a href="https://account.nowpayments.io/settings" target="_blank" rel="noopener">account.nowpayments.io/settings</a>, and set an IPN callback URL to <code>' . rtrim(defined('APP_URL') ? APP_URL : '', '/') . '/webhooks/nowpayments.php</code> with a matching IPN secret below.</p>';
+        return '<p>NOWPayments accepts crypto payments. Get your <strong>API key</strong> from <a href="https://account.nowpayments.io/store-settings" target="_blank" rel="noopener">account.nowpayments.io → Settings → Payments</a>, generate an <strong>IPN secret</strong> there and paste both below. The IPN callback URL is sent with every invoice automatically: <code>' . $base . '/webhooks/nowpayments.php</code>. The plan activates when the payment is confirmed on the blockchain.</p>';
     }
     if ($which === 'binance') {
-        return '<p>Create an API key under Binance Pay / Binance Merchant in your Binance account, with payment-collection permissions only (never withdrawal permissions), and paste the Key/Secret below.</p>';
+        return '<p>In <a href="https://merchant.binance.com" target="_blank" rel="noopener">Binance Merchant</a> → Developers → API keys, create a Binance Pay API key (payment permissions only — never withdrawals) and paste the <strong>API key</strong> and <strong>Secret key</strong> below. Payments are in USDT; the webhook URL <code>' . $base . '/webhooks/binance.php</code> is sent with every order, and each order is re-checked with Binance before the plan activates.</p>';
     }
     return '';
 }
