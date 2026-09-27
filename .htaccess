@@ -1,0 +1,92 @@
+# ---------------------------------------------------------------------------
+# WebToPin — clean URLs (no ".php"), pretty blog URLs, custom 404 page.
+# Works on Hostinger (LiteSpeed) and Apache. App must be at the domain root.
+# ---------------------------------------------------------------------------
+DirectoryIndex index.php
+ErrorDocument 404 /404.php
+ErrorDocument 403 /404.php
+
+# ---------------------------------------------------------------------------
+# Speed: gzip text files and let browsers cache static files.
+# CSS/JS are always linked with ?v=<file time>, so a changed file gets a new URL
+# and the long cache never serves an old version.
+# ---------------------------------------------------------------------------
+AddType font/woff2 .woff2
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml text/javascript application/javascript application/x-javascript application/json application/xml image/svg+xml
+</IfModule>
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css "access plus 1 year"
+    ExpiresByType application/javascript "access plus 1 year"
+    ExpiresByType text/javascript "access plus 1 year"
+    ExpiresByType font/woff2 "access plus 1 year"
+    ExpiresByType image/webp "access plus 30 days"
+    ExpiresByType image/jpeg "access plus 30 days"
+    ExpiresByType image/png "access plus 30 days"
+    ExpiresByType image/gif "access plus 30 days"
+    ExpiresByType image/svg+xml "access plus 30 days"
+    ExpiresByType image/x-icon "access plus 30 days"
+    ExpiresByType video/mp4 "access plus 30 days"
+</IfModule>
+<IfModule mod_headers.c>
+    <FilesMatch "\.(css|js|woff2)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+</IfModule>
+
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteBase /
+
+# ---------------------------------------------------------------------------
+# 1) Anyone who types a ".php" URL gets our 404 page.
+#    THE_REQUEST = the raw line the browser sent, so this never fires after
+#    our own internal rewrites (no redirect loops).
+#    Allowed exceptions: OAuth callbacks (registered with Pinterest/Google/
+#    Shopify etc.), cron, and the one-time install/migrate scripts.
+# ---------------------------------------------------------------------------
+RewriteCond %{THE_REQUEST} ^[A-Z]+\s[^\s?]*\.php[\s?/] [NC]
+RewriteCond %{REQUEST_URI} !^/(oauth|cron)/ [NC]
+RewriteCond %{REQUEST_URI} !^/(install|migrate|update-pricing-plans|404)\.php$ [NC]
+RewriteRule ^ 404.php [L]
+
+# 2) Folder roots
+RewriteRule ^user/?$ /user/dashboard [R=302,L]
+RewriteRule ^auth/?$ /auth/login [R=302,L]
+RewriteRule ^admin/?$ /admin/dashboard [R=302,L]
+
+# 2b) Images moved to external storage (hosting copy removed) -> redirect to the external copy.
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^(uploads/(?:pins|articles|blog|storage|designs)/.+\.(?:jpe?g|png|webp|gif|svg|avif))$ media.php?p=$1 [L,QSA,NC]
+
+# 3) "/pricing/" -> "/pricing"
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{DOCUMENT_ROOT}/$1.php -f
+RewriteRule ^(.+)/$ /$1 [R=301,L]
+
+# 4) Blog
+RewriteRule ^blog/?$ blog.php [L,QSA]
+RewriteRule ^blog/([a-z0-9-]+)/?$ blog.php?category=$1 [L,QSA]
+
+# 5) Clean URL -> real file:  /pricing -> pricing.php,
+#    /user/dashboard -> user/dashboard.php, /admin/users -> admin/users.php
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}.php -f
+RewriteRule ^(.+)$ $1.php [L,QSA]
+
+# 6) /{category}/{post} -> blog post (unknown post -> 404 page)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^([a-z0-9-]+)/([a-z0-9-]+)/?$ blog-post.php?category=$1&slug=$2 [L,QSA]
+
+# 7) /{category} -> blog category (unknown category -> 404 page)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^([a-z0-9-]+)/?$ blog.php?category=$1 [L,QSA]
+
+# 8) Anything else that doesn't exist -> our 404 page (never the host's)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ 404.php [L]
+</IfModule>

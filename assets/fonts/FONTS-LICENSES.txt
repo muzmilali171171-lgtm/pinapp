@@ -1,0 +1,4 @@
+Fonts added for the pin templates (all free for commercial use, from Google Fonts):
+- Anton, Bebas Neue, Pacifico, Archivo Black, Titan One, Great Vibes, DM Serif Display — SIL Open Font License 1.1
+- Luckiest Guy, Satisfy — Apache License 2.0
+- Playfair Display Italic (replaces a broken 14-byte file) — SIL Open Font License 1.1

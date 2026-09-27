@@ -1,0 +1,203 @@
+# Default image categories — one main category per line: "Main category: sub | sub | sub".
+# Loaded by image_categories_seed_defaults() (includes/image_category_functions.php) on migrate
+# and from Admin → Image Categories → "Add missing default categories". Lines starting with # are ignored.
+Fashion: Outfit Ideas | Outfit Inspiration | Seasonal Fashion | Fashion Trends | Everyday Style | Capsule Wardrobe | Fashion Basics | Outfit Combinations
+Women's Fashion: Casual Outfits | Formal Outfits | Office Wear | Party Wear | Summer Fashion | Winter Fashion | Date Night Outfits | Traditional Wear | Modest Outfits | Outfit Ideas
+Men's Fashion: Casual Outfits | Formal Wear | Business Casual | Streetwear | Men's Suits | Summer Outfits | Winter Outfits | Grooming | Men's Accessories | Outfit Ideas
+Kids' Fashion: Boys' Outfits | Girls' Outfits | School Outfits | Party Outfits | Casual Outfits | Summer Clothes | Winter Clothes | Matching Outfits | Kids' Shoes | Accessories
+Baby Fashion: Baby Girl Outfits | Baby Boy Outfits | Newborn Clothes | Baby Dresses | Baby Rompers | Baby Shoes | Baby Accessories | Winter Baby Clothes | Summer Baby Clothes | Photo Shoot Outfits
+Street Style: Urban Fashion | Streetwear | Sneakers | Oversized Outfits | Denim Style | Layering | Athleisure | Street Style Photography | Casual Looks | Youth Fashion
+Casual Fashion: Everyday Outfits | Jeans Outfits | T-Shirt Outfits | Casual Dresses | Weekend Looks | Casual Office Wear | Summer Casual | Winter Casual | Minimal Outfits | Comfortable Fashion
+Formal Fashion: Formal Dresses | Evening Wear | Business Wear | Suits | Blazers | Formal Skirts | Formal Pants | Office Outfits | Gala Fashion | Event Wear
+Modest Fashion: Hijab Fashion | Abaya | Modest Dresses | Long Skirts | Modest Office Wear | Modest Casual Wear | Modest Wedding Wear | Muslim Fashion | Layering | Modest Summer Outfits
+Vintage Fashion: 1920s Fashion | 1950s Fashion | 1960s Fashion | 1970s Fashion | 1980s Fashion | 1990s Fashion | Vintage Dresses | Retro Outfits | Vintage Accessories | Vintage Styling
+Shoes: Women's Shoes | Men's Shoes | Boots | Heels | Flats | Sandals | Loafers | Dress Shoes | Casual Shoes | Shoe Styling
+Sneakers: Sneakers Outfits | White Sneakers | Running Sneakers | Basketball Shoes | High-Top Sneakers | Low-Top Sneakers | Sneaker Styling | Sneaker Collections | Retro Sneakers | Streetwear Sneakers
+Handbags: Tote Bags | Shoulder Bags | Crossbody Bags | Clutches | Backpacks | Mini Bags | Designer Bags | Work Bags | Travel Bags | Bag Styling
+Jewelry: Necklaces | Earrings | Rings | Bracelets | Anklets | Gold Jewelry | Silver Jewelry | Handmade Jewelry | Bridal Jewelry | Jewelry Styling
+Watches: Men's Watches | Women's Watches | Luxury Watches | Smartwatches | Vintage Watches | Dress Watches | Sports Watches | Watch Styling | Watch Collections | Watch Accessories
+Fashion Accessories: Belts | Hats | Scarves | Sunglasses | Gloves | Hair Accessories | Wallets | Socks | Ties | Accessories Styling
+Beauty: Beauty Tips | Beauty Routines | Makeup | Skincare | Haircare | Nails | Fragrance | Natural Beauty | Beauty Products | Beauty Inspiration
+Makeup: Everyday Makeup | Natural Makeup | Bridal Makeup | Party Makeup | Eye Makeup | Lip Makeup | Foundation | Contouring | Makeup Tutorials | Makeup Looks
+Skincare: Skincare Routine | Morning Skincare | Night Skincare | Face Masks | Acne Care | Dry Skin | Oily Skin | Anti-Aging | Natural Skincare | Skincare Tips
+Haircare: Hair Routines | Curly Hair | Straight Hair | Wavy Hair | Hair Treatments | Hair Masks | Hair Growth | Healthy Hair | Natural Hair | Hair Products
+Hairstyles: Short Hairstyles | Long Hairstyles | Medium Hairstyles | Curly Hairstyles | Braids | Ponytails | Buns | Wedding Hairstyles | Easy Hairstyles | Party Hairstyles
+Nail Art: Gel Nails | Acrylic Nails | French Nails | Simple Nails | Wedding Nails | Short Nails | Long Nails | Nail Designs | Nail Colors | Seasonal Nails
+Hair Color: Blonde Hair | Brunette Hair | Black Hair | Red Hair | Brown Hair | Balayage | Highlights | Ombre | Pastel Hair | Hair Color Ideas
+Men's Grooming: Beard Styles | Haircuts | Men's Skincare | Shaving | Mustache Styles | Hair Styling | Fragrance | Grooming Routine | Men's Beauty | Grooming Products
+Fragrances: Women's Perfume | Men's Perfume | Unisex Fragrance | Perfume Collections | Fragrance Notes | Perfume Layering | Luxury Perfume | Affordable Perfume | Perfume Gifts | Fragrance Styling
+Beauty Tips: Makeup Tips | Skincare Tips | Hair Tips | Nail Tips | Beauty Hacks | Natural Beauty Tips | Beginner Beauty | Beauty Routines | Quick Beauty Tips | Beauty Tutorials
+Self-Care: Self-Care Routines | Morning Routine | Night Routine | Bath & Body | Relaxation | Journaling | Meditation | Self-Care Ideas | Self-Love | Wellness
+Home Decor: Living Room Decor | Bedroom Decor | Kitchen Decor | Bathroom Decor | Dining Room Decor | Wall Decor | Seasonal Decor | DIY Decor | Minimalist Decor | Cozy Decor
+Interior Design: Modern Interior | Minimalist Interior | Scandinavian | Boho Interior | Farmhouse | Industrial | Traditional Interior | Luxury Interior | Rustic Interior | Contemporary Design
+Living Room: Sofa Ideas | Coffee Tables | TV Wall | Living Room Colors | Small Living Rooms | Luxury Living Rooms | Minimalist Living Rooms | Cozy Living Rooms | Wall Decor | Living Room Layouts
+Bedroom: Master Bedroom | Small Bedroom | Bedroom Colors | Bed Designs | Bedroom Lighting | Cozy Bedroom | Minimalist Bedroom | Luxury Bedroom | Kids' Bedroom | Bedroom Organization
+Kitchen Design: Modern Kitchens | Small Kitchens | Kitchen Cabinets | Kitchen Islands | Kitchen Colors | Open Kitchens | Luxury Kitchens | Minimalist Kitchens | Kitchen Storage | Kitchen Lighting
+Bathroom Design: Small Bathrooms | Modern Bathrooms | Luxury Bathrooms | Bathroom Tiles | Shower Ideas | Bathtub Ideas | Bathroom Storage | Bathroom Colors | Bathroom Lighting | Minimalist Bathrooms
+Home Office: Office Desk | Desk Setup | Office Decor | Small Home Office | Productivity Setup | Office Storage | Office Lighting | Minimalist Office | Creative Office | Work From Home
+Dining Room: Dining Tables | Dining Chairs | Dining Decor | Table Settings | Dining Lighting | Small Dining Rooms | Modern Dining Rooms | Dining Centerpieces | Dinner Party Decor | Dining Room Colors
+Home Organization: Closet Organization | Kitchen Organization | Bathroom Organization | Bedroom Organization | Garage Organization | Pantry Organization | Desk Organization | Decluttering | Cleaning Organization | Storage Hacks
+Storage Ideas: Small Space Storage | Closet Storage | Kitchen Storage | Bathroom Storage | Bedroom Storage | Toy Storage | Shoe Storage | Garage Storage | DIY Storage | Hidden Storage
+Small Spaces: Small Apartments | Small Bedrooms | Small Kitchens | Small Bathrooms | Small Living Rooms | Tiny Homes | Studio Apartments | Small Office | Space-Saving Furniture | Small Space Organization
+Apartment Decor: Rental Decor | Small Apartment | Studio Apartment | Living Room | Bedroom | Balcony Decor | Kitchen Decor | Budget Decor | Rental-Friendly DIY | Apartment Organization
+Luxury Homes: Luxury Living Rooms | Luxury Bedrooms | Luxury Kitchens | Luxury Bathrooms | Luxury Furniture | Luxury Lighting | Luxury Architecture | Luxury Pools | Luxury Outdoor Spaces | Luxury Interiors
+Minimalist Homes: Minimalist Bedroom | Minimalist Kitchen | Minimalist Living Room | Minimalist Furniture | Minimalist Organization | Minimalist Lifestyle | Neutral Decor | Decluttering | Simple Interiors | Minimalist Office
+DIY Home Projects: DIY Furniture | DIY Wall Decor | DIY Shelves | DIY Storage | DIY Lighting | DIY Painting | DIY Makeovers | DIY Garden | Budget Renovations | Upcycling
+Furniture: Sofas | Beds | Tables | Chairs | Desks | Cabinets | Shelves | Outdoor Furniture | DIY Furniture | Furniture Styling
+Lighting: Ceiling Lights | Pendant Lights | Chandeliers | Floor Lamps | Table Lamps | Wall Lights | Bedroom Lighting | Kitchen Lighting | Outdoor Lighting | Decorative Lighting
+Wall Decor: Wall Art | Gallery Walls | Wall Shelves | Mirrors | Photo Walls | Wallpaper | DIY Wall Decor | Bedroom Walls | Living Room Walls | Accent Walls
+Home Improvement: Renovation | Kitchen Remodeling | Bathroom Remodeling | Flooring | Painting | Roofing | Plumbing | Electrical | DIY Repairs | Home Maintenance
+Architecture: Modern Architecture | Traditional Architecture | Residential Architecture | Commercial Architecture | Luxury Architecture | Tiny Homes | Sustainable Architecture | House Plans | Building Designs | Architectural Details
+Outdoor Living: Patios | Decks | Outdoor Kitchens | Outdoor Furniture | Fire Pits | Outdoor Lighting | Pool Areas | Balcony Ideas | Outdoor Dining | Backyard Design
+Garden Design: Small Gardens | Backyard Gardens | Flower Gardens | Vegetable Gardens | Vertical Gardens | Cottage Gardens | Modern Gardens | Japanese Gardens | Container Gardens | Garden Paths
+Gardening: Vegetable Gardening | Flower Gardening | Herb Gardening | Indoor Gardening | Container Gardening | Organic Gardening | Beginner Gardening | Garden Maintenance | Garden Tools | Gardening Tips
+Flowers: Flower Arrangements | Fresh Flowers | Dried Flowers | Artificial Flowers | Wedding Flowers | Bouquet Ideas | Flower Centerpieces | Flower Photography | Floral Decor | Seasonal Flowers
+Plants: Indoor Plants | Outdoor Plants | Tropical Plants | Succulents | Cacti | Flowering Plants | Low-Light Plants | Air-Purifying Plants | Plant Care | Plant Styling
+Indoor Plants: Bedroom Plants | Living Room Plants | Bathroom Plants | Office Plants | Hanging Plants | Small Indoor Plants | Large Indoor Plants | Low-Light Plants | Indoor Plant Decor | Indoor Plant Care
+Landscaping: Backyard Landscaping | Front Yard Landscaping | Small Yard Landscaping | Garden Landscaping | Lawn Design | Patio Landscaping | Pool Landscaping | Modern Landscaping | Low-Maintenance Landscaping | Landscape Lighting
+Vegetable Gardening: Tomato Gardening | Pepper Gardening | Cucumber Gardening | Carrot Gardening | Potato Gardening | Lettuce Gardening | Container Vegetables | Raised Beds | Organic Vegetables | Vegetable Garden Plans
+Herb Gardening: Basil | Mint | Rosemary | Thyme | Parsley | Cilantro | Oregano | Indoor Herb Garden | Container Herbs | Herb Garden Design
+Crafts: Handmade Crafts | Paper Crafts | Fabric Crafts | Wood Crafts | Clay Crafts | Kids Crafts | Seasonal Crafts | Holiday Crafts | Recycled Crafts | Easy Crafts
+DIY Crafts: Easy DIY Crafts | Budget Crafts | Home Crafts | Kids DIY | Adult Crafts | Handmade Gifts | Recycled DIY | Seasonal DIY | Craft Projects | Beginner Crafts
+Paper Crafts: Origami | Paper Flowers | Paper Cards | Scrapbooking | Paper Decorations | Paper Garlands | Paper Animals | Paper Crafts for Kids | Paper Quilling | Printable Crafts
+Sewing: Sewing Projects | Beginner Sewing | Sewing Patterns | Dresses | Skirts | Bags | Quilts | Home Sewing | Clothing Alterations | Sewing Tips
+Knitting: Beginner Knitting | Knitting Patterns | Sweaters | Scarves | Hats | Socks | Blankets | Baby Knitting | Knitted Toys | Knitting Tips
+Crochet: Crochet Patterns | Beginner Crochet | Crochet Blankets | Crochet Bags | Crochet Hats | Crochet Flowers | Crochet Toys | Amigurumi | Crochet Clothing | Crochet Home Decor
+Embroidery: Hand Embroidery | Embroidery Patterns | Floral Embroidery | Modern Embroidery | Beginner Embroidery | Embroidery Art | Clothing Embroidery | Hoop Art | Embroidery Gifts | Embroidery Tutorials
+Quilting: Quilt Patterns | Beginner Quilting | Modern Quilts | Patchwork | Baby Quilts | Bed Quilts | Quilt Blocks | Quilt Designs | Scrap Quilting | Quilting Tutorials
+Woodworking: Beginner Woodworking | DIY Furniture | Wooden Shelves | Wooden Tables | Wood Decor | Wood Signs | Wood Crafts | Outdoor Wood Projects | Woodworking Tools | Woodworking Plans
+Candle Making: Soy Candles | Scented Candles | Decorative Candles | Container Candles | Candle Molds | Candle Packaging | Candle Business | DIY Candles | Candle Gifts | Candle Making Tips
+Soap Making: Handmade Soap | Natural Soap | Herbal Soap | Floral Soap | Goat Milk Soap | Melt & Pour Soap | Cold Process Soap | Soap Shapes | Soap Packaging | Soap Business
+Jewelry Making: Beaded Jewelry | Handmade Earrings | Handmade Necklaces | Bracelets | Rings | Wire Jewelry | Polymer Clay Jewelry | Resin Jewelry | Jewelry Tutorials | Jewelry Business
+Resin Art: Resin Jewelry | Resin Coasters | Resin Tables | Resin Trays | Resin Wall Art | Resin Geodes | Resin Flowers | Epoxy Art | Resin Crafts | Resin Tutorials
+Pottery: Ceramic Art | Clay Pots | Handmade Mugs | Bowls | Plates | Sculptures | Pottery Painting | Wheel Throwing | Hand-Building | Pottery Ideas
+Painting: Acrylic Painting | Watercolor | Oil Painting | Gouache | Abstract Painting | Landscape Painting | Portrait Painting | Floral Painting | Canvas Art | Beginner Painting
+Drawing: Pencil Drawing | Charcoal Drawing | Ink Drawing | Portrait Drawing | Figure Drawing | Animal Drawing | Nature Drawing | Easy Drawing | Drawing Tutorials | Drawing Ideas
+Sketching: Pencil Sketches | Portrait Sketches | Fashion Sketches | Architecture Sketches | Nature Sketches | Travel Sketches | Urban Sketching | Figure Sketching | Sketchbook Ideas | Sketching Tutorials
+Digital Art: Digital Illustrations | Character Design | Digital Painting | Concept Art | Procreate Art | Digital Portraits | Digital Landscapes | NFT Art | Digital Stickers | Digital Art Tutorials
+Illustration: Children's Illustration | Editorial Illustration | Fashion Illustration | Botanical Illustration | Character Illustration | Digital Illustration | Book Illustration | Cute Illustrations | Minimal Illustrations | Illustration Ideas
+Calligraphy: Modern Calligraphy | Brush Calligraphy | Handwritten Fonts | Arabic Calligraphy | Wedding Calligraphy | Calligraphy Quotes | Calligraphy Practice | Beginner Calligraphy | Calligraphy Art | Calligraphy Projects
+Hand Lettering: Lettering Ideas | Brush Lettering | Chalk Lettering | Quote Lettering | Digital Lettering | Handwritten Quotes | Typography Art | Lettering Practice | Sign Making | Lettering Tutorials
+Graphic Design: Branding Design | Social Media Design | Poster Design | Flyer Design | Business Cards | Packaging Design | Web Design | Editorial Design | Print Design | Design Inspiration
+Logo Design: Minimal Logos | Luxury Logos | Business Logos | Personal Logos | Monogram Logos | Feminine Logos | Modern Logos | Vintage Logos | Typography Logos | Logo Inspiration
+Typography: Font Pairing | Serif Fonts | Sans Serif Fonts | Script Fonts | Display Fonts | Typography Posters | Typography Quotes | Logo Typography | Modern Typography | Typography Inspiration
+Photography: Portrait Photography | Landscape Photography | Street Photography | Fashion Photography | Food Photography | Product Photography | Wedding Photography | Travel Photography | Nature Photography | Photography Tips
+Portrait Photography: Female Portraits | Male Portraits | Family Portraits | Couple Photography | Children Photography | Studio Portraits | Outdoor Portraits | Self-Portraits | Creative Portraits | Portrait Poses
+Wedding Photography: Bridal Photography | Groom Photography | Couple Photos | Wedding Poses | Engagement Photos | Wedding Details | Ceremony Photography | Reception Photography | Wedding Albums | Wedding Photo Ideas
+Travel Photography: Beach Photography | Mountain Photography | City Photography | Adventure Photography | Travel Portraits | Architecture Photography | Food Travel Photography | Road Trip Photography | Travel Poses | Travel Photo Ideas
+Food Photography: Food Styling | Restaurant Photography | Recipe Photography | Dessert Photography | Flat Lay Photography | Food Props | Food Backgrounds | Food Photography Tips | Instagram Food Photos | Food Content Ideas
+Product Photography: E-commerce Photography | Jewelry Photography | Beauty Product Photography | Clothing Photography | Food Product Photography | Flat Lay Products | Product Styling | Product Backgrounds | DIY Product Photos | Product Photography Tips
+Nature Photography: Landscape Photography | Forest Photography | Mountain Photography | Ocean Photography | Flower Photography | Wildlife Photography | Sunset Photography | Sunrise Photography | Macro Nature Photography | Nature Wallpapers
+Art Inspiration: Drawing Inspiration | Painting Inspiration | Color Inspiration | Creative Projects | Art Styles | Abstract Art | Modern Art | Traditional Art | Art References | Art Ideas
+Creative Ideas: DIY Ideas | Craft Ideas | Art Ideas | Room Ideas | Gift Ideas | Photography Ideas | Content Ideas | Design Ideas | Handmade Ideas | Creative Projects
+Food: Healthy Food | Comfort Food | Homemade Food | Street Food | International Food | Quick Meals | Family Meals | Party Food | Food Presentation | Food Inspiration
+Recipes: Easy Recipes | Quick Recipes | Healthy Recipes | Family Recipes | Dinner Recipes | Lunch Recipes | Breakfast Recipes | Dessert Recipes | One-Pot Recipes | 30-Minute Recipes
+Cooking: Beginner Cooking | Easy Cooking | Meal Prep | One-Pot Cooking | Slow Cooker | Air Fryer | Grilling | Baking | Cooking Tips | Kitchen Tips
+Baking: Bread Baking | Cake Baking | Cookie Baking | Cupcakes | Muffins | Pastries | Pies | Cheesecakes | Baking Tips | Easy Baking
+Desserts: Chocolate Desserts | Fruit Desserts | No-Bake Desserts | Ice Cream | Puddings | Cheesecakes | Brownies | Dessert Cups | Traditional Desserts | Easy Desserts
+Cakes: Birthday Cakes | Wedding Cakes | Chocolate Cakes | Vanilla Cakes | Fruit Cakes | Cupcakes | Mini Cakes | Layer Cakes | Cake Decorating | Cake Designs
+Cookies: Chocolate Chip Cookies | Sugar Cookies | Christmas Cookies | Healthy Cookies | Oatmeal Cookies | Shortbread | Sandwich Cookies | No-Bake Cookies | Cookie Decorating | Cookie Recipes
+Bread: Homemade Bread | Sourdough | Flatbread | Naan | Dinner Rolls | Baguettes | Garlic Bread | Sweet Bread | Bread Machine Recipes | Bread Baking
+Breakfast: Healthy Breakfast | Quick Breakfast | High-Protein Breakfast | Breakfast Bowls | Pancakes | Waffles | Eggs | Smoothie Bowls | Toast Ideas | Breakfast Meal Prep
+Lunch Ideas: Easy Lunches | Healthy Lunches | Work Lunches | School Lunches | Lunch Boxes | Sandwiches | Salads | Wraps | Quick Lunches | Meal Prep Lunches
+Dinner Ideas: Easy Dinners | Healthy Dinners | Family Dinners | Quick Dinners | One-Pot Dinners | Chicken Dinners | Beef Dinners | Pasta Dinners | Vegetarian Dinners | Dinner Meal Prep
+Appetizers: Finger Foods | Party Appetizers | Easy Appetizers | Hot Appetizers | Cold Appetizers | Dips & Spreads | Bruschetta | Stuffed Appetizers | Cheese Appetizers | Holiday Appetizers
+Snacks: Healthy Snacks | Quick Snacks | Kids' Snacks | School Snacks | Protein Snacks | Low-Carb Snacks | Sweet Snacks | Savory Snacks | Party Snacks | Homemade Snacks
+Healthy Food: Clean Eating | Whole Foods | High-Protein Food | Low-Carb Food | Low-Calorie Food | Healthy Breakfast | Healthy Lunch | Healthy Dinner | Healthy Desserts | Meal Prep
+Vegetarian Food: Vegetarian Recipes | Vegetarian Breakfast | Vegetarian Lunch | Vegetarian Dinner | Vegetarian Snacks | Vegetarian Soups | Vegetarian Pasta | Vegetarian Curries | Vegetarian Salads | High-Protein Vegetarian Meals
+Vegan Food: Vegan Recipes | Vegan Breakfast | Vegan Lunch | Vegan Dinner | Vegan Desserts | Vegan Snacks | Vegan Baking | Vegan Meal Prep | Vegan Fast Food | Plant-Based Meals
+Pakistani Food: Pakistani Recipes | Biryani | Nihari | Karahi | Haleem | Pulao | Pakistani Curries | Pakistani Breakfast | Pakistani Desserts | Pakistani Street Food
+Indian Food: Indian Recipes | Indian Curries | Biryani | Masala Dishes | Indian Breakfast | Indian Snacks | Indian Street Food | South Indian Food | North Indian Food | Indian Desserts
+Mexican Food: Tacos | Burritos | Quesadillas | Enchiladas | Nachos | Mexican Rice | Salsa | Guacamole | Mexican Soups | Mexican Desserts
+Italian Food: Pasta | Pizza | Lasagna | Risotto | Italian Desserts | Italian Bread | Italian Soups | Italian Salads | Italian Sauces | Traditional Italian Recipes
+Asian Food: Chinese Food | Japanese Food | Korean Food | Thai Food | Vietnamese Food | Filipino Food | Indonesian Food | Malaysian Food | Asian Noodles | Asian Street Food
+Drinks: Cold Drinks | Hot Drinks | Smoothies | Juices | Mocktails | Cocktails | Coffee Drinks | Tea Drinks | Party Drinks | Healthy Drinks
+Coffee: Coffee Recipes | Iced Coffee | Cold Brew | Latte | Cappuccino | Espresso | Coffee Desserts | Coffee Art | Home Coffee | Coffee Shop Inspiration
+Tea: Green Tea | Black Tea | Herbal Tea | Chai | Iced Tea | Matcha | Fruit Tea | Tea Recipes | Tea Parties | Tea Benefits
+Smoothies: Fruit Smoothies | Green Smoothies | Protein Smoothies | Breakfast Smoothies | Weight-Loss Smoothies | Berry Smoothies | Tropical Smoothies | Detox Smoothies | Smoothie Bowls | Kids' Smoothies
+Cocktails & Mocktails: Non-Alcoholic Drinks | Party Mocktails | Fruit Mocktails | Summer Drinks | Holiday Drinks | Cocktail Recipes | Classic Cocktails | Tropical Drinks | Drink Garnishes | Drink Presentation
+Meal Planning: Weekly Meal Plans | Monthly Meal Plans | Family Meal Plans | Budget Meal Plans | Healthy Meal Plans | Weight-Loss Meal Plans | High-Protein Meal Plans | Vegetarian Meal Plans | Meal Prep | Grocery Lists
+Healthy Living: Healthy Eating | Exercise | Sleep | Self-Care | Stress Management | Healthy Habits | Morning Routines | Wellness Routines | Mindful Living | Healthy Lifestyle
+Fitness: Strength Training | Cardio | Home Fitness | Gym Workouts | Women's Fitness | Men's Fitness | Beginner Fitness | Functional Fitness | Fitness Challenges | Fitness Motivation
+Workouts: Full-Body Workouts | Upper-Body Workouts | Lower-Body Workouts | Core Workouts | Cardio Workouts | HIIT | Strength Workouts | Beginner Workouts | Home Workouts | Gym Workouts
+Home Workouts: No-Equipment Workouts | Dumbbell Workouts | Resistance Band Workouts | Full-Body Workouts | Abs Workouts | Leg Workouts | Arm Workouts | Cardio at Home | Beginner Home Workouts | 10-Minute Workouts
+Yoga: Beginner Yoga | Morning Yoga | Evening Yoga | Yoga Poses | Yoga Flows | Yoga for Flexibility | Yoga for Strength | Yoga for Relaxation | Yoga at Home | Yoga Challenges
+Pilates: Beginner Pilates | Mat Pilates | Reformer Pilates | Pilates for Beginners | Core Pilates | Leg Pilates | Arm Pilates | Full-Body Pilates | Pilates at Home | Pilates Routines
+Running: Beginner Running | Running Plans | 5K Training | 10K Training | Marathon Training | Running Motivation | Running Gear | Running Workouts | Trail Running | Running Tips
+Weight Training: Beginner Weightlifting | Dumbbell Training | Barbell Training | Strength Training | Muscle Building | Upper-Body Training | Lower-Body Training | Leg Training | Arm Training | Gym Programs
+Weight Management: Healthy Weight Loss | Weight-Loss Meals | Calorie Awareness | High-Protein Meals | Healthy Snacks | Meal Prep | Walking | Fitness Routines | Healthy Habits | Lifestyle Changes
+Wellness: Physical Wellness | Mental Wellness | Emotional Wellness | Sleep Wellness | Nutrition | Self-Care | Stress Relief | Relaxation | Healthy Habits | Wellness Routines
+Mental Wellness: Stress Management | Anxiety Management | Self-Care | Mindfulness | Journaling | Meditation | Positive Thinking | Emotional Wellness | Relaxation | Mental Health Awareness
+Meditation: Guided Meditation | Morning Meditation | Sleep Meditation | Mindfulness Meditation | Breathing Exercises | Meditation for Beginners | Stress Relief | Relaxation | Meditation Music | Meditation Spaces
+Mindfulness: Mindful Living | Mindful Eating | Mindful Breathing | Meditation | Gratitude | Present-Moment Awareness | Stress Reduction | Mindful Journaling | Self-Awareness | Daily Mindfulness
+Personal Development: Self-Improvement | Goal Setting | Confidence | Discipline | Habits | Mindset | Communication | Leadership | Personal Growth | Life Skills
+Motivation: Daily Motivation | Success Quotes | Study Motivation | Fitness Motivation | Career Motivation | Business Motivation | Life Motivation | Morning Motivation | Goal Motivation | Motivational Wallpapers
+Inspirational Quotes: Life Quotes | Love Quotes | Success Quotes | Motivation Quotes | Friendship Quotes | Self-Love Quotes | Positive Quotes | Career Quotes | Wisdom Quotes | Quote Wallpapers
+Productivity: Productivity Tips | Daily Planning | Time Blocking | To-Do Lists | Goal Setting | Productivity Apps | Desk Organization | Focus Techniques | Morning Routines | Workflows
+Time Management: Time Blocking | Daily Schedules | Weekly Planning | Monthly Planning | Prioritization | Task Management | Productivity Systems | Study Schedules | Work Schedules | Time Management Tips
+Study Motivation: Study Quotes | Study Desk | Study Aesthetic | Study Routine | Exam Motivation | Note-Taking | Study Planner | Focus Tips | Student Productivity | Study Wallpapers
+Education: Online Education | Homeschooling | Early Education | Elementary Education | Secondary Education | Higher Education | Educational Activities | Teaching Resources | Learning Resources | Educational Printables
+Study Tips: Note-Taking | Memorization | Exam Preparation | Study Schedules | Flashcards | Active Recall | Study Techniques | Concentration | Homework Tips | Study Organization
+School: School Organization | School Supplies | Classroom Ideas | Teacher Resources | Student Activities | School Projects | School Outfits | Lunch Ideas | School Notes | School Motivation
+College: College Life | College Dorms | Dorm Decor | College Organization | College Study Tips | College Fashion | College Budgeting | College Meals | College Planning | Graduation Ideas
+Online Learning: Online Courses | E-Learning | Digital Skills | Coding Courses | Language Courses | Business Courses | Design Courses | Marketing Courses | Study Platforms | Learning Resources
+Language Learning: English Learning | Spanish Learning | French Learning | German Learning | Arabic Learning | Vocabulary | Grammar | Speaking Practice | Language Worksheets | Language Study Tips
+Books: Fiction | Nonfiction | Romance | Mystery | Thriller | Fantasy | Self-Help | Business Books | Children's Books | Book Recommendations
+Reading: Reading Lists | Book Reviews | Reading Challenges | Book Clubs | Reading Journals | Book Aesthetics | Summer Reading | Reading Goals | Cozy Reading | Reading Recommendations
+Literature: Classic Literature | Modern Literature | Poetry | Fiction | Literary Fiction | World Literature | Children's Literature | Literary Quotes | Authors | Literature Analysis
+Writing: Creative Writing | Fiction Writing | Poetry Writing | Blogging | Journaling | Storytelling | Copywriting | Screenwriting | Writing Prompts | Writing Tips
+Journaling: Daily Journaling | Bullet Journaling | Gratitude Journal | Travel Journal | Dream Journal | Self-Care Journal | Reading Journal | Study Journal | Journal Prompts | Journal Ideas
+Planners: Daily Planner | Weekly Planner | Monthly Planner | Yearly Planner | Student Planner | Fitness Planner | Meal Planner | Budget Planner | Business Planner | Printable Planner
+Printable Templates: Planners | Calendars | Checklists | Worksheets | Invitations | Budget Sheets | Meal Planners | Study Templates | Business Templates | Kids' Activities
+Career: Career Advice | Career Planning | Job Skills | Interview Tips | Workplace Tips | Career Change | Remote Work | Professional Development | Leadership | Workplace Productivity
+Resume & CV: Resume Templates | CV Templates | Resume Design | Cover Letters | Resume Writing | Entry-Level Resume | Student Resume | Professional Resume | Creative Resume | Resume Tips
+Job Search: Job Hunting | Job Applications | Interview Preparation | Remote Jobs | Work From Home | Freelance Jobs | LinkedIn Tips | Career Websites | Job Search Tips | Interview Questions
+Business: Business Ideas | Small Business | Online Business | Business Planning | Business Strategy | Business Branding | Business Marketing | Business Management | Business Growth | Business Tips
+Entrepreneurship: Startup Ideas | Online Entrepreneurship | Female Entrepreneurship | Young Entrepreneurs | Startup Planning | Business Ideas | Entrepreneur Motivation | Leadership | Business Strategy | Entrepreneur Tips
+Small Business: Small Business Ideas | Home Business | Local Business | Online Store | Handmade Business | Service Business | Small Business Marketing | Small Business Branding | Business Organization | Small Business Tips
+Online Business: E-commerce | Digital Products | Online Courses | Blogging | Affiliate Marketing | Freelancing | Print on Demand | Dropshipping | Online Services | Passive Income Ideas
+Blogging: Blog Ideas | Blogging Tips | Blog Design | WordPress Blogging | Lifestyle Blogging | Food Blogging | Travel Blogging | Fashion Blogging | SEO Blogging | Blog Monetization
+Affiliate Marketing: Affiliate Programs | Affiliate Links | Pinterest Affiliate Marketing | Blog Affiliate Marketing | Product Reviews | Affiliate Niches | Affiliate Content | Affiliate SEO | Affiliate Strategies | Affiliate Income
+Digital Marketing: SEO | Content Marketing | Email Marketing | Social Media Marketing | Search Marketing | Online Advertising | Marketing Strategy | Marketing Analytics | Lead Generation | Conversion Optimization
+Social Media Marketing: Instagram Marketing | Facebook Marketing | TikTok Marketing | Pinterest Marketing | YouTube Marketing | Social Media Strategy | Content Planning | Social Media Branding | Engagement Strategies | Social Media Analytics
+Pinterest Marketing: Pinterest SEO | Pinterest Keywords | Pinterest Pins | Pinterest Boards | Pinterest Business | Pinterest Analytics | Pinterest Traffic | Pinterest Content Strategy | Pinterest Affiliate Marketing | Pinterest Growth
+Branding: Brand Identity | Logo Branding | Brand Colors | Brand Fonts | Personal Branding | Business Branding | Luxury Branding | Minimal Branding | Packaging Branding | Brand Strategy
+E-commerce: Online Stores | Shopify | Product Ideas | Product Photography | Product Listings | E-commerce Branding | E-commerce Marketing | Online Shopping | Store Design | E-commerce Tips
+Finance: Personal Finance | Money Management | Budgeting | Saving | Investing | Debt Management | Financial Planning | Passive Income | Financial Goals | Money Tips
+Budgeting: Monthly Budget | Weekly Budget | Family Budget | Student Budget | Zero-Based Budget | Budget Planner | Grocery Budget | Household Budget | Budget Templates | Budgeting Tips
+Saving Money: Money-Saving Tips | Frugal Living | Grocery Savings | Shopping Savings | Household Savings | Saving Challenges | Emergency Fund | Budget Saving | Couponing | No-Spend Challenges
+Investing: Investing Basics | Stocks | ETFs | Bonds | Index Funds | Retirement Investing | Long-Term Investing | Dividend Investing | Investment Education | Investment Planning
+Real Estate: Home Buying | Home Selling | Real Estate Investing | Rental Properties | Property Management | House Hunting | Real Estate Design | Property Renovation | Investment Properties | Real Estate Tips
+Travel: Travel Ideas | Travel Inspiration | Travel Planning | Solo Travel | Family Travel | Luxury Travel | Budget Travel | Adventure Travel | Weekend Trips | Travel Tips
+Travel Planning: Itinerary Ideas | Packing Lists | Travel Checklists | Trip Planning | Budget Planning | Travel Routes | Hotel Planning | Flight Planning | Road Trip Planning | Travel Apps
+Travel Destinations: Europe | Asia | North America | South America | Africa | Middle East | Australia | Island Destinations | City Breaks | Hidden Destinations
+Hotels & Resorts: Luxury Hotels | Boutique Hotels | Beach Resorts | Family Resorts | Romantic Hotels | Hotel Rooms | Hotel Design | Hotel Inspiration | Resort Pools | Hotel Photography
+Beach Travel: Beach Destinations | Tropical Beaches | Beach Resorts | Beach Outfits | Beach Photography | Beach Activities | Beach Vacation | Island Travel | Beach Packing | Beach Decor
+Adventure Travel: Hiking | Camping | Backpacking | Mountain Travel | Rock Climbing | Scuba Diving | Surfing | Kayaking | Wildlife Adventures | Outdoor Expeditions
+Road Trips: Road Trip Routes | Road Trip Packing | Road Trip Snacks | Road Trip Cars | Scenic Drives | Family Road Trips | Couple Road Trips | Road Trip Games | Road Trip Photography | Road Trip Planning
+Family Travel: Family Vacations | Kids Travel | Family Resorts | Family Road Trips | Family Activities | Travel With Toddlers | Travel With Babies | Family Packing | Budget Family Travel | Family Travel Tips
+Wedding: Wedding Ideas | Wedding Planning | Wedding Decor | Wedding Dresses | Wedding Photography | Wedding Flowers | Wedding Invitations | Wedding Cakes | Bridal Beauty | Wedding Reception
+Wedding Planning: Wedding Checklist | Wedding Budget | Wedding Timeline | Venue Ideas | Guest Lists | Wedding Vendors | Ceremony Planning | Reception Planning | Wedding Schedule | Wedding Organization
+Wedding Dresses: Bridal Gowns | Simple Wedding Dresses | Luxury Wedding Dresses | Boho Wedding Dresses | Mermaid Dresses | Ball Gowns | A-Line Dresses | Plus-Size Wedding Dresses | Modest Wedding Dresses | Wedding Dress Accessories
+Wedding Decor: Ceremony Decor | Reception Decor | Table Decor | Wedding Backdrops | Centerpieces | Wedding Lighting | Floral Decor | Rustic Wedding Decor | Luxury Wedding Decor | Minimalist Wedding Decor
+Wedding Invitations: Digital Invitations | Printable Invitations | Minimal Invitations | Luxury Invitations | Floral Invitations | Wedding Invitation Templates | Save-the-Date Cards | RSVP Cards | Invitation Typography | Invitation Design
+Bridal Beauty: Bridal Makeup | Bridal Skincare | Bridal Hair | Bridal Nails | Bridal Hairstyles | Bridal Glow | Beauty Preparation | Pre-Wedding Skincare | Bridal Beauty Routine | Wedding Day Beauty
+Bridal Hairstyles: Bridal Buns | Bridal Braids | Updos | Half-Up Hairstyles | Long Hair Styles | Short Hair Styles | Veil Hairstyles | Floral Hairstyles | Traditional Bridal Hair | Modern Bridal Hair
+Bridal Makeup: Natural Bridal Makeup | Glam Bridal Makeup | Soft Glam | Eye Makeup | Bridal Lip Makeup | Pakistani Bridal Makeup | Indian Bridal Makeup | Asian Bridal Makeup | Bridal Makeup Tutorials | Bridal Makeup Inspiration
+Party Ideas: Birthday Parties | Baby Showers | Bridal Showers | Graduation Parties | Dinner Parties | Garden Parties | Themed Parties | Holiday Parties | Kids' Parties | Party Decorations
+Birthday Ideas: Birthday Themes | Birthday Decorations | Birthday Cakes | Birthday Invitations | Birthday Games | Kids' Birthdays | Adult Birthdays | Milestone Birthdays | Birthday Gifts | Birthday Party Food
+Baby & Parenting: Newborn Care | Baby Activities | Baby Food | Baby Sleep | Baby Clothes | Parenting Tips | Toddler Activities | Baby Room | Parenting Organization | Family Routines
+Pregnancy: Pregnancy Tips | Pregnancy Announcement | Maternity Fashion | Pregnancy Nutrition | Pregnancy Workouts | Baby Shower | Pregnancy Photography | Hospital Bag | Nursery Preparation | Pregnancy Journaling
+Baby Activities: Sensory Activities | Baby Games | Tummy Time | Learning Activities | Indoor Activities | Outdoor Activities | DIY Baby Toys | Motor Skills | Baby Crafts | Toddler Activities
+Kids Activities: Indoor Activities | Outdoor Activities | Arts & Crafts | Educational Games | Science Activities | STEM Activities | Coloring | Printable Activities | Holiday Activities | Family Games
+Family Activities: Family Games | Outdoor Activities | Family Crafts | Movie Nights | Family Cooking | Family Travel | Weekend Activities | Holiday Activities | Educational Activities | Family Challenges
+Pets: Pet Care | Pet Food | Pet Grooming | Pet Training | Pet Accessories | Pet Toys | Pet Photography | Pet Health | Pet Activities | Pet Products
+Dogs: Dog Training | Puppy Training | Dog Grooming | Dog Food | Dog Toys | Dog Breeds | Dog Activities | Dog Walking | Dog Accessories | Dog Photography
+Cats: Cat Care | Kitten Care | Cat Food | Cat Toys | Cat Grooming | Cat Breeds | Cat Activities | Cat Furniture | Cat Accessories | Cat Photography
+Animals: Wildlife | Farm Animals | Birds | Marine Animals | Wild Cats | Horses | Reptiles | Insects | Animal Photography | Animal Facts
+Cars: Car Photography | Luxury Cars | Sports Cars | Classic Cars | Electric Cars | SUVs | Trucks | Car Interiors | Car Modifications | Car Maintenance
+Motorcycles: Motorcycle Photography | Sport Bikes | Cruisers | Adventure Bikes | Classic Motorcycles | Motorcycle Gear | Motorcycle Customization | Motorcycle Trips | Motorcycle Maintenance | Motorcycle Lifestyle
+Technology: Smartphones | Laptops | Computers | AI Tools | Apps | Gadgets | Smart Home | Wearable Technology | Tech Accessories | Technology Tips
+Gaming: PC Gaming | Console Gaming | Mobile Gaming | PlayStation | Xbox | Nintendo | Gaming Setup | Gaming Room | Gaming Accessories | Game Guides
+Movies & TV: Movie Recommendations | TV Shows | Netflix | Movie Quotes | TV Quotes | Movie Posters | Film Photography | Actors & Characters | Movie Aesthetics | Entertainment News
+Music & Entertainment: Music | Songs | Playlists | Music Quotes | Concerts | Musicians | Singing | Instruments | Music Production | Entertainment Ideas
