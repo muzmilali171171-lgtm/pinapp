@@ -210,32 +210,22 @@ function pin_resolve_style(string $value, string $title): string
 /** Changes whenever template code changes, so cached previews refresh automatically. */
 function pin_template_preview_version(): string
 {
-    $files = [__DIR__ . '/pin_templates_300.php', __DIR__ . '/pin_templates_100.php', __DIR__ . '/pin_templates_60.php', __DIR__ . '/pin_templates_more.php', __DIR__ . '/pin_styles_extra.php', __DIR__ . '/pin_template_registry.php', __DIR__ . '/ai_functions.php'];
+    $files = [__DIR__ . '/../assets/img/template-sky.jpg', __DIR__ . '/pin_templates_300.php', __DIR__ . '/pin_templates_100.php', __DIR__ . '/pin_templates_60.php', __DIR__ . '/pin_templates_more.php', __DIR__ . '/pin_styles_extra.php', __DIR__ . '/pin_template_registry.php', __DIR__ . '/ai_functions.php'];
     $m = 0;
     foreach ($files as $f) $m = max($m, (int)@filemtime($f));
     return substr(md5((string)$m), 0, 8);
 }
 
-/** Sample photo for template previews (downloaded once from the site's CDN and cached). */
+/** Sample background for template previews: a soft sky-blue, cloudy image shipped with the app (assets/img/template-sky.jpg). */
 function pin_template_sample_image(string $cacheDir): ?string
 {
-    $url = 'https://media.webtopin.com/cdn/uploads/a75be867c16cff3b35e3d4849775c9fc.png';
-    $cache = rtrim($cacheDir, '/') . '/_sample.img';
-    if (is_file($cache) && filesize($cache) > 1000) return file_get_contents($cache);
-    $ch = curl_init($url);
-    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_FOLLOWLOCATION => true, CURLOPT_TIMEOUT => 30, CURLOPT_USERAGENT => 'AutomatedPin/1.0']);
-    $bytes = curl_exec($ch);
-    $code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-    if ($code === 200 && is_string($bytes) && @imagecreatefromstring($bytes)) {
-        @file_put_contents($cache, $bytes);
-        return $bytes;
-    }
-    // Fallback: a soft gradient so previews still render if the CDN is unreachable.
+    $sky = __DIR__ . '/../assets/img/template-sky.jpg';
+    if (is_file($sky)) return file_get_contents($sky);
+    // Fallback if the file is missing: a plain sky-blue gradient.
     $im = imagecreatetruecolor(1024, 1536);
     for ($y = 0; $y < 1536; $y++) {
         $t = $y / 1536;
-        imageline($im, 0, $y, 1024, $y, imagecolorallocate($im, (int)(214 - 40 * $t), (int)(196 - 30 * $t), (int)(178 - 20 * $t)));
+        imageline($im, 0, $y, 1024, $y, imagecolorallocate($im, (int)(92 + 122 * $t), (int)(170 + 66 * $t), (int)(240 + 15 * $t)));
     }
     ob_start(); imagejpeg($im, null, 90); $out = ob_get_clean(); imagedestroy($im);
     return $out;

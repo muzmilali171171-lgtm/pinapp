@@ -14,7 +14,7 @@
 
 require_once __DIR__ . '/ai_functions.php';
 
-const CW_SAMPLE_IMAGE = 'https://media.webtopin.com/cdn/uploads/7ab2e5572b1504f22f79908988cdbd08.webp';
+const CW_SAMPLE_IMAGE = __DIR__ . '/../assets/img/template-sky.jpg'; // sky-blue cloudy sample used before a page is scanned
 const CW_MIN_IMG_W = 350;        // narrower than this = too small, skipped
 const CW_MIN_IMG_H = 350;        // shorter than this = too small, skipped
 const CW_MAX_WIDE_RATIO = 2.2;   // width / height above this = banner/strip, skipped
@@ -215,8 +215,11 @@ function cw_image_dims_ok(int $w, int $h): bool
 /** Caches the sample image used for template thumbnails before any site is scanned. */
 function cw_sample_image(): ?string
 {
-    $res = cw_download_usable_images([CW_SAMPLE_IMAGE], 1, 1);
-    return $res['images'][0]['url'] ?? null;
+    // Copied next to the downloaded page images, so pins can be drawn from it like any other image.
+    $name = 'sample_sky_' . substr(md5((string)@filemtime(CW_SAMPLE_IMAGE)), 0, 8) . '.jpg';
+    $dest = cw_src_abs_dir() . $name;
+    if (!is_file($dest) && is_file(CW_SAMPLE_IMAGE)) @copy(CW_SAMPLE_IMAGE, $dest);
+    return is_file($dest) ? CW_SRC_DIR . '/' . $name : null;
 }
 
 /* ===================== Projects ===================== */

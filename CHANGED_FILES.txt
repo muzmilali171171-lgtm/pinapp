@@ -504,3 +504,4 @@ admin/article-batch-limits.php
 design-share.php
 sitemap.php
 includes/sitemap_functions.php
+assets/img/template-sky.jpg

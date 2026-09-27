@@ -1,3 +1,9 @@
+# Update — sky-blue template previews
+
+Template previews (Pin Templates & Styles, free tools, Bulk Pin) and the Classic Wizard's template
+thumbnails now use a soft sky-blue, cloudy background (assets/img/template-sky.jpg) instead of the old
+sample photo. Old cached previews refresh automatically.
+
 # Update — endless photos & templates, font search, "Blog → AutomatedPin → Pinterest → 5x" section, security
 
 1. Design editor: photo search keeps loading more photos as you scroll (next Pexels page each time);
