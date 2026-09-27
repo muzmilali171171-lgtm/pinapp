@@ -80,6 +80,13 @@ if (!$article) {
     echo json_encode(['ok' => true, 'done' => true, 'message' => 'No due articles right now.']);
     exit;
 }
+// Each user can run only a set number of batches at once (Admin → Articles Schedule → Batch Limits).
+if ($article['status'] === 'queued' && !article_batch_allowed($pdo, (int)$batch['id'])) {
+    article_batch_lock_release($batchLock);
+    $limit = article_batch_limit_for_user(article_batch_limits_all($pdo), (int)$batch['user_id']);
+    echo json_encode(['ok' => true, 'done' => true, 'message' => "You already have $limit batch(es) running at once — this batch starts automatically as soon as one of them finishes."]);
+    exit;
+}
 
 $currentArticleId = $article['id'];
 $result = process_article_step($pdo, $article, $batch);

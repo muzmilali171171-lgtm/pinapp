@@ -1334,3 +1334,10 @@ CREATE TABLE IF NOT EXISTS design_elements (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     KEY idx_de_cat (category, status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Admin → Articles Schedule → Batch Limits (user_id 0 = default per user, -1 = server total)
+CREATE TABLE IF NOT EXISTS article_batch_limits (
+    user_id INT NOT NULL PRIMARY KEY,
+    max_batches INT NOT NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

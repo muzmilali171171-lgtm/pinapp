@@ -91,12 +91,13 @@
         </div>
 
         <div class="admin-nav-group">
-            <button type="button" class="admin-nav-group-toggle <?= in_array($activePage, ['articles-schedule', 'all-articles'], true) ? 'open' : '' ?>" id="artSchedToggle">
+            <button type="button" class="admin-nav-group-toggle <?= in_array($activePage, ['articles-schedule', 'all-articles', 'article-batch-limits'], true) ? 'open' : '' ?>" id="artSchedToggle">
                 Articles Schedule <span class="admin-nav-caret">▾</span>
             </button>
-            <div class="admin-nav-submenu <?= in_array($activePage, ['articles-schedule', 'all-articles'], true) ? 'open' : '' ?>" id="artSchedSubmenu">
+            <div class="admin-nav-submenu <?= in_array($activePage, ['articles-schedule', 'all-articles', 'article-batch-limits'], true) ? 'open' : '' ?>" id="artSchedSubmenu">
                 <a href="articles-schedule" class="<?= $activePage === 'articles-schedule' ? 'active' : '' ?>">Queue &amp; Cron</a>
                 <a href="articles" class="<?= $activePage === 'all-articles' ? 'active' : '' ?>">All Articles</a>
+                <a href="article-batch-limits" class="<?= $activePage === 'article-batch-limits' ? 'active' : '' ?>">Batch Limits</a>
             </div>
         </div>
 

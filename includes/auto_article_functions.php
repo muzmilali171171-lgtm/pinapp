@@ -1138,7 +1138,67 @@ function step_publish_article(PDO $pdo, array $article, array $batch): array
  *   - The cron / runner fallback loop (run_due_article_steps) goes round-robin across batches,
  *     one step per batch in turn, so even without workers no batch is stuck behind another.
  */
-if (!defined('ARTICLE_MAX_PARALLEL_BATCHES')) define('ARTICLE_MAX_PARALLEL_BATCHES', 10);
+if (!defined('ARTICLE_MAX_PARALLEL_BATCHES')) define('ARTICLE_MAX_PARALLEL_BATCHES', 20);
+if (!defined('ARTICLE_DEFAULT_BATCHES_PER_USER')) define('ARTICLE_DEFAULT_BATCHES_PER_USER', 5);
+
+/**
+ * Admin → Articles Schedule → Batch Limits. Table article_batch_limits:
+ *   user_id = 0   → default "batches at once" for every user (5)
+ *   user_id = -1  → total batches at once on the whole server (ARTICLE_MAX_PARALLEL_BATCHES)
+ *   user_id > 0   → that user's own limit (overrides the default)
+ */
+function article_batch_limits_ensure_schema(PDO $pdo): void
+{
+    static $done = false;
+    if ($done) return;
+    $done = true;
+    try {
+        $pdo->exec("CREATE TABLE IF NOT EXISTS article_batch_limits (
+            user_id INT NOT NULL PRIMARY KEY,
+            max_batches INT NOT NULL,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    } catch (Throwable $e) { /* created by migrate.php */ }
+}
+
+/** All saved limits: [user_id => max_batches] (includes the 0 / -1 rows). */
+function article_batch_limits_all(PDO $pdo): array
+{
+    article_batch_limits_ensure_schema($pdo);
+    try {
+        return array_map('intval', $pdo->query("SELECT user_id, max_batches FROM article_batch_limits")->fetchAll(PDO::FETCH_KEY_PAIR));
+    } catch (Throwable $e) {
+        return [];
+    }
+}
+
+function article_batch_limit_default(array $limits): int
+{
+    return max(1, (int)($limits[0] ?? ARTICLE_DEFAULT_BATCHES_PER_USER));
+}
+
+function article_batch_limit_total(array $limits): int
+{
+    return max(1, (int)($limits[-1] ?? ARTICLE_MAX_PARALLEL_BATCHES));
+}
+
+/** How many of this user's batches may run at the same time. */
+function article_batch_limit_for_user(array $limits, int $userId): int
+{
+    return isset($limits[$userId]) && $limits[$userId] > 0 ? (int)$limits[$userId] : article_batch_limit_default($limits);
+}
+
+/** Saves one limit row; $max = null removes a user's own limit (back to the default). */
+function article_batch_limit_save(PDO $pdo, int $userId, ?int $max): void
+{
+    article_batch_limits_ensure_schema($pdo);
+    if ($max === null || $max <= 0) {
+        if ($userId > 0) $pdo->prepare("DELETE FROM article_batch_limits WHERE user_id = ?")->execute([$userId]);
+        return;
+    }
+    $pdo->prepare("INSERT INTO article_batch_limits (user_id, max_batches) VALUES (?, ?)
+        ON DUPLICATE KEY UPDATE max_batches = VALUES(max_batches)")->execute([$userId, min(100, $max)]);
+}
 
 /** SQL condition for "this article has work to do right now" (table alias a). */
 function article_due_condition_sql(): string
@@ -1151,16 +1211,47 @@ function article_due_condition_sql(): string
         AND NOT (COALESCE(a.last_error, '') LIKE 'Retrying%' AND a.updated_at > NOW() - INTERVAL 3 MINUTE)";   // short pause between retries (COALESCE: a NULL here used to hide every article for 3 min after each step)
 }
 
-/** Active batches that have an article due right now, oldest work first. */
-function due_article_batch_ids(PDO $pdo): array
+/** Active batches that have an article due right now, oldest work first: [batch_id => user_id]. */
+function due_article_batches(PDO $pdo): array
 {
-    $stmt = $pdo->prepare("SELECT a.batch_id, MIN(a.scheduled_for) AS first_due, MIN(a.id) AS first_id FROM articles a
+    $stmt = $pdo->prepare("SELECT a.batch_id, b.user_id, MIN(a.scheduled_for) AS first_due, MIN(a.id) AS first_id FROM articles a
         JOIN article_batches b ON b.id = a.batch_id
         WHERE b.status = 'active' AND " . article_due_condition_sql() . "
-        GROUP BY a.batch_id
+        GROUP BY a.batch_id, b.user_id
         ORDER BY first_due ASC, first_id ASC");
     $stmt->execute([date('Y-m-d')]);
-    return array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
+    $out = [];
+    foreach ($stmt->fetchAll() as $r) $out[(int)$r['batch_id']] = (int)$r['user_id'];
+    return $out;
+}
+
+function due_article_batch_ids(PDO $pdo): array
+{
+    return array_keys(due_article_batches($pdo));
+}
+
+/**
+ * Due batches that may run right now: each user's oldest N due batches (N = that user's
+ * "batches at once" limit from Admin → Batch Limits). A user's other batches wait for a slot.
+ */
+function allowed_article_batch_ids(PDO $pdo): array
+{
+    $limits = article_batch_limits_all($pdo);
+    $perUser = [];
+    $out = [];
+    foreach (due_article_batches($pdo) as $batchId => $userId) {
+        $perUser[$userId] = ($perUser[$userId] ?? 0) + 1;
+        if ($perUser[$userId] <= article_batch_limit_for_user($limits, $userId)) $out[] = $batchId;
+    }
+    return $out;
+}
+
+/** May this batch run right now (inside its user's "batches at once" limit)? Batches with nothing due count as allowed. */
+function article_batch_allowed(PDO $pdo, int $batchDbId): bool
+{
+    $due = due_article_batches($pdo);
+    if (!isset($due[$batchDbId])) return true;
+    return in_array($batchDbId, allowed_article_batch_ids($pdo), true);
 }
 
 /** The next article to step in one batch (articles already mid-pipeline first, then the oldest due one). */
@@ -1226,7 +1317,7 @@ function article_run_one_step(PDO $pdo, array $article): ?array
 /**
  * Runs up to $maxSteps pipeline steps across ALL users' due/in-progress articles, system-wide,
  * going round-robin over the batches (one step for batch A, one for batch B, …) so no batch
- * waits for another batch to finish. Batches that a background worker is already running are
+ * waits for another batch to finish (only each user's "batches at once" limit applies). Batches that a background worker is already running are
  * skipped here (the worker handles them). Used by cron/article-scheduler.php, the built-in runner
  * and Admin → Articles Schedule.
  */
@@ -1239,7 +1330,7 @@ function run_due_article_steps(PDO $pdo, int $maxSteps = 10): array
 
     while ($processed < $maxSteps) {
         ensure_db_connection($pdo);
-        $batchIds = array_values(array_diff(due_article_batch_ids($pdo), $doneBatches));
+        $batchIds = array_values(array_diff(allowed_article_batch_ids($pdo), $doneBatches));
         if (!$batchIds) break;
 
         foreach ($batchIds as $batchDbId) {
@@ -1278,6 +1369,9 @@ function run_batch_article_steps(PDO $pdo, int $batchDbId, int $seconds = 540): 
         ensure_db_connection($pdo);
         $article = next_due_article_for_batch($pdo, $batchDbId, $seenFail);
         if (!$article) return ['steps_run' => $processed, 'log' => $log, 'more' => false];
+        // Over the user's "batches at once" limit (e.g. the admin lowered it): wait for a free slot.
+        // Only between articles, so an article that was started is always finished first.
+        if ($article['status'] === 'queued' && !article_batch_allowed($pdo, $batchDbId)) return ['steps_run' => $processed, 'log' => $log, 'more' => false];
         if (time() >= $end) return ['steps_run' => $processed, 'log' => $log, 'more' => true];
         $entry = article_run_one_step($pdo, $article);
         if (!$entry) return ['steps_run' => $processed, 'log' => $log, 'more' => false];   // batch stopped
@@ -1303,23 +1397,27 @@ function article_batch_worker_start(int $batchDbId): bool
 }
 
 /**
- * Makes sure every batch with due work has its own worker running (up to ARTICLE_MAX_PARALLEL_BATCHES
- * at once), so all batches — from every user — are written and published at the same time.
- * $onlyBatch: start just this batch (e.g. right after it was created).
+ * Makes sure every batch with due work has its own worker running, so all users' batches are
+ * written and published at the same time. Limits (Admin → Articles Schedule → Batch Limits):
+ * each user runs at most their "batches at once" (default 5), and the whole server at most
+ * the "total at once" number.
+ * $onlyBatch: start just this batch (e.g. right after it was created), if its user has a free slot.
  * Returns how many workers were started.
  */
 function article_batch_workers_kick(PDO $pdo, ?int $onlyBatch = null): int
 {
     if (function_exists('scheduler_runner_enabled') && !scheduler_runner_enabled()) return 0;
-    $ids = $onlyBatch ? [$onlyBatch] : due_article_batch_ids($pdo);
+    $allowed = allowed_article_batch_ids($pdo);
+    $total = article_batch_limit_total(article_batch_limits_all($pdo));
     $running = 0;
     $idle = [];
-    foreach ($ids as $id) {
-        if (article_batch_busy($id)) $running++; else $idle[] = $id;
+    foreach (due_article_batch_ids($pdo) as $id) {
+        if (article_batch_busy($id)) $running++;
+        elseif (in_array($id, $allowed, true) && ($onlyBatch === null || $id === $onlyBatch)) $idle[] = $id;
     }
     $started = 0;
     foreach ($idle as $id) {
-        if ($running + $started >= max(1, (int)ARTICLE_MAX_PARALLEL_BATCHES)) break;
+        if ($running + $started >= $total) break;
         if (article_batch_worker_start($id)) $started++;
     }
     return $started;
