@@ -417,8 +417,12 @@ function cw_daily_quota(array $sched, DateTime $start, DateTime $day): int
 /**
  * Assigns publish times. Pins are taken round by round (every page's 1st pin, then every
  * page's 2nd pin …); pin N+1 of a page goes out at least page_gap_days after pin N. Each day
- * holds at most its quota (existing pending pins on the same account count toward it), and the
- * slots of a day are spread evenly across 24 hours from the start time (6/day = every 4 hours).
+ * holds at most its quota of THIS run's pins, and the slots of a day are spread evenly across
+ * 24 hours from the start time (6/day = every 4 hours). The run always starts on the chosen
+ * start date — pins the account already has scheduled (other runs / tools) never push it later;
+ * they are only kept from landing on the exact same minute.
+ * Starting today after the start time: today's pins are spread from now until midnight
+ * (instead of all being overdue and going out at once).
  *
  * $pins: [['id'=>..,'page_key'=>..,'pin_index'=>..], ...] in page order. Returns [id => 'Y-m-d H:i:s'].
  */
@@ -426,9 +430,10 @@ function cw_compute_schedule(PDO $pdo, int $accountId, array $pins, array $sched
 {
     $tz = new DateTimeZone(date_default_timezone_get());
     $now = new DateTime('now', $tz);
+    $today = (clone $now)->setTime(0, 0);
     $startDate = DateTime::createFromFormat('Y-m-d', (string)($sched['start_date'] ?? ''), $tz) ?: (clone $now)->modify('+1 day');
     $startDate->setTime(0, 0);
-    if ($startDate < (clone $now)->setTime(0, 0)) $startDate = (clone $now)->setTime(0, 0);
+    if ($startDate < $today) $startDate = clone $today;
     [$sh, $sm] = array_map('intval', explode(':', preg_match('/^\d{1,2}:\d{2}$/', (string)($sched['start_time'] ?? '')) ? $sched['start_time'] : '08:00'));
     $gapDays = max(1, min(365, (int)($sched['page_gap_days'] ?? 30)));
     // Gap between pins of the same page can be in minutes or days.
@@ -436,11 +441,15 @@ function cw_compute_schedule(PDO $pdo, int $accountId, array $pins, array $sched
     $gapMinutes = max(1, min(525600, (int)($sched['page_gap_minutes'] ?? 60)));
     $jitter = !empty($sched['jitter']) ? 12 : 0;
 
-    // Existing pending pins on this account, per day, so two runs don't stack on the same days.
-    $used = [];
-    $stmt = $pdo->prepare("SELECT DATE(publish_at) d, COUNT(*) c FROM scheduled_pins WHERE pinterest_account_id = ? AND status = 'pending' AND publish_at >= ? GROUP BY DATE(publish_at)");
+    // Minutes the account already has a pending pin at, so this run doesn't post at the very same minute.
+    $taken = [];
+    $stmt = $pdo->prepare("SELECT DATE_FORMAT(publish_at, '%Y-%m-%d %H:%i') m FROM scheduled_pins WHERE pinterest_account_id = ? AND status = 'pending' AND publish_at >= ?");
     $stmt->execute([$accountId, $startDate->format('Y-m-d 00:00:00')]);
-    foreach ($stmt->fetchAll() as $r) $used[$r['d']] = (int)$r['c'];
+    foreach ($stmt->fetchAll(PDO::FETCH_COLUMN) as $m) $taken[$m] = true;
+
+    // First slot today can't be in the past: start from a few minutes from now.
+    $soon = (clone $now)->modify('+5 minutes');
+    $soon->setTime((int)$soon->format('H'), (int)$soon->format('i'), 0);
 
     $byPage = [];
     foreach ($pins as $p) $byPage[$p['page_key']][] = $p;
@@ -448,6 +457,7 @@ function cw_compute_schedule(PDO $pdo, int $accountId, array $pins, array $sched
     unset($list);
     $maxRounds = $byPage ? max(array_map('count', $byPage)) : 0;
 
+    $used = [];
     $lastDate = [];
     $lastAt = [];
     $out = [];
@@ -472,12 +482,20 @@ function cw_compute_schedule(PDO $pdo, int $accountId, array $pins, array $sched
             $quota = cw_daily_quota($sched, $startDate, $day);
             $slot = $used[$d] ?? 0;
             $used[$d] = $slot + 1;
-            $minutes = (int)round($slot * (1440 / $quota));
-            $at = (clone $day)->setTime($sh, $sm)->modify("+$minutes minutes");
+            $base = (clone $day)->setTime($sh, $sm);
+            $step = 1440 / $quota;
+            if ($day == $today && $base < $soon) {
+                // Today, start time already passed: spread today's slots over the rest of the day.
+                $base = clone $soon;
+                $left = max(10, (int)floor(((clone $today)->modify('+1 day')->getTimestamp() - $soon->getTimestamp()) / 60));
+                $step = min($step, $left / $quota);
+            }
+            $at = (clone $base)->modify('+' . (int)round($slot * $step) . ' minutes');
             if ($earliest && $at < $earliest) $at = clone $earliest;
             if ($jitter) $at->modify(random_int(-$jitter, $jitter) . ' minutes');
-            // A time that has already passed stays in the past on purpose: on approval such
-            // overdue pins are published immediately instead of waiting.
+            if ($at < $soon && $day == $today) $at = clone $soon;
+            for ($g = 0; $g < 60 && isset($taken[$at->format('Y-m-d H:i')]); $g++) $at->modify('+3 minutes');
+            $taken[$at->format('Y-m-d H:i')] = true;
             $out[$pin['id']] = $at->format('Y-m-d H:i:s');
             $lastDate[$key] = $day;
             $lastAt[$key] = clone $at;

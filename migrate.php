@@ -320,6 +320,11 @@ add_column_if_missing($pdo, 'crawl_sites', 'source', "source ENUM('scan','csv') 
 add_column_if_missing($pdo, 'users', 'affiliate_code', 'affiliate_code VARCHAR(30) DEFAULT NULL UNIQUE', $errors);
 add_column_if_missing($pdo, 'users', 'referred_by_user_id', 'referred_by_user_id INT DEFAULT NULL', $errors);
 add_column_if_missing($pdo, 'users', 'referred_by_code', 'referred_by_code VARCHAR(30) DEFAULT NULL', $errors);
+// Custom Design → Share design (public link)
+add_column_if_missing($pdo, 'user_designs', 'share_token', 'share_token VARCHAR(32) DEFAULT NULL UNIQUE', $errors);
+add_column_if_missing($pdo, 'user_designs', 'shared_at', 'shared_at DATETIME DEFAULT NULL', $errors);
+add_column_if_missing($pdo, 'user_designs', 'share_images', 'share_images TEXT DEFAULT NULL', $errors);
+add_column_if_missing($pdo, 'user_designs', 'copied_from', 'copied_from INT DEFAULT NULL', $errors);
 try {
     $affCount = $pdo->query("SELECT COUNT(*) FROM affiliate_settings")->fetchColumn();
     if ($affCount == 0) {

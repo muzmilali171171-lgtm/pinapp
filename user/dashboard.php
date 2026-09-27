@@ -4,6 +4,13 @@ require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/../includes/auth.php';
 require_login();
 
+// Came from a shared design ("Edit this design" → log in / sign up): open it in the editor now.
+if (!empty($_SESSION['after_login_redirect'])) {
+    $next = (string)$_SESSION['after_login_redirect'];
+    unset($_SESSION['after_login_redirect']);
+    if (preg_match('#^/user/[a-z0-9\-]+(\?[A-Za-z0-9=&%_\-]*)?$#', $next)) redirect(rtrim(APP_URL, '/') . $next);
+}
+
 $user = current_user($pdo);
 $activePage = 'dashboard';
 $pageTitle = 'Dashboard';
@@ -71,7 +78,7 @@ unset($_SESSION['free_tool_pincreate_pending']);
         <tr><th>Board</th><th>Total</th><th>Published</th><th>Pending</th></tr>
         <?php foreach ($byBoard as $b): ?>
         <tr>
-            <td><?= e($b['board_name'] ?: $b['board_id']) ?></td>
+            <td><?= e((string)($b['board_name'] ?: $b['board_id'])) ?></td>
             <td><?= $b['total'] ?></td>
             <td><?= $b['published'] ?></td>
             <td><?= $b['pending'] ?></td>

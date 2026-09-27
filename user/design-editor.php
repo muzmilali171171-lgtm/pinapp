@@ -10,8 +10,17 @@ require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/../includes/design_functions.php';
 require_once __DIR__ . '/../includes/auth.php';
+
+// Shared design link (design-share?t=…): logged-in visitors open it straight in the editor
+// (their own copy, or the original for its owner). Not logged in yet → back to the preview page.
+if (!empty($_GET['shared'])) {
+    $shared = design_by_share_token($pdo, (string)$_GET['shared']);
+    if (!$shared) redirect('designs');
+    if (empty($_SESSION['user_id'])) redirect(design_share_url($shared['share_token']));
+}
 require_login();
 $user = current_user($pdo);
+if (!empty($shared)) redirect('design-editor?id=' . design_open_shared($pdo, $shared, (int)$user['id']));
 
 $boot = ['id' => 0, 'template' => 0, 'width' => 1000, 'height' => 1500, 'title' => 'Untitled design'];
 if (!empty($_GET['id'])) {
@@ -30,7 +39,7 @@ $v = function (string $rel) { return @filemtime(__DIR__ . '/../' . $rel) ?: time
 <head>
 <meta charset="UTF-8">
 <title>Design Editor — <?= e(APP_NAME) ?></title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Alfa+Slab+One&family=Amatic+SC:wght@700&family=Anton&family=Archivo+Black&family=Bangers&family=Bebas+Neue&family=Caveat:wght@400;700&family=Cinzel:wght@400;700&family=DM+Serif+Display:ital@0;1&family=Dancing+Script:wght@400;700&family=Fredoka:wght@400;700&family=Great+Vibes&family=Josefin+Sans:ital,wght@0,400;0,700;1,400&family=Kaushan+Script&family=Lato:ital,wght@0,400;0,900;1,400&family=Lobster&family=Luckiest+Guy&family=Merriweather:ital,wght@0,400;0,900;1,400&family=Montserrat:ital,wght@0,400;0,800;1,400;1,800&family=Nunito:ital,wght@0,400;0,900;1,400&family=Open+Sans:ital,wght@0,400;0,800;1,400&family=Oswald:wght@400;700&family=Pacifico&family=Permanent+Marker&family=Playfair+Display:ital,wght@0,400;0,900;1,400;1,900&family=Poppins:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Quicksand:wght@400;700&family=Raleway:ital,wght@0,400;0,800;1,400&family=Righteous&family=Roboto:ital,wght@0,400;0,900;1,400&family=Sacramento&family=Satisfy&family=Shadows+Into+Light&family=Titan+One&display=swap">
@@ -41,21 +50,34 @@ $v = function (string $rel) { return @filemtime(__DIR__ . '/../' . $rel) ?: time
 <header class="de-top">
     <a href="designs" class="de-back" title="Back to your designs">←</a>
     <input type="text" id="deTitle" class="de-title" value="<?= e($boot['title']) ?>" maxlength="255" aria-label="Design title">
-    <button type="button" class="de-tbtn" id="deResizeBtn" title="Resize">📐 <span id="deSizeLabel"><?= $boot['width'] ?> × <?= $boot['height'] ?></span></button>
-    <div class="de-sep"></div>
+    <button type="button" class="de-tbtn de-desk" id="deResizeBtn" title="Resize">📐 <span id="deSizeLabel"><?= $boot['width'] ?> × <?= $boot['height'] ?></span></button>
+    <div class="de-sep de-desk"></div>
     <button type="button" class="de-tbtn" id="deUndo" title="Undo (Ctrl+Z)">↶</button>
     <button type="button" class="de-tbtn" id="deRedo" title="Redo (Ctrl+Y)">↷</button>
-    <div class="de-sep"></div>
-    <button type="button" class="de-tbtn" id="deZoomOut" title="Zoom out">−</button>
-    <span id="deZoomLabel" class="de-zoom">100%</span>
-    <button type="button" class="de-tbtn" id="deZoomIn" title="Zoom in">+</button>
-    <button type="button" class="de-tbtn" id="deZoomFit" title="Fit to screen">⤢</button>
+    <div class="de-sep de-desk"></div>
+    <button type="button" class="de-tbtn de-desk" id="deZoomOut" title="Zoom out">−</button>
+    <span id="deZoomLabel" class="de-zoom de-desk">100%</span>
+    <button type="button" class="de-tbtn de-desk" id="deZoomIn" title="Zoom in">+</button>
+    <button type="button" class="de-tbtn de-desk" id="deZoomFit" title="Fit to screen">⤢</button>
     <div class="de-spacer"></div>
     <span id="deSaveState" class="de-savestate"></span>
-    <button type="button" class="de-btn" id="deSave">💾 Save</button>
-    <button type="button" class="de-btn" id="deImportBtn" title="Import a design file (.json)">📂 Import</button>
-    <button type="button" class="de-btn" id="deDownloadBtn">⬇ Download</button>
-    <button type="button" class="de-btn de-primary" id="deUse">✔ Use This Design</button>
+    <button type="button" class="de-btn de-desk" id="deSave">💾 Save</button>
+    <button type="button" class="de-btn de-desk" id="deImportBtn" title="Import a design file (.json)">📂 Import</button>
+    <button type="button" class="de-btn" id="deDownloadBtn" title="Download or share">⬇<span class="de-lbl"> Download</span></button>
+    <button type="button" class="de-btn de-primary" id="deUse">✔<span class="de-lbl"> Use This Design</span><span class="de-lbl-short"> Use</span></button>
+    <div class="de-dd de-mob" id="deMoreDd">
+        <button type="button" class="de-tbtn de-more" id="deMoreBtn" title="More" aria-label="More options">⋯</button>
+        <div class="de-ddmenu de-moremenu">
+            <button type="button" data-proxy="deSave">💾 Save</button>
+            <button type="button" data-proxy="deShareOpenBtn">🔗 Share design</button>
+            <button type="button" data-proxy="deResizeBtn">📐 Resize</button>
+            <button type="button" data-proxy="deZoomIn">➕ Zoom in</button>
+            <button type="button" data-proxy="deZoomOut">➖ Zoom out</button>
+            <button type="button" data-proxy="deZoomFit">⤢ Fit to screen</button>
+            <button type="button" data-proxy="deImportBtn">📂 Import design file</button>
+        </div>
+    </div>
+    <button type="button" id="deShareOpenBtn" hidden></button>
 </header>
 
 <div class="de-main">
@@ -71,6 +93,7 @@ $v = function (string $rel) { return @filemtime(__DIR__ . '/../' . $rel) ?: time
     </nav>
 
     <aside class="de-panel" id="dePanel">
+        <div class="de-sheetbar"><span class="de-grip" aria-hidden="true"></span><button type="button" class="de-panel-close" id="dePanelClose" aria-label="Close panel">✕</button></div>
         <!-- Templates -->
         <section data-panel-body="templates">
             <h3>Templates</h3>
@@ -176,7 +199,7 @@ $v = function (string $rel) { return @filemtime(__DIR__ . '/../' . $rel) ?: time
     <div class="de-stagewrap">
         <!-- context toolbar -->
         <div class="de-ctx" id="deCtx">
-            <div class="de-ctx-empty" id="deCtxEmpty">Select an element to edit it · Double-click text to type · Del to delete · Ctrl+D duplicate</div>
+            <div class="de-ctx-empty" id="deCtxEmpty"><span class="de-desk-t">Select an element to edit it · Double-click text to type · Del to delete · Ctrl+D duplicate</span><span class="de-mob-t">Tap an element to edit it · Tap selected text again to type · Pinch to zoom</span></div>
 
             <div class="de-ctx-group" data-ctx="text" hidden>
                 <select id="deFont" class="de-fontsel" title="Font"></select>
@@ -356,7 +379,30 @@ $v = function (string $rel) { return @filemtime(__DIR__ . '/../' . $rel) ?: time
             <div class="de-dl-grid" id="deDlGrid" hidden></div>
         </div>
         <p class="de-muted" id="deDlNote" style="margin:10px 0 0;"></p>
-        <div class="de-modal-actions"><button type="button" class="de-btn" data-close>Cancel</button><button type="button" class="de-btn de-primary" id="deDlGo">Download</button></div>
+        <div class="de-modal-actions"><button type="button" class="de-btn de-share-btn" id="deDlShare">🔗 Share design</button><span class="de-spacer"></span><button type="button" class="de-btn" data-close>Cancel</button><button type="button" class="de-btn de-primary" id="deDlGo">Download</button></div>
+    </div>
+</div>
+
+<!-- Share design: public link anyone can open (no approval needed) -->
+<div class="de-modal" id="deShareModal" hidden>
+    <div class="de-modal-box de-share-box">
+        <h3>🔗 Share design</h3>
+        <p class="de-muted">Anyone with the link can see this design and open their own copy of it in the editor.</p>
+        <div id="deShareBusy" class="de-share-busy"><span class="de-spin"></span> Publishing your design…</div>
+        <div id="deShareReady" hidden>
+            <img id="deShareImg" class="de-share-img" alt="">
+            <div class="de-sharelink">
+                <input type="text" id="deShareUrl" class="de-input" readonly aria-label="Design link">
+                <button type="button" class="de-btn de-primary" id="deShareCopy">Copy link</button>
+            </div>
+            <div class="de-socials" id="deShareSocials"></div>
+            <div class="de-modal-actions">
+                <button type="button" class="de-btn" id="deUnshare">Stop sharing</button>
+                <span class="de-spacer"></span>
+                <a class="de-btn" id="deShareView" href="#" target="_blank" rel="noopener">Open page</a>
+                <button type="button" class="de-btn de-primary" data-close>Done</button>
+            </div>
+        </div>
     </div>
 </div>
 

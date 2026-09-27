@@ -1,3 +1,25 @@
+# Update — Classic Wizard start date fix, mobile design editor, Share design
+
+1. Classic Wizard schedule: pins now start on the start date you choose. Before, pins the Pinterest
+   account already had scheduled (other runs / tools) filled up the daily quota, so a new run was
+   pushed days later (e.g. "from Oct 2"). Now only this run's pins count toward its pins-per-day;
+   existing pins only stop two pins landing on the exact same minute. Starting today after the start
+   time: today's pins are spread from a few minutes from now until midnight (no burst of overdue pins).
+2. Custom Design editor works on phones like Canva: compact top bar with a ⋯ menu (Save, Share,
+   Resize, Zoom, Import), bottom tab bar, panels open as a bottom sheet (close after adding),
+   context toolbar scrolls sideways, dropdowns open as sheets (they now open on tap on iPhone too),
+   pinch with two fingers to zoom, bigger touch handles.
+3. Share design: Download → "Share design" (also ⋯ → Share design on phones). Publishes the design
+   to a public link right away (no admin approval): copy-link button + Facebook, X, Pinterest,
+   WhatsApp, LinkedIn, Telegram, Reddit, Email (and the phone share sheet). "Stop sharing" turns it off.
+   Link page (design-share?t=…): logged-in visitors open it straight in the design editor (their own
+   copy; the owner gets the original). Visitors see the preview and "Edit this design" → Log in /
+   Sign up, and land in the editor on that design afterwards. New columns on user_designs are added
+   automatically (or run /migrate.php).
+New file: design-share.php. Changed: includes/cw_functions.php, includes/design_functions.php,
+user/ajax-design.php, user/design-editor.php, user/dashboard.php, assets/js/design-editor.js,
+assets/css/design-editor.css, admin/scheduler.php, migrate.php, database/schema.sql.
+
 # Update — Classic Wizard gets all Pin Templates & Styles, cleaner user side, new user menu colours
 
 1. Classic Wizard: every Bulk Pin "Pin Templates & Styles" design (500+) is now in the template list too,

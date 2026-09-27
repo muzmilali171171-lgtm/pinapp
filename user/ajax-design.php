@@ -70,6 +70,41 @@ try {
             }
             out(['ok' => true, 'id' => $id]);
         }
+        case 'share': {
+            // Publishes the design to a public link right away (no approval needed).
+            design_ensure_share_schema($pdo);
+            $id = (int)($_POST['id'] ?? 0);
+            $row = design_row_for_user($pdo, $id, $userId);
+            if (!$row) out(['ok' => false, 'error' => 'Save the design first, then share it.']);
+            $imgs = json_decode((string)($_POST['images'] ?? '[]'), true);
+            $imgs = is_array($imgs) ? array_slice($imgs, 0, 10) : [];
+            $saved = [];
+            design_user_dir($userId);
+            foreach ($imgs as $n => $data) {
+                $rel = 'uploads/designs/' . $userId . '/share_' . $id . '_' . bin2hex(random_bytes(4)) . '_' . $n . '.jpg';
+                if (is_string($data) && design_save_data_url($data, __DIR__ . '/../' . $rel, 6 * 1024 * 1024)) $saved[] = $rel;
+            }
+            if (!$saved && !$row['thumb_path']) out(['ok' => false, 'error' => 'Could not make a preview of this design. Try again.']);
+            if ($saved) design_delete_share_images($row['share_images'] ?? null);
+            $token = !empty($row['share_token']) ? $row['share_token'] : bin2hex(random_bytes(8));
+            $pdo->prepare("UPDATE user_designs SET share_token = ?, shared_at = COALESCE(shared_at, NOW()), share_images = ? WHERE id = ?")
+                ->execute([$token, $saved ? json_encode($saved) : ($row['share_images'] ?? null), $id]);
+            $first = $saved[0] ?? ($row['thumb_path'] ?: '');
+            out(['ok' => true, 'url' => design_share_url($token), 'image' => $first ? rtrim(APP_URL, '/') . '/' . $first : '', 'title' => $row['title']]);
+        }
+        case 'unshare': {
+            design_ensure_share_schema($pdo);
+            $row = design_row_for_user($pdo, (int)($_POST['id'] ?? 0), $userId);
+            if (!$row) out(['ok' => false, 'error' => 'Design not found.']);
+            design_delete_share_images($row['share_images'] ?? null);
+            $pdo->prepare("UPDATE user_designs SET share_token = NULL, shared_at = NULL, share_images = NULL WHERE id = ?")->execute([(int)$row['id']]);
+            out(['ok' => true]);
+        }
+        case 'share_status': {
+            design_ensure_share_schema($pdo);
+            $row = design_row_for_user($pdo, (int)($_POST['id'] ?? 0), $userId);
+            out(['ok' => true, 'shared' => $row && !empty($row['share_token']), 'url' => $row && !empty($row['share_token']) ? design_share_url($row['share_token']) : '']);
+        }
         case 'rename': {
             $id = (int)($_POST['id'] ?? 0);
             $title = mb_substr(trim((string)($_POST['title'] ?? '')), 0, 255) ?: 'Untitled design';
@@ -100,6 +135,7 @@ try {
             $row = design_row_for_user($pdo, $id, $userId);
             if (!$row) out(['ok' => false, 'error' => 'Design not found.']);
             design_delete_thumb($row['thumb_path']);
+            design_delete_share_images($row['share_images'] ?? null);
             $pdo->prepare("DELETE FROM user_designs WHERE id = ?")->execute([$id]);
             out(['ok' => true]);
         }

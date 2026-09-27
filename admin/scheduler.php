@@ -151,7 +151,7 @@ include __DIR__ . '/includes/admin-header.php';
         <?php foreach ($upcoming as $p): ?>
         <tr>
             <td><?= e($p['user_name']) ?></td>
-            <td><?= e($p['board_name'] ?: $p['board_id']) ?></td>
+            <td><?= e((string)($p['board_name'] ?: $p['board_id'])) ?></td>
             <td><?= e($p['title'] ?: '(no title)') ?></td>
             <td><?= format_datetime($p['publish_at']) ?></td>
             <td><span class="badge badge-<?= e($p['status']) ?>"><?= e(ucfirst($p['status'])) ?></span></td>
@@ -172,7 +172,7 @@ include __DIR__ . '/includes/admin-header.php';
         <?php foreach ($failed as $p): ?>
         <tr>
             <td><?= e($p['user_name']) ?></td>
-            <td><?= e($p['board_name'] ?: $p['board_id']) ?></td>
+            <td><?= e((string)($p['board_name'] ?: $p['board_id'])) ?></td>
             <td><?= e($p['title'] ?: '(no title)') ?></td>
             <td><?= format_datetime($p['publish_at']) ?></td>
             <td class="muted"><?= e(mb_strimwidth((string)$p['last_error'], 0, 80, '...')) ?></td>

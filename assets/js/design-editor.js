@@ -235,9 +235,11 @@
         canvas.calcOffset();
         canvas.requestRenderAll();
     }
+    const isMobile = () => window.matchMedia('(max-width: 768px)').matches;
     function fitZoom() {
         const stage = $('deStage');
-        const z = Math.min((stage.clientWidth - 60) / design.w, (stage.clientHeight - 120) / design.h);
+        const m = isMobile();
+        const z = Math.min((stage.clientWidth - (m ? 20 : 60)) / design.w, (stage.clientHeight - (m ? 70 : 120)) / design.h);
         applyZoom(z);
     }
     /** Scales one page's saved JSON from the old page size to a new one (same maths as before). */
@@ -575,7 +577,9 @@
             $('deCtxEmpty').textContent = 'Cropping — drag the corners, then click Done (Enter). Esc cancels.';
             return;
         }
-        $('deCtxEmpty').textContent = 'Select an element to edit it · Double-click text to type · Double-click a photo to crop · Del to delete · Ctrl+D duplicate';
+        $('deCtxEmpty').textContent = isMobile()
+            ? 'Tap an element to edit it · Tap selected text again to type · Pinch to zoom'
+            : 'Select an element to edit it · Double-click text to type · Double-click a photo to crop · Del to delete · Ctrl+D duplicate';
         $('deCtxEmpty').hidden = !!o;
         showGroup('common', !!o);
         showGroup('text', isText(o));
@@ -2039,6 +2043,114 @@
     $('deTitle').addEventListener('input', markDirty);
     // double-click an empty frame → pick a photo
     canvas.on('mouse:dblclick', (e) => { if (e.target && isEmptyFrame(e.target)) { replaceTarget = e.target; $('deReplaceInput').click(); } });
+
+    /* =================================================== dropdowns (tap to open — works on phones too) */
+    document.addEventListener('click', (e) => {
+        const btn = e.target.closest('.de-dd > button');
+        const inMenu = e.target.closest('.de-ddmenu');
+        document.querySelectorAll('.de-ddmenu.open').forEach((m) => {
+            if ((!btn || m !== btn.nextElementSibling) && (!inMenu || m !== inMenu || e.target.closest('[data-proxy], [data-case], [data-fx], [data-layer], [data-palign]'))) m.classList.remove('open');
+        });
+        if (btn && btn.nextElementSibling && btn.nextElementSibling.classList.contains('de-ddmenu')) {
+            btn.nextElementSibling.classList.toggle('open');
+            btn.blur();
+        }
+        const proxy = e.target.closest('[data-proxy]');
+        if (proxy && $(proxy.dataset.proxy)) $(proxy.dataset.proxy).click();
+    });
+
+    /* =================================================== mobile (Canva-style bottom sheet + touch) */
+    function closePanel() {
+        document.body.classList.add('de-panel-closed');
+        document.querySelectorAll('.de-rail [data-panel]').forEach((x) => x.classList.remove('on'));
+    }
+    $('dePanelClose').addEventListener('click', closePanel);
+    document.querySelectorAll('.de-rail [data-panel]').forEach((b) => b.addEventListener('click', (e) => {
+        // tapping the open tab again closes the sheet
+        if (isMobile() && b.dataset.wasOn === '1') { closePanel(); b.dataset.wasOn = ''; e.stopImmediatePropagation(); return; }
+        document.querySelectorAll('.de-rail [data-panel]').forEach((x) => { x.dataset.wasOn = ''; });
+        b.dataset.wasOn = '1';
+    }, true));
+    // after adding something from the sheet, show the page again
+    $('dePanel').addEventListener('click', (e) => {
+        if (!isMobile()) return;
+        if (e.target.closest('.de-tpl, .de-photo, .de-el, .de-elgrid-std button, .de-elgrid-emoji button, .de-shapegrid button, .de-layoutgrid button, .de-addtext, .de-textstyles button, .de-emojigrid button')
+            && !e.target.closest('.de-photo-del, .de-photo-bg')) setTimeout(closePanel, 350);
+    });
+    if (isMobile()) {
+        closePanel();
+        fabric.Object.prototype.set({ cornerSize: 18, touchCornerSize: 34, padding: 6 });
+    }
+    // pinch with two fingers to zoom the page
+    let pinch = null;
+    const touchDist = (t) => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+    stageEl.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 2) { pinch = { d: touchDist(e.touches), z: zoom }; e.preventDefault(); e.stopPropagation(); }
+    }, { capture: true, passive: false });
+    stageEl.addEventListener('touchmove', (e) => {
+        if (pinch && e.touches.length === 2) {
+            e.preventDefault(); e.stopPropagation();
+            const z = pinch.z * touchDist(e.touches) / pinch.d;
+            if (Math.abs(z - zoom) / zoom > 0.02) applyZoom(z);
+        }
+    }, { capture: true, passive: false });
+    stageEl.addEventListener('touchend', (e) => { if (pinch && e.touches.length < 2) pinch = null; }, { capture: true });
+
+    /* =================================================== share design (public link) */
+    const SHARE_NETS = [
+        ['Facebook', '#1877f2', 'f', (u) => 'https://www.facebook.com/sharer/sharer.php?u=' + u],
+        ['X', '#000000', '𝕏', (u, t) => 'https://twitter.com/intent/tweet?url=' + u + '&text=' + t],
+        ['Pinterest', '#e60023', 'P', (u, t, m) => 'https://pinterest.com/pin/create/button/?url=' + u + '&media=' + m + '&description=' + t],
+        ['WhatsApp', '#25d366', 'W', (u, t) => 'https://wa.me/?text=' + t + '%20' + u],
+        ['LinkedIn', '#0a66c2', 'in', (u) => 'https://www.linkedin.com/sharing/share-offsite/?url=' + u],
+        ['Telegram', '#229ed9', '➤', (u, t) => 'https://t.me/share/url?url=' + u + '&text=' + t],
+        ['Reddit', '#ff4500', 'r', (u, t) => 'https://www.reddit.com/submit?url=' + u + '&title=' + t],
+        ['Email', '#6b7280', '✉', (u, t) => 'mailto:?subject=' + t + '&body=' + u],
+    ];
+    function showShareLink(r) {
+        const u = encodeURIComponent(r.url), t = encodeURIComponent(($('deTitle').value || 'My design')), m = encodeURIComponent(r.image || '');
+        $('deShareUrl').value = r.url;
+        $('deShareView').href = r.url;
+        $('deShareImg').hidden = !r.image;
+        if (r.image) $('deShareImg').src = r.image + (r.image.indexOf('?') < 0 ? '?v=' + Date.now() : '');
+        $('deShareSocials').innerHTML = SHARE_NETS.map(([n, c, i, f]) => `<a href="${esc(f(u, t, m))}" target="_blank" rel="noopener" style="background:${c}"><b>${esc(i)}</b>${esc(n)}</a>`).join('')
+            + (navigator.share ? '<button type="button" id="deShareNative" style="background:#374151"><b>⋯</b>More</button>' : '');
+        if (navigator.share) $('deShareNative').addEventListener('click', () => navigator.share({ title: $('deTitle').value, url: r.url }).catch(() => {}));
+        $('deShareBusy').hidden = true;
+        $('deShareReady').hidden = false;
+    }
+    async function shareDesign() {
+        $('deDlModal').hidden = true;
+        $('deShareBusy').hidden = false;
+        $('deShareReady').hidden = true;
+        $('deShareModal').hidden = false;
+        const ok = await save();
+        if (!ok || !design.id) { $('deShareModal').hidden = true; return; }
+        const images = [];
+        const mult = Math.min(1, 1000 / Math.max(design.w, design.h));
+        for (let i = 0; i < Math.min(10, pages.length); i++) {
+            try { images.push(await renderJSON(pages[i].json, { fmt: 'jpg', mult, quality: 0.85 })); } catch (e) { /* image blocks export — skip this page */ }
+        }
+        const r = await post({ action: 'share', id: design.id, images: JSON.stringify(images) });
+        if (!r.ok) { $('deShareModal').hidden = true; toast(r.error || 'Could not share this design.', 5000); return; }
+        showShareLink(r);
+    }
+    $('deDlShare').addEventListener('click', shareDesign);
+    $('deShareOpenBtn').addEventListener('click', shareDesign);
+    $('deShareCopy').addEventListener('click', () => {
+        const inp = $('deShareUrl');
+        const done = () => { $('deShareCopy').textContent = 'Copied ✓'; setTimeout(() => { $('deShareCopy').textContent = 'Copy link'; }, 1800); };
+        if (navigator.clipboard) navigator.clipboard.writeText(inp.value).then(done, () => { inp.select(); document.execCommand('copy'); done(); });
+        else { inp.select(); document.execCommand('copy'); done(); }
+    });
+    $('deUnshare').addEventListener('click', () => {
+        if (!confirm('Stop sharing? The link will stop working for everyone.')) return;
+        post({ action: 'unshare', id: design.id }).then((r) => {
+            $('deShareModal').hidden = true;
+            toast(r.ok ? 'This design is no longer shared.' : (r.error || 'Could not stop sharing.'));
+        });
+    });
+    $('deShareModal').addEventListener('click', (e) => { if (e.target === $('deShareModal') || e.target.hasAttribute('data-close')) $('deShareModal').hidden = true; });
 
     /* =================================================== boot */
     applyZoom(1);
