@@ -492,6 +492,111 @@ function ai_generate_pin_batch(PDO $pdo, array $keywords, bool $withTags, string
 }
 
 /**
+ * $count different pins for ONE article/page (Auto Article and Auto Website to Daily Pin).
+ * Every pin keeps the same search intent, the same main keyword and — if the source title has
+ * one — the same number, but gets its own freshly written title, description, alt text and a
+ * different set of related keywords, so no two pins of the same article read alike.
+ * $provider/$model default to the pin text model (then the article text model).
+ * Returns ['ok'=>bool, 'items'=>[['title','description','alt_text','keywords'], ...], 'error'=>?string].
+ */
+function ai_generate_pin_variations(PDO $pdo, string $sourceTitle, int $count, string $destLink = '', ?string $provider = null, ?string $model = null): array
+{
+    $count = max(1, $count);
+    $sourceTitle = trim($sourceTitle);
+    if (!$provider) {
+        $settings = get_article_settings($pdo);
+        $provider = $settings['pin_text_provider'] ?? null;
+        $model = $settings['pin_text_model'] ?? null;
+        if (!$provider) {
+            $provider = $settings['text_provider'] ?? null;
+            $model = $settings['text_model'] ?? null;
+        }
+    }
+    if (!$provider) {
+        return ['ok' => false, 'items' => [], 'error' => 'AI writing is not available right now. Please try again later.'];
+    }
+
+    $number = preg_match('/\d+/', $sourceTitle, $m) ? $m[0] : null;
+    $normalize = fn($s) => trim(preg_replace('/[^a-z0-9]+/', ' ', strtolower((string)$s)));
+    $ctaLine = $destLink !== ''
+        ? "End every description with a short, natural call-to-action inviting the reader to visit $destLink."
+        : 'End every description with a short, natural call-to-action inviting the reader to visit the website.';
+    $numberLine = $number !== null
+        ? "The source title contains the number $number: EVERY title must contain that exact number $number, written as a digit — never drop it, spell it out or change it."
+        : 'The source title has no number: do NOT add any number to the titles.';
+
+    $items = [];
+    $usedKeys = [$normalize($sourceTitle) => true];
+    $mainKeyword = '';
+    $lastError = null;
+    // Small rounds keep each call inside the output-token budget; each round is told which
+    // titles already exist so it never repeats them.
+    for ($round = 0; $round < 5 && count($items) < $count; $round++) {
+        $need = min(8, $count - count($items));
+        $existing = array_map(fn($it) => $it['title'], $items);
+        $systemPrompt = 'You are an expert Pinterest marketer. Respond with ONLY a JSON object, no markdown fences, no commentary. '
+            . 'Shape: {"main_keyword": "...", "pins": [{"title": "...", "description": "...", "alt_text": "...", "keywords": "..."}, ...]} '
+            . "with exactly $need objects in \"pins\". All pins promote the SAME article, so they must keep the SAME search intent and topic "
+            . 'as the source title. main_keyword: the core keyword phrase of the source title (2-5 words, as written in it). '
+            . 'EVERY title must contain that main keyword, but otherwise be a brand-new sentence with a different angle, hook and wording — '
+            . 'never the source title copied or lightly reworded, and never a near-duplicate of another pin or of an already used title. '
+            . 'Each pin must also work in DIFFERENT related/secondary keywords (synonyms, long-tail variations, related searches) in its title '
+            . 'and description, so the pins rank for different searches. ' . $numberLine . ' '
+            . 'Titles: catchy, STRICTLY under 100 characters. Descriptions: 2-4 natural sentences with the main keyword plus that pin\'s related '
+            . 'keywords, STRICTLY under 500 characters, each one written differently. alt_text: describes the pin image, under 500 characters. '
+            . 'keywords: 5-8 comma-separated lowercase keywords — the main keyword first, then that pin\'s own related keywords. ' . $ctaLine;
+        $userPrompt = "Source article title: $sourceTitle\n"
+            . ($mainKeyword !== '' ? "Main keyword: $mainKeyword\n" : '')
+            . ($existing ? "Titles already used (do NOT repeat or paraphrase these):\n- " . implode("\n- ", $existing) . "\n" : '')
+            . "Write $need different Pinterest pins for this article.";
+
+        $result = ai_generate_text($pdo, $provider, (string)$model, $systemPrompt, $userPrompt, min(4000, 700 + $need * 350));
+        if (!$result['ok']) { $lastError = $result['error']; continue; }
+        $json = extract_json_from_text($result['text']);
+        if (!is_array($json)) { $lastError = 'Could not parse the AI response.'; continue; }
+        if ($mainKeyword === '' && !empty($json['main_keyword']) && is_string($json['main_keyword'])) {
+            $mainKeyword = trim($json['main_keyword']);
+        }
+        $pins = $json['pins'] ?? $json['items'] ?? (array_keys($json) === range(0, count($json) - 1) ? $json : []);
+        foreach ((array)$pins as $row) {
+            if (!is_array($row) || count($items) >= $count) continue;
+            $title = trim((string)($row['title'] ?? ''));
+            if ($title === '') continue;
+            // Same number as the source title: splice it in if the model dropped or changed it.
+            if ($number !== null && !preg_match('/(?<!\d)' . $number . '(?!\d)/', $title)) {
+                $title = preg_match('/^\d+/', $title) ? preg_replace('/^\d+/', $number, $title) : $number . ' ' . $title;
+            } elseif ($number === null) {
+                $title = trim(preg_replace('/^\d+\s+/', '', $title));
+            }
+            $title = pin_enforce_max_chars($title, 100);
+            $key = $normalize($title);
+            if ($key === '' || isset($usedKeys[$key])) continue; // duplicate of the source or of another pin
+            $usedKeys[$key] = true;
+            $items[] = [
+                'title' => $title,
+                'description' => pin_enforce_max_chars(trim((string)($row['description'] ?? '')), 500),
+                'alt_text' => pin_enforce_max_chars(trim((string)($row['alt_text'] ?? '')), 500),
+                'keywords' => pin_enforce_max_chars(trim((string)($row['keywords'] ?? '')), 500),
+            ];
+        }
+    }
+
+    if (empty($items) && $lastError !== null) {
+        return ['ok' => false, 'items' => [], 'error' => $lastError];
+    }
+    // Last resort for any pin the rounds above could not fill: a plain-text single-pin call.
+    for ($guard = 0; count($items) < $count && $guard < $count * 2; $guard++) {
+        $fallback = ai_generate_single_pin_fallback($pdo, $provider, (string)$model, $sourceTitle);
+        $key = $normalize($fallback['title']);
+        if (isset($usedKeys[$key]) && $guard < $count) continue;
+        $usedKeys[$key] = true;
+        $items[] = $fallback;
+    }
+
+    return ['ok' => true, 'items' => $items, 'error' => null];
+}
+
+/**
  * Safety net for ai_generate_pin_batch(): if the model returned a title that's just the
  * keyword/topic copied (or trivially reworded — same words, ignoring case/punctuation),
  * ask once more for a genuinely fresh, attractive title with the same intent, keeping any

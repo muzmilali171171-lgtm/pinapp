@@ -140,8 +140,8 @@ function website_pin_image_settings(PDO $pdo, array $articleSettings, string $qu
 
 /**
  * Generates $count pin title/description/alt/keyword sets for the SAME page —
- * all sharing that page's topic/intent, but each genuinely reworded so no two
- * pins for the page read as duplicates. All $count pins share one board.
+ * all sharing that page's topic/intent, main keyword and number, but each with a
+ * new title, description and related keywords. All $count pins share one board.
  */
 function ai_generate_page_pin_variations(PDO $pdo, string $pageTitle, int $count, string $destLink = ''): array
 {
@@ -152,41 +152,9 @@ function ai_generate_page_pin_variations(PDO $pdo, string $pageTitle, int $count
         return ['ok' => false, 'items' => [], 'error' => 'No AI text model is configured for Auto Website to Daily Pin yet.'];
     }
 
-    $ctaLine = $destLink !== ''
-        ? "Each description should end with a short, natural call-to-action inviting the reader to visit $destLink."
-        : "Each description should end with a short, natural call-to-action.";
-    $systemPrompt = 'You are an expert Pinterest marketer. Respond with ONLY a JSON array, no markdown fences, no commentary. '
-        . 'Shape: [{"title": "...", "description": "...", "alt_text": "...", "keywords": "..."}, ...] — exactly ' . $count . ' objects. '
-        . 'Every object is for the SAME page/topic — they must all share the same intent and subject — but each '
-        . 'title and description must be genuinely reworded and distinct from the others (different angle, different '
-        . 'phrasing, different hook) so none of them read as duplicates or near-duplicates of each other. '
-        . 'Titles: catchy, keyword-rich, STRICTLY under 100 characters. Descriptions: 2-3 sentences, STRICTLY under 500 characters. '
-        . 'alt_text: descriptive, STRICTLY under 500 characters. keywords: 5-8 comma-separated lowercase keywords/phrases. '
-        . $ctaLine;
-    $userPrompt = "Page title/topic: $pageTitle\nGenerate $count distinct Pinterest pins for this one page.";
-
-    $result = ai_generate_text($pdo, $provider, $model, $systemPrompt, $userPrompt, 3000);
-    if (!$result['ok']) {
-        return ['ok' => false, 'items' => [], 'error' => $result['error']];
-    }
-    $json = extract_json_from_text($result['text']);
-    if (!$json || !is_array($json)) {
-        return ['ok' => false, 'items' => [], 'error' => 'Could not parse the AI response.'];
-    }
-    $isList = array_keys($json) === range(0, count($json) - 1);
-    if (!$isList) $json = $json['pins'] ?? $json['items'] ?? array_values($json);
-
-    $items = [];
-    for ($i = 0; $i < $count; $i++) {
-        $row = $json[$i] ?? null;
-        $items[] = [
-            'title' => pin_enforce_max_chars(is_array($row) ? trim((string)($row['title'] ?? $pageTitle)) : $pageTitle, 100),
-            'description' => pin_enforce_max_chars(is_array($row) ? trim((string)($row['description'] ?? '')) : '', 500),
-            'alt_text' => pin_enforce_max_chars(is_array($row) ? trim((string)($row['alt_text'] ?? '')) : '', 500),
-            'keywords' => pin_enforce_max_chars(is_array($row) ? trim((string)($row['keywords'] ?? '')) : '', 500),
-        ];
-    }
-    return ['ok' => true, 'items' => $items, 'error' => null];
+    // Same intent + main keyword (+ the title's number) on every pin, each with its own new
+    // title, description and related keywords — see ai_generate_pin_variations().
+    return ai_generate_pin_variations($pdo, $pageTitle, $count, $destLink, $provider, $model);
 }
 
 /* ===================== Board resolution ===================== */

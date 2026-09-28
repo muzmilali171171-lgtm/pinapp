@@ -709,9 +709,10 @@ function auto_schedule_pins_for_article(PDO $pdo, array $article, array $batch):
         return ['ok' => false, 'error' => 'Could not resolve a board for auto-pinning.'];
     }
 
-    // AI writer for pin title/description/alt/keywords, tailored to this one article.
-    $pinCopy = ai_generate_pin_batch($pdo, [$article['title']], false, $article['wp_post_url'] ?: '');
-    $copyItem = $pinCopy['ok'] ? $pinCopy['items'][0] : ['title' => $article['title'], 'description' => '', 'alt_text' => '', 'keywords' => ''];
+    // AI writer: a different title/description/alt/keywords for EACH of this article's pins —
+    // same intent, main keyword and number as the article title, new related keywords per pin.
+    $pinCopy = ai_generate_pin_variations($pdo, $article['title'], $pinsPerArticle, $article['wp_post_url'] ?: '');
+    $fallbackCopy = ['title' => $article['title'], 'description' => '', 'alt_text' => '', 'keywords' => ''];
 
     $batchCreated = new DateTime($batch['created_at']);
     $scheduled = 0;
@@ -725,6 +726,7 @@ function auto_schedule_pins_for_article(PDO $pdo, array $article, array $batch):
     $prevAt = null;
     $newPinIds = [];
     for ($i = 0; $i < $pinsPerArticle; $i++) {
+        $copyItem = ($pinCopy['ok'] ? ($pinCopy['items'][$i] ?? null) : null) ?: $fallbackCopy;
         $targetDate = new DateTime('today');
         if (!$gapMinutesMode) $targetDate->modify('+' . ($i * $articleGapDays) . ' days');
         $earliest = ($gapMinutesMode && $prevAt) ? (clone $prevAt)->modify("+$gapMinutes minutes") : null;
@@ -752,8 +754,9 @@ function auto_schedule_pins_for_article(PDO $pdo, array $article, array $batch):
         $ctaText = $ctaMode === 'none' ? '' : ($ctaMode === 'custom' && $ctaTextSetting !== '' ? $ctaTextSetting : auto_pick_cta($article['title']));
         $style = pin_resolve_style((string)$imageStyle, $article['title']);
 
-        // Article titles are long — print a short, unique headline and base the photo on the category.
-        $brief = pin_prepare_image_brief($pdo, $article['title'], article_batch_category_path($pdo, $batch, 'pin'));
+        // Print a short headline from THIS pin's own title (so each pin's image text differs too)
+        // and base the photo on the category.
+        $brief = pin_prepare_image_brief($pdo, $copyItem['title'], article_batch_category_path($pdo, $batch, 'pin'));
         // Single vs collage (and how many different photos) comes from the chosen template.
         $gen = pin_generate_template_images($pdo, $style, $brief['headline'], '', $brief, $sizeKey, (string)$imgSettings['provider'], (string)$imgSettings['model'], (int)$imgSettings['iterations']);
         $genOk = $gen['ok'];
