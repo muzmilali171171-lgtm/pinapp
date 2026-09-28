@@ -71,12 +71,13 @@
 
         <a href="users" class="<?= $activePage === 'users' ? 'active' : '' ?>">Users</a>
         <div class="admin-nav-group">
-            <button type="button" class="admin-nav-group-toggle <?= in_array($activePage, ['scheduler', 'all-pins'], true) ? 'open' : '' ?>" id="pinsSchedToggle">
+            <button type="button" class="admin-nav-group-toggle <?= in_array($activePage, ['scheduler', 'all-pins', 'website-pin-batch-limits'], true) ? 'open' : '' ?>" id="pinsSchedToggle">
                 All Pins Scheduled <span class="admin-nav-caret">▾</span>
             </button>
-            <div class="admin-nav-submenu <?= in_array($activePage, ['scheduler', 'all-pins'], true) ? 'open' : '' ?>" id="pinsSchedSubmenu">
+            <div class="admin-nav-submenu <?= in_array($activePage, ['scheduler', 'all-pins', 'website-pin-batch-limits'], true) ? 'open' : '' ?>" id="pinsSchedSubmenu">
                 <a href="scheduler" class="<?= $activePage === 'scheduler' ? 'active' : '' ?>">Scheduler &amp; Cron</a>
                 <a href="pins" class="<?= $activePage === 'all-pins' ? 'active' : '' ?>">All Pins</a>
+                <a href="website-pin-batch-limits" class="<?= $activePage === 'website-pin-batch-limits' ? 'active' : '' ?>">Batch Limits</a>
             </div>
         </div>
 

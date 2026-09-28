@@ -1346,3 +1346,11 @@ CREATE TABLE IF NOT EXISTS article_batch_limits (
     max_batches INT NOT NULL,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Admin → All Pins Scheduled → Batch Limits for Auto Website to Daily Pin / Classic Wizard
+-- (user_id 0 = default per user, -1 = server total)
+CREATE TABLE IF NOT EXISTS website_pin_batch_limits (
+    user_id INT NOT NULL PRIMARY KEY,
+    max_batches INT NOT NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

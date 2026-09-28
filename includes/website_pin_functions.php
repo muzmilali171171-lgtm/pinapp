@@ -666,30 +666,266 @@ function ensure_website_pin_batches_row(PDO $pdo, array $batch): string
     return $batch['batch_id'];
 }
 
-/* ===================== Shared step-loop (cron + tick + manual button) ===================== */
+/* ===================== Batches side by side (cron + tick + workers) ===================== */
 
+/**
+ * Every Auto Website to Daily Pin / Classic Wizard batch runs on its own — a new batch never waits
+ * for another batch (the same user's or another user's) to finish:
+ *   - each batch with due pages gets its own background worker (cron/website-pin-worker.php);
+ *   - a per-batch lock file makes sure only one process works on a batch at a time;
+ *   - the cron / runner fallback loop goes round-robin over the batches (one step per batch in turn).
+ * Limits (Admin → All Pins Scheduled → Batch Limits): each user runs at most their "batches at once"
+ * (default 10); their other batches wait and start as soon as one finishes. The whole server runs at
+ * most the "total at once" (default 10,000).
+ */
+if (!defined('WEBSITE_PIN_MAX_PARALLEL_BATCHES')) define('WEBSITE_PIN_MAX_PARALLEL_BATCHES', 10000);
+if (!defined('WEBSITE_PIN_DEFAULT_BATCHES_PER_USER')) define('WEBSITE_PIN_DEFAULT_BATCHES_PER_USER', 10);
+if (!defined('BATCH_LIMIT_MAX')) define('BATCH_LIMIT_MAX', 100000);
+if (!defined('BATCH_WORKERS_PER_KICK')) define('BATCH_WORKERS_PER_KICK', 500);
+
+/** Table website_pin_batch_limits: user_id 0 = default per user, -1 = server total, > 0 = that user's own limit. */
+function website_pin_batch_limits_ensure_schema(PDO $pdo): void
+{
+    static $done = false;
+    if ($done) return;
+    $done = true;
+    try {
+        $pdo->exec("CREATE TABLE IF NOT EXISTS website_pin_batch_limits (
+            user_id INT NOT NULL PRIMARY KEY,
+            max_batches INT NOT NULL,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    } catch (Throwable $e) { /* created by migrate.php */ }
+}
+
+/** All saved limits: [user_id => max_batches] (includes the 0 / -1 rows). */
+function website_pin_batch_limits_all(PDO $pdo): array
+{
+    website_pin_batch_limits_ensure_schema($pdo);
+    try {
+        return array_map('intval', $pdo->query("SELECT user_id, max_batches FROM website_pin_batch_limits")->fetchAll(PDO::FETCH_KEY_PAIR));
+    } catch (Throwable $e) {
+        return [];
+    }
+}
+
+function website_pin_batch_limit_default(array $limits): int
+{
+    return max(1, (int)($limits[0] ?? WEBSITE_PIN_DEFAULT_BATCHES_PER_USER));
+}
+
+function website_pin_batch_limit_total(array $limits): int
+{
+    return max(1, (int)($limits[-1] ?? WEBSITE_PIN_MAX_PARALLEL_BATCHES));
+}
+
+function website_pin_batch_limit_for_user(array $limits, int $userId): int
+{
+    return isset($limits[$userId]) && $limits[$userId] > 0 ? (int)$limits[$userId] : website_pin_batch_limit_default($limits);
+}
+
+/** Saves one limit row; $max = null removes a user's own limit (back to the default). */
+function website_pin_batch_limit_save(PDO $pdo, int $userId, ?int $max): void
+{
+    website_pin_batch_limits_ensure_schema($pdo);
+    if ($max === null || $max <= 0) {
+        if ($userId > 0) $pdo->prepare("DELETE FROM website_pin_batch_limits WHERE user_id = ?")->execute([$userId]);
+        return;
+    }
+    $pdo->prepare("INSERT INTO website_pin_batch_limits (user_id, max_batches) VALUES (?, ?)
+        ON DUPLICATE KEY UPDATE max_batches = VALUES(max_batches)")->execute([$userId, min(BATCH_LIMIT_MAX, $max)]);
+}
+
+/** SQL condition for "this page has work to do right now" (table alias p). A page another process claimed for text less than 10 minutes ago is skipped. */
+function website_pin_page_due_sql(): string
+{
+    return "(p.status IN ('queued', 'generating_images', 'ready')
+        OR (p.status = 'generating_text' AND p.updated_at < NOW() - INTERVAL 10 MINUTE))";
+}
+
+/** Active batches that have a page due right now, oldest first: [batch_id => user_id]. */
+function due_website_pin_batches(PDO $pdo): array
+{
+    $stmt = $pdo->query("SELECT p.batch_id, b.user_id, MIN(p.id) AS first_id FROM website_pin_pages p
+        JOIN website_pin_batches b ON b.id = p.batch_id
+        WHERE b.status = 'active' AND " . website_pin_page_due_sql() . "
+        GROUP BY p.batch_id, b.user_id
+        ORDER BY first_id ASC");
+    $out = [];
+    foreach ($stmt->fetchAll() as $r) $out[(int)$r['batch_id']] = (int)$r['user_id'];
+    return $out;
+}
+
+/** Due batches that may run right now: each user's oldest N due batches (N = that user's "batches at once"). */
+function allowed_website_pin_batch_ids(PDO $pdo, ?array $due = null): array
+{
+    $limits = website_pin_batch_limits_all($pdo);
+    $perUser = [];
+    $out = [];
+    foreach ($due ?? due_website_pin_batches($pdo) as $batchId => $userId) {
+        $perUser[$userId] = ($perUser[$userId] ?? 0) + 1;
+        if ($perUser[$userId] <= website_pin_batch_limit_for_user($limits, $userId)) $out[] = $batchId;
+    }
+    return $out;
+}
+
+/** May this batch run right now (inside its user's limit)? Batches with nothing due count as allowed. */
+function website_pin_batch_allowed(PDO $pdo, int $batchDbId): bool
+{
+    $due = due_website_pin_batches($pdo);
+    if (!isset($due[$batchDbId])) return true;
+    return in_array($batchDbId, allowed_website_pin_batch_ids($pdo, $due), true);
+}
+
+/** The next page to step in one batch (pages already mid-pipeline first, then the oldest queued one). */
+function next_due_page_for_batch(PDO $pdo, int $batchDbId, array $skipIds = []): ?array
+{
+    $skip = $skipIds ? ' AND p.id NOT IN (' . implode(',', array_map('intval', $skipIds)) . ')' : '';
+    $stmt = $pdo->prepare("SELECT p.* FROM website_pin_pages p
+        WHERE p.batch_id = ? AND " . website_pin_page_due_sql() . "$skip
+        ORDER BY (p.status = 'queued') ASC, p.id ASC LIMIT 1");
+    $stmt->execute([$batchDbId]);
+    return $stmt->fetch() ?: null;
+}
+
+function website_pin_batch_lock_path(int $batchDbId): string
+{
+    $dir = __DIR__ . '/../uploads';
+    if (!is_dir($dir)) @mkdir($dir, 0755, true);
+    return $dir . '/.website_pin_batch_' . $batchDbId . '.lock';
+}
+
+/** Takes this batch's lock without waiting. Returns the handle, or null if another process is working on the batch. */
+function website_pin_batch_lock_try(int $batchDbId)
+{
+    $h = @fopen(website_pin_batch_lock_path($batchDbId), 'c');
+    if (!$h) return null;
+    if (!flock($h, LOCK_EX | LOCK_NB)) { fclose($h); return null; }
+    return $h;
+}
+
+function website_pin_batch_lock_release($h): void
+{
+    if (!$h) return;
+    flock($h, LOCK_UN);
+    fclose($h);
+}
+
+function website_pin_batch_busy(int $batchDbId): bool
+{
+    $h = website_pin_batch_lock_try($batchDbId);
+    if (!$h) return true;
+    website_pin_batch_lock_release($h);
+    return false;
+}
+
+/** Runs one step for one page and returns its log entry (null if the batch is no longer active). */
+function website_pin_run_one_step(PDO $pdo, array $page): ?array
+{
+    $batchStmt = $pdo->prepare("SELECT * FROM website_pin_batches WHERE id = ?");
+    $batchStmt->execute([$page['batch_id']]);
+    $batch = $batchStmt->fetch();
+    if (!$batch || $batch['status'] !== 'active') return null;
+    $result = process_website_pin_page_step($pdo, $page, $batch);
+    return ['page_id' => $page['id'], 'url' => $page['page_url'], 'ok' => $result['ok'], 'more' => $result['more'], 'error' => $result['error'] ?? null];
+}
+
+/**
+ * Runs up to $maxSteps steps across ALL users' due pages, round-robin over the batches (one step for
+ * batch A, one for batch B, …), so no batch waits for another. Batches a worker is running are skipped.
+ */
 function run_due_website_pin_steps(PDO $pdo, int $maxSteps = 6): array
 {
     $processed = 0;
     $log = [];
-    for ($i = 0; $i < $maxSteps; $i++) {
+    $seenFail = [];
+    $doneBatches = [];
+    while ($processed < $maxSteps) {
         ensure_db_connection($pdo);
-        $stmt = $pdo->prepare("SELECT p.* FROM website_pin_pages p
-            JOIN website_pin_batches b ON b.id = p.batch_id
-            WHERE b.status = 'active' AND p.status IN ('queued', 'generating_text', 'generating_images', 'ready')
-            ORDER BY p.id ASC LIMIT 1");
-        $stmt->execute();
-        $page = $stmt->fetch();
-        if (!$page) break;
-
-        $batchStmt = $pdo->prepare("SELECT * FROM website_pin_batches WHERE id = ?");
-        $batchStmt->execute([$page['batch_id']]);
-        $batch = $batchStmt->fetch();
-        if (!$batch || $batch['status'] !== 'active') continue;
-
-        $result = process_website_pin_page_step($pdo, $page, $batch);
-        $processed++;
-        $log[] = ['page_id' => $page['id'], 'url' => $page['page_url'], 'ok' => $result['ok'], 'more' => $result['more'], 'error' => $result['error'] ?? null];
+        $batchIds = array_values(array_diff(allowed_website_pin_batch_ids($pdo), $doneBatches));
+        if (!$batchIds) break;
+        foreach ($batchIds as $batchDbId) {
+            if ($processed >= $maxSteps) break;
+            $lock = website_pin_batch_lock_try($batchDbId);
+            if (!$lock) { $doneBatches[] = $batchDbId; continue; }   // its own worker is on it
+            try {
+                $page = next_due_page_for_batch($pdo, $batchDbId, $seenFail);
+                if (!$page) { $doneBatches[] = $batchDbId; continue; }
+                $entry = website_pin_run_one_step($pdo, $page);
+                if (!$entry) { $doneBatches[] = $batchDbId; continue; }
+                $processed++;
+                if (!$entry['ok'] && $entry['error'] === 'Already being processed.') $seenFail[] = (int)$page['id'];   // no progress — don't spin on it
+                $log[] = $entry;
+            } finally {
+                website_pin_batch_lock_release($lock);
+            }
+        }
     }
     return ['steps_run' => $processed, 'log' => $log];
+}
+
+/**
+ * Works through ONE batch until nothing is due or $seconds run out. Caller holds the batch's lock.
+ * Returns ['steps_run', 'log', 'more' => bool (time ran out with work still waiting)].
+ */
+function run_website_pin_batch_steps(PDO $pdo, int $batchDbId, int $seconds = 540): array
+{
+    $end = time() + $seconds;
+    $processed = 0;
+    $log = [];
+    $seenFail = [];
+    while (true) {
+        ensure_db_connection($pdo);
+        $page = next_due_page_for_batch($pdo, $batchDbId, $seenFail);
+        if (!$page) return ['steps_run' => $processed, 'log' => $log, 'more' => false];
+        // Over the user's limit (e.g. the admin lowered it): wait for a free slot — only between pages,
+        // so a page that was started is always finished first.
+        if ($page['status'] === 'queued' && !website_pin_batch_allowed($pdo, $batchDbId)) return ['steps_run' => $processed, 'log' => $log, 'more' => false];
+        if (time() >= $end) return ['steps_run' => $processed, 'log' => $log, 'more' => true];
+        $entry = website_pin_run_one_step($pdo, $page);
+        if (!$entry) return ['steps_run' => $processed, 'log' => $log, 'more' => false];   // batch paused / stopped
+        $processed++;
+        if (!$entry['ok'] && $entry['error'] === 'Already being processed.') $seenFail[] = (int)$page['id'];   // no progress — don't spin on it
+        $log[] = $entry;
+    }
+}
+
+function website_pin_batch_worker_url(int $batchDbId): string
+{
+    return rtrim(APP_URL, '/') . '/cron/website-pin-worker.php?key=' . scheduler_web_key() . '&t=' . time() . '&batch=' . $batchDbId;
+}
+
+/**
+ * Makes sure every due batch has its own worker (inside the per-user and server limits), started
+ * together in parallel. $onlyBatch: start just this batch (e.g. right after it was created).
+ * Returns how many workers were started.
+ */
+function website_pin_batch_workers_kick(PDO $pdo, ?int $onlyBatch = null): int
+{
+    if (function_exists('scheduler_runner_enabled') && !scheduler_runner_enabled()) return 0;
+    if (!function_exists('curl_init') || !function_exists('scheduler_web_key') || !function_exists('background_workers_start')) return 0;
+    $due = due_website_pin_batches($pdo);
+    $allowed = array_flip(allowed_website_pin_batch_ids($pdo, $due));
+    $total = website_pin_batch_limit_total(website_pin_batch_limits_all($pdo));
+    $running = 0;
+    $idle = [];
+    foreach (array_keys($due) as $id) {
+        if (website_pin_batch_busy($id)) $running++;
+        elseif (isset($allowed[$id]) && ($onlyBatch === null || $id === $onlyBatch)) $idle[] = $id;
+    }
+    $idle = array_slice($idle, 0, max(0, min(BATCH_WORKERS_PER_KICK, $total - $running)));
+    return background_workers_start(array_map('website_pin_batch_worker_url', $idle), 'AutomatedPin-WebsitePinWorker');
+}
+
+/**
+ * Right after a batch is created (response already sent): start its own worker; if workers can't
+ * be started (no curl), work on this batch here for a while instead.
+ */
+function website_pin_batch_start_now(PDO $pdo, int $batchDbId): void
+{
+    if (website_pin_batch_workers_kick($pdo, $batchDbId)) return;
+    $lock = website_pin_batch_lock_try($batchDbId);
+    if (!$lock) return;
+    try { run_website_pin_batch_steps($pdo, $batchDbId, 240); } catch (Throwable $e) { /* cron / runner continues */ }
+    website_pin_batch_lock_release($lock);
 }

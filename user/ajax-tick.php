@@ -60,6 +60,8 @@ try { scheduler_runner_kick(); } catch (Throwable $e) { /* optional */ }
 try { scheduler_runner_kick(false, 'articles'); } catch (Throwable $e) { /* optional */ }
 // Each Auto Article batch has its own worker, so no batch waits for another one to finish.
 try { article_batch_workers_kick($pdo); } catch (Throwable $e) { /* optional */ }
+// Same for Auto Website to Daily Pin / Classic Wizard batches.
+try { website_pin_batch_workers_kick($pdo); } catch (Throwable $e) { /* optional */ }
 
 if (!function_exists('fastcgi_finish_request') && !function_exists('litespeed_finish_request')) {
     echo json_encode(['ok' => true, 'steps_run' => 0]);

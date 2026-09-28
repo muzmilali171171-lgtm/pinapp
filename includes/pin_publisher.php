@@ -368,6 +368,38 @@ function scheduler_web_key(): string
     return substr(hash_hmac('sha256', 'scheduler-cron', defined('APP_SECRET') ? APP_SECRET : 'webtopin'), 0, 24);
 }
 
+/**
+ * Fires many background worker URLs at once (curl_multi, $parallel at a time). Each request is
+ * dropped after ~1.5s on purpose — the worker keeps running on the server after we hang up — so
+ * starting 1,000 workers takes seconds instead of 1,000 × 1.5s one after another.
+ * Returns how many requests were sent.
+ */
+function background_workers_start(array $urls, string $userAgent = 'AutomatedPin-Worker', int $parallel = 100): int
+{
+    if (!$urls || !function_exists('curl_multi_init')) return 0;
+    $sent = 0;
+    foreach (array_chunk(array_values($urls), max(1, $parallel)) as $group) {
+        $mh = curl_multi_init();
+        $handles = [];
+        foreach ($group as $url) {
+            $ch = curl_init($url);
+            curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT_MS => 1500, CURLOPT_CONNECTTIMEOUT_MS => 1200,
+                CURLOPT_NOSIGNAL => true, CURLOPT_FOLLOWLOCATION => true, CURLOPT_USERAGENT => $userAgent,
+            ]);
+            curl_multi_add_handle($mh, $ch);
+            $handles[] = $ch;
+        }
+        do {
+            $status = curl_multi_exec($mh, $active);
+            if ($active) curl_multi_select($mh, 0.2);
+        } while ($active && $status === CURLM_OK);
+        foreach ($handles as $ch) { curl_multi_remove_handle($mh, $ch); curl_close($ch); $sent++; }
+        curl_multi_close($mh);
+    }
+    return $sent;
+}
+
 
 /* ===================== Automatic running: real cron (auto-installed) + built-in runner fallback ===================== */
 
@@ -563,6 +595,11 @@ function article_scheduler_run(PDO $pdo, string $source = 'cron', int $steps = 8
         }
         $out['steps'] += $result['steps_run'];
         ensure_db_connection($pdo);
+        // Auto Website to Daily Pin / Classic Wizard: same thing — one worker per batch, side by side.
+        try {
+            $kicked = website_pin_batch_workers_kick($pdo);
+            if ($kicked) $out['messages'][] = "Started $kicked website pin batch worker(s).";
+        } catch (Throwable $e) { scheduler_log("[website-pins/$source] worker kick: " . $e->getMessage()); }
         $w = run_due_website_pin_steps($pdo, $steps);
         if ($w['steps_run'] === 0) $out['messages'][] = 'No due website pin pages.';
         foreach ($w['log'] as $entry) {

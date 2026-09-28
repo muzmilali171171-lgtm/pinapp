@@ -1,61 +1,63 @@
 <?php
 /**
- * Admin → Articles Schedule → Batch Limits.
- * How many Auto Article batches each user can have writing / publishing at the same time
- * (default 20 per user), with an own limit per user, and a total for the whole server (default 20,000).
- * A user's extra batches wait and start automatically as soon as one of their running batches finishes.
+ * Admin → All Pins Scheduled → Batch Limits.
+ * How many Auto Website to Daily Pin / Classic Wizard batches each user can have creating and
+ * scheduling pins at the same time (default 10 per user), with an own limit per user, and a total
+ * for the whole server (default 10,000). A user's extra batches wait and start automatically as soon
+ * as one of their running batches finishes. Every user's batches run on their own — one user's batch
+ * never waits for another user's batch.
  */
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/../includes/ai_functions.php';
-require_once __DIR__ . '/../includes/auto_article_functions.php';
+require_once __DIR__ . '/../includes/website_pin_functions.php';
 require_once __DIR__ . '/includes/admin-auth.php';
 require_admin_login();
 
-$activePage = 'article-batch-limits';
-$pageTitle = 'Batch Limits';
+$activePage = 'website-pin-batch-limits';
+$pageTitle = 'Pin Batch Limits';
 $msg = null;
 
 $q = trim((string)($_GET['q'] ?? ''));
 $page = max(1, (int)($_GET['p'] ?? 1));
-$backUrl = 'article-batch-limits' . ($q !== '' || $page > 1 ? '?' . http_build_query(array_filter(['q' => $q, 'p' => $page > 1 ? $page : null])) : '');
+$backUrl = 'website-pin-batch-limits' . ($q !== '' || $page > 1 ? '?' . http_build_query(array_filter(['q' => $q, 'p' => $page > 1 ? $page : null])) : '');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['save_defaults'])) {
-        article_batch_limit_save($pdo, 0, max(1, min(BATCH_LIMIT_MAX, (int)($_POST['default_per_user'] ?? ARTICLE_DEFAULT_BATCHES_PER_USER))));
-        article_batch_limit_save($pdo, -1, max(1, min(BATCH_LIMIT_MAX, (int)($_POST['server_total'] ?? ARTICLE_MAX_PARALLEL_BATCHES))));
-        log_event($pdo, 'system', 'Admin updated Auto Article batch limits (default per user / server total)');
-        $_SESSION['abl_msg'] = 'Defaults saved.';
+        website_pin_batch_limit_save($pdo, 0, max(1, min(BATCH_LIMIT_MAX, (int)($_POST['default_per_user'] ?? WEBSITE_PIN_DEFAULT_BATCHES_PER_USER))));
+        website_pin_batch_limit_save($pdo, -1, max(1, min(BATCH_LIMIT_MAX, (int)($_POST['server_total'] ?? WEBSITE_PIN_MAX_PARALLEL_BATCHES))));
+        log_event($pdo, 'system', 'Admin updated Auto Website to Daily Pin batch limits (default per user / server total)');
+        $_SESSION['wpbl_msg'] = 'Defaults saved.';
     } elseif (isset($_POST['save_user'])) {
         $uid = (int)($_POST['user_id'] ?? 0);
         $val = trim((string)($_POST['max_batches'] ?? ''));
         if ($uid > 0) {
-            article_batch_limit_save($pdo, $uid, $val === '' ? null : max(1, min(BATCH_LIMIT_MAX, (int)$val)));
-            log_event($pdo, 'system', "Admin set Auto Article batches at once for user #$uid to " . ($val === '' ? 'default' : (int)$val));
-            $_SESSION['abl_msg'] = $val === '' ? 'User set back to the default.' : 'User limit saved.';
+            website_pin_batch_limit_save($pdo, $uid, $val === '' ? null : max(1, min(BATCH_LIMIT_MAX, (int)$val)));
+            log_event($pdo, 'system', "Admin set Auto Website to Daily Pin batches at once for user #$uid to " . ($val === '' ? 'default' : (int)$val));
+            $_SESSION['wpbl_msg'] = $val === '' ? 'User set back to the default.' : 'User limit saved.';
         }
     } elseif (isset($_POST['reset_user'])) {
         $uid = (int)($_POST['user_id'] ?? 0);
-        if ($uid > 0) article_batch_limit_save($pdo, $uid, null);
-        $_SESSION['abl_msg'] = 'User set back to the default.';
+        if ($uid > 0) website_pin_batch_limit_save($pdo, $uid, null);
+        $_SESSION['wpbl_msg'] = 'User set back to the default.';
     }
     // Start any batches that now have a free slot.
-    try { article_batch_workers_kick($pdo); } catch (Throwable $e) { /* optional */ }
+    try { website_pin_batch_workers_kick($pdo); } catch (Throwable $e) { /* optional */ }
     redirect($backUrl);
 }
-if (!empty($_SESSION['abl_msg'])) { $msg = $_SESSION['abl_msg']; unset($_SESSION['abl_msg']); }
+if (!empty($_SESSION['wpbl_msg'])) { $msg = $_SESSION['wpbl_msg']; unset($_SESSION['wpbl_msg']); }
 
-$limits = article_batch_limits_all($pdo);
-$defaultPerUser = article_batch_limit_default($limits);
-$serverTotal = article_batch_limit_total($limits);
+$limits = website_pin_batch_limits_all($pdo);
+$defaultPerUser = website_pin_batch_limit_default($limits);
+$serverTotal = website_pin_batch_limit_total($limits);
 
 // Live state: due batches per user, and how many are running right now.
-$due = due_article_batches($pdo);
-$allowed = array_flip(allowed_article_batch_ids($pdo));
+$due = due_website_pin_batches($pdo);
+$allowed = array_flip(allowed_website_pin_batch_ids($pdo, $due));
 $dueByUser = []; $runningByUser = []; $waitingByUser = []; $runningTotal = 0;
 foreach ($due as $batchId => $userId) {
     $dueByUser[$userId] = ($dueByUser[$userId] ?? 0) + 1;
-    if (article_batch_busy($batchId)) { $runningByUser[$userId] = ($runningByUser[$userId] ?? 0) + 1; $runningTotal++; }
+    if (website_pin_batch_busy($batchId)) { $runningByUser[$userId] = ($runningByUser[$userId] ?? 0) + 1; $runningTotal++; }
     if (!isset($allowed[$batchId])) $waitingByUser[$userId] = ($waitingByUser[$userId] ?? 0) + 1;
 }
 
@@ -72,7 +74,7 @@ $page = min($page, $pages);
 $busyIds = array_map('intval', array_unique(array_merge(array_keys($dueByUser), array_filter(array_keys($limits), fn($k) => $k > 0))));
 $busyOrder = $busyIds ? 'u.id IN (' . implode(',', $busyIds) . ') DESC, ' : '';
 $stmt = $pdo->prepare("SELECT u.id, u.name, u.email,
-        (SELECT COUNT(*) FROM article_batches b WHERE b.user_id = u.id AND b.status = 'active') AS active_batches
+        (SELECT COUNT(*) FROM website_pin_batches b WHERE b.user_id = u.id AND b.status = 'active') AS active_batches
     FROM users u $where
     ORDER BY {$busyOrder}u.created_at DESC
     LIMIT $perPage OFFSET " . (($page - 1) * $perPage));
@@ -81,14 +83,15 @@ $users = $stmt->fetchAll();
 
 include __DIR__ . '/includes/admin-header.php';
 ?>
-<div class="page-header"><h1>Batch Limits</h1></div>
+<div class="page-header"><h1>Pin Batch Limits</h1></div>
 <?php if ($msg): ?><div class="alert alert-success"><?= e($msg) ?></div><?php endif; ?>
 
 <div class="card">
     <h2>Batches at once</h2>
-    <p class="muted">Every Auto Article batch runs on its own — a new batch starts writing and publishing right away, without
-        waiting for other batches. Here you choose how many batches <strong>one user</strong> can run at the same time.
-        A user's extra batches wait and start automatically as soon as one of their running batches finishes.</p>
+    <p class="muted">For <strong>Auto Website to Daily Pin</strong> and <strong>Classic Wizard</strong>. Every batch runs on its
+        own — a new batch starts creating and scheduling its pins right away, without waiting for other batches or other
+        users. Here you choose how many batches <strong>one user</strong> can run at the same time. A user's extra batches
+        wait and start automatically as soon as one of their running batches finishes.</p>
     <form method="POST" style="display:flex; gap:16px; align-items:flex-end; flex-wrap:wrap;">
         <div class="form-row" style="margin:0;">
             <label>Default batches at once per user</label>
@@ -101,8 +104,8 @@ include __DIR__ . '/includes/admin-header.php';
         <button type="submit" name="save_defaults" value="1" class="btn-primary">Save</button>
     </form>
     <p class="muted" style="margin-top:10px;">Right now: <strong><?= (int)$runningTotal ?></strong> batch(es) running,
-        <strong><?= count($due) ?></strong> with articles due. Keep the server total within what your hosting can handle
-        (each running batch is one background PHP process).</p>
+        <strong><?= count($due) ?></strong> with pages due. Each running batch is one background PHP process — keep the
+        server total within what your server (PHP-FPM workers, database connections) can handle.</p>
 </div>
 
 <div class="card">
@@ -110,7 +113,7 @@ include __DIR__ . '/includes/admin-header.php';
     <form method="GET" style="display:flex; gap:8px; margin-bottom:12px;">
         <input type="text" name="q" value="<?= e($q) ?>" placeholder="Search name or email" style="max-width:280px;">
         <button type="submit" class="btn-secondary">Search</button>
-        <?php if ($q !== ''): ?><a href="article-batch-limits" class="btn-secondary">Clear</a><?php endif; ?>
+        <?php if ($q !== ''): ?><a href="website-pin-batch-limits" class="btn-secondary">Clear</a><?php endif; ?>
     </form>
     <?php if (empty($users)): ?>
         <div class="empty-state">No users found.</div>

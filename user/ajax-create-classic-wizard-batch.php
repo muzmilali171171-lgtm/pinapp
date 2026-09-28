@@ -131,13 +131,12 @@ if (empty($pageRows)) {
 $result = create_website_pin_batch($pdo, $user['id'], $cfg, $pageRows);
 log_event($pdo, 'system', "Classic Wizard schedule created: {$result['count']} pages queued", $user['id']);
 
-// Kick off background processing immediately (detached), same pattern as Auto Website to Daily Pin.
+// Respond right away, then start THIS batch's own background worker (same as Auto Website to Daily Pin),
+// so it never waits for other batches to finish.
 ignore_user_abort(true);
-@set_time_limit(90);
-if (function_exists('fastcgi_finish_request')) {
-    echo json_encode($result);
-    fastcgi_finish_request();
-    run_due_website_pin_steps($pdo, 6);
-} else {
-    echo json_encode($result);
-}
+@set_time_limit(0);
+echo json_encode($result);
+if (function_exists('litespeed_finish_request')) litespeed_finish_request();
+elseif (function_exists('fastcgi_finish_request')) fastcgi_finish_request();
+else { @ob_end_flush(); @flush(); }
+website_pin_batch_start_now($pdo, (int)$result['batch_db_id']);

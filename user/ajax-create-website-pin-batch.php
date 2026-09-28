@@ -104,14 +104,12 @@ if (empty($pageRows)) {
 $result = create_website_pin_batch($pdo, $user['id'], $cfg, $pageRows);
 log_event($pdo, 'system', "Auto Website to Daily Pin schedule created: {$result['count']} pages queued", $user['id']);
 
-// Kick off background processing immediately (detached), same pattern as Auto Article batches,
-// so pin generation starts right away instead of waiting for the next tick or a manual click.
+// Respond right away, then start THIS batch's own background worker so its pins begin creating /
+// scheduling immediately — it never waits for other batches (yours or other users') to finish.
 ignore_user_abort(true);
-@set_time_limit(90);
-if (function_exists('fastcgi_finish_request')) {
-    echo json_encode($result);
-    fastcgi_finish_request();
-    run_due_website_pin_steps($pdo, 6);
-} else {
-    echo json_encode($result);
-}
+@set_time_limit(0);
+echo json_encode($result);
+if (function_exists('litespeed_finish_request')) litespeed_finish_request();
+elseif (function_exists('fastcgi_finish_request')) fastcgi_finish_request();
+else { @ob_end_flush(); @flush(); }
+website_pin_batch_start_now($pdo, (int)$result['batch_db_id']);

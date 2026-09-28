@@ -43,17 +43,31 @@ if ($batch['status'] !== 'active') {
     exit;
 }
 
-$stmt = $pdo->prepare("SELECT * FROM website_pin_pages WHERE batch_id = ? AND status IN ('queued','generating_text','generating_images','ready') ORDER BY id ASC LIMIT 1");
-$stmt->execute([$batch['id']]);
-$page = $stmt->fetch();
+// Only one process works on a batch at a time. If its background worker is already on it,
+// there is nothing to do here — the worker keeps going on its own.
+$batchLock = website_pin_batch_lock_try((int)$batch['id']);
+if (!$batchLock) {
+    echo json_encode(['ok' => true, 'done' => true, 'message' => 'This schedule is already creating pins in the background — refresh in a minute to see progress.']);
+    exit;
+}
 
+$page = next_due_page_for_batch($pdo, (int)$batch['id']);
 if (!$page) {
+    website_pin_batch_lock_release($batchLock);
     echo json_encode(['ok' => true, 'done' => true, 'message' => 'No pages left to process right now.']);
+    exit;
+}
+// Each user can run only a set number of batches at once (Admin → All Pins Scheduled → Batch Limits).
+if ($page['status'] === 'queued' && !website_pin_batch_allowed($pdo, (int)$batch['id'])) {
+    website_pin_batch_lock_release($batchLock);
+    $limit = website_pin_batch_limit_for_user(website_pin_batch_limits_all($pdo), (int)$batch['user_id']);
+    echo json_encode(['ok' => true, 'done' => true, 'message' => "You already have $limit schedule(s) running at once — this one starts automatically as soon as one of them finishes."]);
     exit;
 }
 
 $currentPageId = $page['id'];
 $result = process_website_pin_page_step($pdo, $page, $batch);
+website_pin_batch_lock_release($batchLock);
 
 echo json_encode([
     'ok' => $result['ok'],
