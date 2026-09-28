@@ -589,6 +589,55 @@ function ai_generate_board_suggestion(PDO $pdo, string $keyword): array
     ];
 }
 
+/**
+ * Auto Article "AI select existing board" / multi-board "Custom board" — picks the ONE board from
+ * $boardNames that best fits the article's intent. Never invents a new board: the answer is always
+ * an index into $boardNames. Falls back to keyword overlap when AI is unavailable or unparseable.
+ * Returns ['ok'=>bool, 'index'=>int, 'error'=>?string].
+ */
+function ai_pick_existing_board(PDO $pdo, string $title, array $boardNames): array
+{
+    $boardNames = array_values($boardNames);
+    if (empty($boardNames)) {
+        return ['ok' => false, 'index' => -1, 'error' => 'No boards to choose from.'];
+    }
+    if (count($boardNames) === 1) {
+        return ['ok' => true, 'index' => 0, 'error' => null];
+    }
+
+    $settings = get_article_settings($pdo);
+    $provider = $settings['pin_text_provider'] ?? ($settings['text_provider'] ?? null);
+    $model = $settings['pin_text_model'] ?? ($settings['text_model'] ?? null);
+    if ($provider) {
+        $list = [];
+        foreach ($boardNames as $i => $name) $list[] = ($i + 1) . '. ' . $name;
+        $systemPrompt = 'You are an expert Pinterest marketer. Given an article title and a numbered list of EXISTING Pinterest boards, '
+            . 'choose the single board whose topic best matches the article\'s search intent and audience. You MUST choose one of the listed '
+            . 'boards — never invent, rename or suggest a new board. If nothing fits well, choose the closest broader topic. '
+            . 'Respond with ONLY a JSON object, no markdown fences, no commentary. Shape: {"board": <number from the list>}.';
+        $userPrompt = "Article title: $title\n\nExisting boards:\n" . implode("\n", $list);
+        $result = ai_generate_text($pdo, $provider, $model, $systemPrompt, $userPrompt, 100);
+        if ($result['ok']) {
+            $json = extract_json_from_text($result['text']);
+            $num = is_array($json) && isset($json['board']) ? (int)$json['board'] : 0;
+            if ($num < 1 && preg_match('/\d+/', $result['text'], $m)) $num = (int)$m[0];
+            if ($num >= 1 && $num <= count($boardNames)) {
+                return ['ok' => true, 'index' => $num - 1, 'error' => null];
+            }
+        }
+    }
+
+    // Rule-based fallback: the board sharing the most words with the title (first board on a tie).
+    $titleWords = array_filter(explode(' ', board_name_key($title)), fn($w) => strlen($w) > 2);
+    $best = 0;
+    $bestScore = -1;
+    foreach ($boardNames as $i => $name) {
+        $score = count(array_intersect($titleWords, explode(' ', board_name_key((string)$name))));
+        if ($score > $bestScore) { $best = $i; $bestScore = $score; }
+    }
+    return ['ok' => true, 'index' => $best, 'error' => $provider ? 'AI answer unusable; matched by keywords.' : 'AI unavailable; matched by keywords.'];
+}
+
 /** A "new board" answer, turned into a match when the cleaned name equals an existing board (keeps names unique). */
 function board_assign_item_for_name(string $name, string $description, array $existingBoards): array
 {

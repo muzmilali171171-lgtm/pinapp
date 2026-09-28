@@ -241,7 +241,18 @@ include __DIR__ . '/includes/user-header.php';
                 <select id="boardMode">
                     <option value="auto">AI Auto (match or create a board per topic)</option>
                     <option value="separate_per_article">Separate board for each article</option>
+                    <option value="custom">Custom board (select my own board)</option>
+                    <option value="ai_existing">AI select existing board only (never create new boards)</option>
                 </select>
+                <p class="muted" id="boardModeHint" style="margin:4px 0 0;">AI matches an existing board or creates a new one from each article's topic.</p>
+            </div>
+            <div class="form-row" id="customBoardBox" style="display:none;">
+                <div class="board-picker-toolbar">
+                    <input type="text" id="customBoardSearch" placeholder="Search boards…">
+                    <button type="button" class="btn-secondary btn-small" id="customBoardRefresh" title="Reload boards">↻</button>
+                </div>
+                <div id="customBoardPicker" class="board-picker board-picker-list"><div class="muted" style="padding:14px;">Select a Pinterest account first.</div></div>
+                <p class="muted" id="customBoardCount" style="margin:6px 0 0;">No board selected. Pick one board, or several and the AI picks the best one of them per article.</p>
             </div>
 
             <div class="bs-panel-title">Pin Size</div>
@@ -454,6 +465,84 @@ document.querySelectorAll('[data-publish-mode]').forEach(btn => {
         document.getElementById('pinAutoBox').style.display = publishMode === 'pin_auto' ? 'block' : 'none';
     });
 });
+/* ---------------- Board setting ---------------- */
+const BOARD_MODE_HINTS = {
+    auto: 'AI matches an existing board or creates a new one from each article\'s topic.',
+    separate_per_article: 'AI names and creates a new board for every article.',
+    custom: 'Pins go to the board(s) you pick below. With several boards, the AI picks the best one per article.',
+    ai_existing: 'AI picks the best of your existing boards for each article\'s intent — no new boards are created.',
+};
+let accountBoards = [];            // [{id, name, status}] for the selected Pinterest account
+let customBoardIds = new Set();    // selected board row ids (Custom board mode)
+function escHtml(s) {
+    return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+function renderCustomBoards() {
+    const picker = document.getElementById('customBoardPicker');
+    const q = document.getElementById('customBoardSearch').value.trim().toLowerCase();
+    if (!document.getElementById('pinAccount').value) {
+        picker.innerHTML = '<div class="muted" style="padding:14px;">Select a Pinterest account first.</div>';
+    } else {
+        const list = accountBoards.filter(b => b.name.toLowerCase().includes(q));
+        picker.innerHTML = list.length ? list.map(b => `
+            <div class="board-card ${customBoardIds.has(b.id) ? 'selected' : ''}" data-custom-board="${b.id}">
+                <div class="board-card-icon">${customBoardIds.has(b.id) ? '✅' : '📌'}</div>
+                <div class="board-card-info">
+                    <div class="board-card-name">${escHtml(b.name)}</div>
+                    ${b.status === 'pending_creation' ? '<span class="muted">Will be created</span>' : ''}
+                </div>
+            </div>`).join('') : '<div class="muted" style="padding:14px;">No boards found.</div>';
+        picker.querySelectorAll('[data-custom-board]').forEach(el => {
+            el.addEventListener('click', () => {
+                const id = parseInt(el.dataset.customBoard, 10);
+                if (customBoardIds.has(id)) customBoardIds.delete(id); else customBoardIds.add(id);
+                renderCustomBoards();
+            });
+        });
+    }
+    const n = customBoardIds.size;
+    document.getElementById('customBoardCount').textContent = n === 0
+        ? 'No board selected. Pick one board, or several and the AI picks the best one of them per article.'
+        : (n === 1 ? '1 board selected — every article\'s pins go to this board.' : n + ' boards selected — the AI picks the best one of them for each article.');
+}
+async function loadAccountBoards() {
+    const accountId = document.getElementById('pinAccount').value;
+    const keep = customBoardIds;          // a refresh keeps the boards already picked
+    accountBoards = [];
+    customBoardIds = new Set();
+    if (!accountId) { renderCustomBoards(); return; }
+    document.getElementById('customBoardPicker').innerHTML = '<div class="muted" style="padding:14px;">Loading boards…</div>';
+    const fd = new FormData();
+    fd.append('action', 'list');
+    fd.append('account_id', accountId);
+    try {
+        const res = await fetch('ajax-classic-wizard-boards', { method: 'POST', body: fd });
+        const result = await res.json();
+        if (document.getElementById('pinAccount').value !== accountId) return; // account changed meanwhile
+        if (result.ok) {
+            accountBoards = result.boards.filter(b => b.status !== 'create_failed');
+            accountBoards.forEach(b => { if (keep.has(b.id)) customBoardIds.add(b.id); });
+        } else {
+            showAlert('Could not load boards: ' + result.error, 'error');
+        }
+    } catch (e) {
+        showAlert('Network error while loading boards.', 'error');
+    }
+    renderCustomBoards();
+}
+document.getElementById('boardMode').addEventListener('change', function () {
+    document.getElementById('boardModeHint').textContent = BOARD_MODE_HINTS[this.value] || '';
+    document.getElementById('customBoardBox').style.display = this.value === 'custom' ? 'block' : 'none';
+    if (this.value === 'custom' && !accountBoards.length) loadAccountBoards();
+});
+document.getElementById('pinAccount').addEventListener('change', function () {
+    customBoardIds = new Set(); // boards belong to one account
+    if (document.getElementById('boardMode').value === 'custom') loadAccountBoards();
+    else { accountBoards = []; renderCustomBoards(); }
+});
+document.getElementById('customBoardSearch').addEventListener('input', renderCustomBoards);
+document.getElementById('customBoardRefresh').addEventListener('click', loadAccountBoards);
+
 document.getElementById('pinPaletteEnabled').addEventListener('change', function () {
     document.getElementById('pinPaletteWrap').style.display = this.checked ? 'block' : 'none';
 });
@@ -532,6 +621,7 @@ document.getElementById('createBatchBtn').addEventListener('click', async () => 
 
     if (publishMode === 'pin_auto') {
         if (!document.getElementById('pinAccount').value) { showAlert('Please select a Pinterest account.', 'error'); goToStep(4); return; }
+        if (document.getElementById('boardMode').value === 'custom' && !customBoardIds.size) { showAlert('Please select at least one board for Custom board.', 'error'); goToStep(4); return; }
         payload.pin_settings = {
             pinterest_account_id: document.getElementById('pinAccount').value,
             daily_pin_count: document.getElementById('dailyPinCount').value,
@@ -542,6 +632,7 @@ document.getElementById('createBatchBtn').addEventListener('click', async () => 
             article_pin_gap_days: document.getElementById('articlePinGapUnit').value === 'minutes' ? 1 : document.getElementById('articlePinGapDays').value,
             pin_image_category_id: document.getElementById('pinImageCategory').value,
             board_mode: document.getElementById('boardMode').value,
+            custom_board_ids: document.getElementById('boardMode').value === 'custom' ? Array.from(customBoardIds) : [],
             pin_size: document.getElementById('pinSize').value,
             website: document.getElementById('pinWebsite').value.trim(),
             cta_mode: document.getElementById('pinCtaMode').value,

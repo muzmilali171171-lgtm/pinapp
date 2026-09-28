@@ -67,6 +67,33 @@ if ($publishMode === 'pin_auto') {
         ? max(1, min(525600, (int)($pinSettings['article_pin_gap_minutes'] ?? 60))) : null;
     $pinSettings['article_pin_gap_days'] = max(1, min(365, (int)($pinSettings['article_pin_gap_days'] ?? 30)));
     $pinSettings['pin_image_category_id'] = max(0, (int)($pinSettings['pin_image_category_id'] ?? 0));
+
+    // Board setting: 'auto' | 'separate_per_article' | 'custom' (user-picked boards) | 'ai_existing' (AI picks, never creates).
+    $boardMode = $pinSettings['board_mode'] ?? 'auto';
+    if (!in_array($boardMode, ['auto', 'separate_per_article', 'custom', 'ai_existing'], true)) $boardMode = 'auto';
+    $pinSettings['board_mode'] = $boardMode;
+    $pinSettings['custom_board_ids'] = [];
+    $accStmt = $pdo->prepare("SELECT id FROM pinterest_accounts WHERE id = ? AND user_id = ? AND status = 'connected'");
+    $accStmt->execute([(int)$pinSettings['pinterest_account_id'], $user['id']]);
+    if (!$accStmt->fetch()) {
+        echo json_encode(['ok' => false, 'error' => 'Please choose a valid connected Pinterest account.']);
+        exit;
+    }
+    if ($boardMode === 'custom') {
+        $ids = array_values(array_unique(array_filter(array_map('intval', (array)($payload['pin_settings']['custom_board_ids'] ?? [])))));
+        if ($ids) {
+            // Keep only boards that really belong to the chosen account.
+            $in = implode(',', array_fill(0, count($ids), '?'));
+            $bStmt = $pdo->prepare("SELECT id FROM pinterest_boards WHERE pinterest_account_id = ? AND status <> 'create_failed' AND id IN ($in)");
+            $bStmt->execute(array_merge([(int)$pinSettings['pinterest_account_id']], $ids));
+            $ids = array_map('intval', $bStmt->fetchAll(PDO::FETCH_COLUMN));
+        }
+        if (empty($ids)) {
+            echo json_encode(['ok' => false, 'error' => 'Please select at least one board for Custom board.']);
+            exit;
+        }
+        $pinSettings['custom_board_ids'] = $ids;
+    }
     $pinSettingsJson = json_encode($pinSettings);
 }
 

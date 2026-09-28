@@ -633,7 +633,7 @@ function auto_schedule_pins_for_article(PDO $pdo, array $article, array $batch):
     $ctaTextSetting = trim($settings['cta_text'] ?? '');
     $imageStyle = $settings['image_style'] ?? 'auto';
     $colorPalette = $settings['color_palette'] ?? null; // optional brand color palette (array, from pin_settings_json)
-    $boardMode = $settings['board_mode'] ?? 'auto'; // 'separate_per_article' | 'auto'
+    $boardMode = $settings['board_mode'] ?? 'auto'; // 'auto' | 'separate_per_article' | 'custom' | 'ai_existing'
     $collageEnabled = !empty($settings['collage_enabled']);
     $collageCountSetting = $settings['collage_count'] ?? 'auto'; // 2-6 or 'auto'
 
@@ -651,7 +651,36 @@ function auto_schedule_pins_for_article(PDO $pdo, array $article, array $batch):
 
     // Board resolution.
     $boardResolved = null;
-    if ($boardMode === 'separate_per_article') {
+    if ($boardMode === 'custom' || $boardMode === 'ai_existing') {
+        // Existing boards only — never creates a board. 'custom' = the boards the user picked
+        // (one board: always that one; several: AI picks per article); 'ai_existing' = AI picks
+        // from all of the account's boards by the article's intent.
+        if ($boardMode === 'custom') {
+            $ids = array_values(array_filter(array_map('intval', (array)($settings['custom_board_ids'] ?? []))));
+            $candidates = [];
+            if ($ids) {
+                $in = implode(',', array_fill(0, count($ids), '?'));
+                $bStmt = $pdo->prepare("SELECT * FROM pinterest_boards WHERE pinterest_account_id = ? AND status <> 'create_failed' AND id IN ($in) ORDER BY board_name ASC");
+                $bStmt->execute(array_merge([$accountId], $ids));
+                $candidates = $bStmt->fetchAll();
+            }
+            if (empty($candidates)) {
+                return ['ok' => false, 'error' => 'None of the selected custom boards exist anymore — please pick a board again.'];
+            }
+        } else {
+            $accountStmt = $pdo->prepare("SELECT * FROM pinterest_accounts WHERE id = ?");
+            $accountStmt->execute([$accountId]);
+            $accountRow = $accountStmt->fetch();
+            $candidates = array_values(array_filter($accountRow ? get_boards_for_account($pdo, $accountRow) : [],
+                fn($b) => ($b['status'] ?? '') !== 'create_failed'));
+            if (empty($candidates)) {
+                return ['ok' => false, 'error' => 'This Pinterest account has no boards to choose from — create a board first or use AI Auto.'];
+            }
+        }
+        $pick = ai_pick_existing_board($pdo, $article['title'], array_map(fn($b) => (string)$b['board_name'], $candidates));
+        $chosen = $candidates[$pick['ok'] ? $pick['index'] : 0];
+        $boardResolved = resolve_board_selection($pdo, $accountId, 'row:' . $chosen['id'], '', '');
+    } elseif ($boardMode === 'separate_per_article') {
         $suggestion = ai_generate_board_suggestion($pdo, $article['title']);
         $boardName = $suggestion['ok'] ? $suggestion['name'] : board_name_from_title($article['title']);
         $boardDesc = $suggestion['ok'] ? $suggestion['description'] : '';
