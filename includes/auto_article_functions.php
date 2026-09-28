@@ -192,8 +192,9 @@ function ai_generate_article_outline(PDO $pdo, string $title, string $articleTyp
             . 'fences: {"intent": "who is searching and what they need", "intro": "2-3 sentence hook introducing the roundup", '
             . '"items": [{"heading": "short idea title", "notes": "what makes this idea good, styling/how-to notes"}, ...], '
             . '"faqs": [{"question": "a real reader question about this topic", "answer": "2-3 sentence answer"}, ...], '
-            . '"wrap_up": "2-3 sentence closing thought that ties the roundup together"}. '
-            . "Generate exactly $ideaCount items — that's the count implied by the article title — and 5 faqs." . $extra;
+            . '"wrap_up_heading": "closing section heading, or empty string", "wrap_up": "2-3 sentence closing thought, or empty string"}. '
+            . "Generate exactly $ideaCount items — that's the count implied by the article title — and 5 faqs. "
+            . article_closing_rules() . $extra;
         $userPrompt = "Article title: $title";
     }
     if (!empty($ctx['refs_brief'])) $userPrompt .= "\n\n" . $ctx['refs_brief'];
@@ -219,6 +220,59 @@ function ai_generate_article_outline(PDO $pdo, string $title, string $articleTyp
         return ['ok' => false, 'sections' => [], 'error' => 'The recipe outline was incomplete.'];
     }
     return ['ok' => true, 'sections' => $json, 'error' => null];
+}
+
+/**
+ * Ideas articles: the closing section is optional and never a generic "Wrap Up" / "Conclusion".
+ * The outline decides per article whether it needs one and names it for that niche and topic.
+ */
+function article_closing_rules(): string
+{
+    return 'CLOSING SECTION: decide whether THIS article really needs a closing section after the FAQs. Add one only when it '
+        . 'gives the reader something new — e.g. how to choose between the ideas, a practical next step, a care/safety reminder '
+        . 'or a season/occasion plan. Many articles do not need one: then set the closing heading and thought to empty (NONE). '
+        . 'When you add one, its heading must be specific to this article\'s niche and topic, written like a real section '
+        . 'title for that niche (fashion: "Building Your White Jeans Capsule for Every Season"; food: "Planning These Dinners '
+        . 'Into Your Week"; home decor: "Mixing These Looks in One Room"; hair: "What to Ask Your Stylist Before Your Cut"). '
+        . 'NEVER use generic headings like "Wrap Up", "Conclusion", "Final Thoughts", "Final Words", "Final Word", '
+        . '"In Summary", "Summary", "Closing Thoughts", "The Bottom Line" or "Takeaway".';
+}
+
+/** The closing heading this outline asked for ('' = no closing section, also for generic headings). */
+function article_closing_heading(array $outline): string
+{
+    $h = trim(strip_tags((string)($outline['wrap_up_heading'] ?? '')), " \t\"'#:");
+    $h = preg_replace('/^\d+[\.\)]\s*/', '', $h);
+    if ($h === '' || trim((string)($outline['wrap_up'] ?? '')) === '') return '';
+    return preg_match(article_generic_closing_regex(), $h) ? '' : mb_substr($h, 0, 90);
+}
+
+/** Matches a generic closing heading text ("Wrap Up", "Conclusion", "Final Thoughts", …). */
+function article_generic_closing_regex(): string
+{
+    return '/^(?:the\s+)?(?:wrap(?:ping)?[\s-]*(?:it\s+)?up|conclusions?|in\s+conclusion|final\s+(?:thoughts?|words?|notes?)|'
+        . '(?:in\s+)?summary|to\s+sum\s+up|closing\s+(?:thoughts?|words?)|bottom\s+line|(?:key\s+)?takeaways?|last\s+words?|none)[\s!.:]*$/i';
+}
+
+/** Safety net: drops a generic closing section ("<h2>Wrap Up</h2>…") the AI added anyway, up to the next <h2> or the end. */
+function article_strip_generic_closing(string $html): string
+{
+    return preg_replace_callback('#<h2[^>]*>(.*?)</h2>.*?(?=<h2[^>]*>|$)#is', function ($m) {
+        $text = trim(html_entity_decode(strip_tags($m[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+        return preg_match(article_generic_closing_regex(), $text) ? '' : $m[0];
+    }, $html);
+}
+
+/** Draft-prompt line for the closing section: write it under its own heading, or end after the FAQs. */
+function article_closing_instruction(array $outline, string $prefix): string
+{
+    $h = article_closing_heading($outline);
+    if ($h === '') {
+        return 'Do NOT add any closing, conclusion, "Wrap Up" or "Final Thoughts" section — the article ends with the last FAQ answer.';
+    }
+    return $prefix . 'A closing <h2>' . htmlspecialchars($h, ENT_QUOTES, 'UTF-8') . '</h2> section (use exactly this heading) with 1-2 short '
+        . 'paragraphs built around the closing thought given — practical and specific to this topic, not a summary of the list. '
+        . 'Never title it "Wrap Up", "Conclusion" or "Final Thoughts".';
 }
 
 /**
@@ -292,10 +346,12 @@ function ai_generate_article_draft(PDO $pdo, string $title, array $outline, stri
             . 'Blonde Soft Crop</h2>"). Insert an {{IMAGE:n}} token on its own line immediately after each heading, '
             . 'numbered sequentially starting at 1. ' . $perIdea
             . '3) An <h2>FAQs</h2> section with each question as an <h3> immediately followed by a short <p> answer. '
-            . '4) A closing <h2>Wrap Up</h2> section with 1-2 short paragraphs tying the roundup together. '
+            . article_closing_instruction($outline, '4) ') . ' '
             . article_quality_rules() . $lengthRule;
+        $closingHeading = article_closing_heading($outline);
         $userPrompt = "Article title: $title\nReader intent: " . ($outline['intent'] ?? '') . "\nIntro hook: " . ($outline['intro'] ?? '')
-            . "\nIdeas (write one <h2> section for each, in this exact order and numbering):\n$items\nFAQs to include:\n$faqs\nWrap-up thought to close with: " . ($outline['wrap_up'] ?? '');
+            . "\nIdeas (write one <h2> section for each, in this exact order and numbering):\n$items\nFAQs to include:\n$faqs"
+            . ($closingHeading !== '' ? "\nClosing thought: " . ($outline['wrap_up'] ?? '') : '');
     }
     if (!empty($ctx['refs_brief'])) $userPrompt .= "\n\n" . $ctx['refs_brief'];
 
@@ -306,6 +362,7 @@ function ai_generate_article_draft(PDO $pdo, string $title, array $outline, stri
     }
     $html = trim($result['text']);
     $html = preg_replace('/^```(?:html)?\s*|\s*```$/', '', $html);
+    if ($articleType !== 'recipe') $html = article_strip_generic_closing($html);
     if (!empty($result['truncated'])) {
         // cut off at the token limit — ask for the rest once, then join
         $more = ai_generate_text($pdo, $provider, $model, $systemPrompt . ' You are continuing an answer that was cut off: '
@@ -1037,10 +1094,10 @@ function article_write_part(PDO $pdo, string $title, string $type, array $outlin
     } else { // end
         $faqs = '';
         foreach (($outline['faqs'] ?? []) as $f) $faqs .= 'Q: ' . ($f['question'] ?? '') . "\nA: " . ($f['answer'] ?? '') . "\n";
-        $sys = $base . ' Write ONLY the ending: an <h2>FAQs</h2> section (each question as an <h3> followed by a <p> answer, 5 questions), '
-            . 'then an <h2>Wrap Up</h2> section with 1-2 short paragraphs tying the list together.';
+        $sys = $base . ' Write ONLY the ending: an <h2>FAQs</h2> section (each question as an <h3> followed by a <p> answer, 5 questions). '
+            . article_closing_instruction($outline, 'Then: ');
         $user = $head . ($faqs ? "FAQs to answer (improve them if needed):\n$faqs" : "Write 5 real reader questions about this topic and answer them.\n")
-            . 'Closing thought: ' . ($outline['wrap_up'] ?? '');
+            . (article_closing_heading($outline) !== '' ? 'Closing thought: ' . ($outline['wrap_up'] ?? '') : '');
         $tokens = 2500;
     }
     $r = ai_generate_text($pdo, $provider, $model, $sys, $user, $tokens);
@@ -1048,6 +1105,7 @@ function article_write_part(PDO $pdo, string $title, string $type, array $outlin
     $html = trim(preg_replace('/^```(?:html)?\s*|\s*```$/', '', trim($r['text'])));
     if ($html === '') return ['ok' => false, 'html' => '', 'error' => 'The AI returned an empty answer.'];
     if (!empty($r['truncated'])) return ['ok' => false, 'html' => '', 'error' => 'Answer was cut off (too long).', 'split' => true];
+    if ($part['type'] === 'end') $html = article_strip_generic_closing($html);
     if ($part['type'] === 'items') {
         // every idea of this group must be there, with its image token
         for ($k = $part['from']; $k <= $part['to']; $k++) {
@@ -1073,16 +1131,18 @@ function ai_generate_article_outline_plain(PDO $pdo, string $title, int $ideaCou
     $sys = 'You outline genuinely useful Pinterest-style list articles. ' . article_quality_rules()
         . " Reply in plain text only, exactly in this format:\nINTENT: who is searching and what they need\nINTRO: 2 sentence hook\n"
         . "1. Idea title — what makes it good, how to do/wear/use it\n2. …\n(exactly $ideaCount numbered ideas)\n"
-        . "Q: reader question | A: short answer\n(5 of these)\nWRAP: closing thought";
+        . "Q: reader question | A: short answer\n(5 of these)\nWRAP_HEADING: closing section heading, or NONE\nWRAP: closing thought, or NONE\n"
+        . article_closing_rules();
     $r = ai_generate_text($pdo, $provider, $model, $sys, "Article title: $title" . (!empty($ctx['refs_brief']) ? "\n\n" . $ctx['refs_brief'] : ''), (int)min(9000, 1500 + $ideaCount * 160));
     if (!$r['ok']) return ['ok' => false, 'sections' => [], 'error' => $r['error']];
-    $out = ['intent' => '', 'intro' => '', 'items' => [], 'faqs' => [], 'wrap_up' => ''];
+    $out = ['intent' => '', 'intro' => '', 'items' => [], 'faqs' => [], 'wrap_up_heading' => '', 'wrap_up' => ''];
     foreach (preg_split('/\R/', $r['text']) as $line) {
         $line = trim(strip_tags($line), " \t*#");
         if ($line === '') continue;
         if (preg_match('/^INTENT:\s*(.+)$/i', $line, $m)) $out['intent'] = $m[1];
         elseif (preg_match('/^INTRO:\s*(.+)$/i', $line, $m)) $out['intro'] = $m[1];
-        elseif (preg_match('/^WRAP(?:[ _-]?UP)?:\s*(.+)$/i', $line, $m)) $out['wrap_up'] = $m[1];
+        elseif (preg_match('/^WRAP[ _-]?HEADING:\s*(.+)$/i', $line, $m)) $out['wrap_up_heading'] = strcasecmp(trim($m[1]), 'NONE') === 0 ? '' : $m[1];
+        elseif (preg_match('/^WRAP(?:[ _-]?UP)?:\s*(.+)$/i', $line, $m)) $out['wrap_up'] = strcasecmp(trim($m[1]), 'NONE') === 0 ? '' : $m[1];
         elseif (preg_match('/^Q:\s*(.+?)\s*\|\s*A:\s*(.+)$/i', $line, $m)) $out['faqs'][] = ['question' => $m[1], 'answer' => $m[2]];
         elseif (preg_match('/^\d{1,3}[\.\)]\s*(.+?)(?:\s+[—–-]\s+|:\s+)(.+)$/u', $line, $m)) $out['items'][] = ['heading' => trim($m[1], ' "'), 'notes' => $m[2]];
         elseif (preg_match('/^\d{1,3}[\.\)]\s*(.+)$/', $line, $m)) $out['items'][] = ['heading' => trim($m[1], ' "'), 'notes' => ''];

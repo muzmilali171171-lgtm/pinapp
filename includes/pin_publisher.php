@@ -109,13 +109,8 @@ function pinterest_create_pin_base64(PDO $pdo, array $account, array $pinRow): a
     if ($b64 === null) return ['ok' => false, 'code' => 0, 'data' => null, 'error' => 'Image file not found on server.'];
 
     $account = pinterest_ensure_fresh_token($pdo, $account);
-    $description = (string)($pinRow['description'] ?? '');
-    if (!empty($pinRow['keywords'])) {
-        $kwList = array_filter(array_map('trim', explode(',', $pinRow['keywords'])));
-        if ($kwList && stripos($description, $kwList[0]) === false) {
-            $description = trim($description . "\n" . implode(', ', $kwList));
-        }
-    }
+    // No keyword list appended, no URL in the text (same as pinterest_create_pin()).
+    $description = pin_description_clean((string)($pinRow['description'] ?? ''));
     $payload = [
         'board_id' => $pinRow['board_id'],
         'title' => $pinRow['title'],

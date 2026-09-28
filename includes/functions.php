@@ -482,17 +482,10 @@ function pinterest_create_pin(PDO $pdo, array $account, array $pinRow): array
     // External storage URL when the image is on R2/S3/B2 (uploaded now if needed), else the hosting URL.
     $imageUrl = media_url((string)$pinRow['image_path']);
 
-    $description = (string)($pinRow['description'] ?? '');
-    // Pinterest's public API has no generic "product tag" endpoint for arbitrary
-    // retailer links, and no dedicated keywords field on a pin — fold keywords
-    // into the description (where Pinterest actually indexes them for search)
-    // if they aren't already present there.
-    if (!empty($pinRow['keywords'])) {
-        $kwList = array_filter(array_map('trim', explode(',', $pinRow['keywords'])));
-        if ($kwList && stripos($description, $kwList[0]) === false) {
-            $description = trim($description . "\n" . implode(', ', $kwList));
-        }
-    }
+    // Keywords are NOT appended to the description any more (that left a raw keyword list after the
+    // CTA); the AI already works them into the sentences. Any URL in the text is removed — the link
+    // is sent in the pin's own link field.
+    $description = pin_description_clean((string)($pinRow['description'] ?? ''));
 
     $payload = [
         'board_id' => $pinRow['board_id'],
@@ -989,6 +982,53 @@ function pin_enforce_max_chars(string $text, int $max): string
         $truncated = mb_substr($truncated, 0, $lastSpace);
     }
     return rtrim($truncated);
+}
+
+/** Description rules shared by every AI pin writer: a natural CTA with no link, website or keyword list in the text. */
+function pin_description_cta_rules(): string
+{
+    return 'End every description with a short, natural call-to-action that invites the reader to click or save the pin '
+        . '(e.g. "Tap to see all the outfit ideas.", "Save this for your next grocery run."). NEVER write a URL, link, '
+        . 'domain name or website name anywhere in the description — the link is already attached to the pin. The '
+        . 'description must end with that CTA sentence: never add a list of keywords, tags or search phrases after it — '
+        . 'keywords belong only in the "keywords" field.';
+}
+
+/**
+ * Last line of defense before a pin description is saved or published: removes any URL / bare
+ * domain the AI (or a CSV) put in the text and tidies the sentence it sat in ("Read more at
+ * https://site.com/post" -> "Read more."). The pin's real link is sent in its own field.
+ */
+function pin_description_clean(string $text): string
+{
+    $t = str_replace("\r\n", "\n", $text);
+    // Mark every URL / bare domain, then drop it together with the word that led into it
+    // ("at", "on", "via", "from", ":" or a dash) — only there, so normal sentences are untouched.
+    $t = preg_replace('~\(?\s*(?:https?://|www\.)[^\s)]+\)?~iu', "\x01", $t);
+    $t = preg_replace('~\b[a-z0-9][a-z0-9-]*(?:\.[a-z0-9-]+)*\.(?:com|net|org|co|io|shop|store|blog|info|site|online|xyz|me|us|uk|ca|au|in|pk|de|fr)(?:/[^\s)]*)?(?=[\s.,!?;:)]|$)~iu', "\x01", $t);
+    // "Visit site.com for more" -> "Tap the pin for more"
+    $t = preg_replace_callback('~\b(visit|check out|head (?:over )?to|go to|click)[ \t]*\x01~iu',
+        fn($m) => ctype_upper($m[1][0]) ? 'Tap the pin' : 'tap the pin', $t);
+    $t = preg_replace('~[ \t]*(?:\b(?:at|on|via|from)\b|[:\-–—])?[ \t]*\x01~iu', '', $t);
+    // A bare keyword list after the last sentence ("white jeans over 60, spring outfits, …") — drop it.
+    $lines = explode("\n", trim($t));
+    while (count($lines) > 1) {
+        $last = trim(end($lines));
+        $isKeywordList = $last === '' || (substr_count($last, ',') >= 2 && !preg_match('~[.!?]["\')]?$~u', $last));
+        if (!$isKeywordList) break;
+        array_pop($lines);
+    }
+    $t = implode("\n", $lines);
+    // …or on the same line, right after the last sentence ("…to fall! white jeans over 60, casual looks, …").
+    if (preg_match('~^(.*[.!?]["\')]?)\s+([^.!?\n]*,[^.!?\n]*,[^.!?\n]*)$~us', $t, $m)) $t = $m[1];
+    $t = preg_replace('~[ \t]+~u', ' ', $t);
+    $t = preg_replace('~\s+([.,!?;:])~u', '$1', $t);
+    $t = preg_replace('~([.!?])[.,;:]+~u', '$1', $t);
+    $t = preg_replace("~\n{3,}~u", "\n\n", $t);
+    $t = trim($t);
+    // A sentence cut short where the link was ("Read the full guide") still ends with a full stop.
+    if ($t !== '' && $t !== trim($text) && preg_match('~[\p{L}\p{N}]$~u', $t) && !preg_match('~#[\p{L}\p{N}_]+$~u', $t)) $t .= '.';
+    return $t;
 }
 
 /* ===================== Pinterest bulk-upload CSV export ===================== */

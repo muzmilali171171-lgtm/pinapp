@@ -290,7 +290,7 @@ function cw_ai_page_content(PDO $pdo, int $userId, array $page, int $count, arra
         . 'Shape: {"category": "...", "board": "...", "new_board": null, "pins": [{"title": "...", "description": "...", "alt_text": "...", "keywords": "...", "headline": "...", "kicker": "...", "cta": "..."}]}. '
         . '"category" is one of: ' . implode(', ', CW_CATEGORIES) . '. '
         . 'Give exactly ' . $count . ' pins. All pins are for the SAME page and share its intent, but every title, description and headline must use a different angle and hook so none read as duplicates. '
-        . 'title: keyword-rich, under 100 characters. description: 2-3 natural sentences, under 480 characters, ending with a short call to action. '
+        . 'title: keyword-rich, under 100 characters. description: 2-3 natural sentences, under 480 characters. ' . pin_description_cta_rules() . ' '
         . 'alt_text: literal description of what the pin image shows for screen readers, under 300 characters. keywords: 5-8 comma-separated lowercase search phrases. '
         . 'headline: the words printed ON the pin image — punchy, 3-7 words, under 45 characters, keep any leading number from the page title. '
         . 'kicker: 1-3 word small tag line printed above the headline (e.g. "Easy recipe", "Must try", "Save for later"). '
@@ -315,7 +315,7 @@ function cw_ai_page_content(PDO $pdo, int $userId, array $page, int $count, arra
         $title = trim((string)($r['title'] ?? $page['title']));
         $items[] = [
             'title' => pin_enforce_max_chars($title !== '' ? $title : $page['title'], 100),
-            'description' => pin_enforce_max_chars(trim((string)($r['description'] ?? $page['description'] ?? '')), 500),
+            'description' => pin_enforce_max_chars(pin_description_clean(trim((string)($r['description'] ?? $page['description'] ?? ''))), 500),
             'alt_text' => pin_enforce_max_chars(trim((string)($r['alt_text'] ?? $title)), 500),
             'keywords' => pin_enforce_max_chars(trim((string)($r['keywords'] ?? '')), 500),
             'headline' => pin_enforce_max_chars(trim((string)($r['headline'] ?? $title)), 60),
@@ -345,7 +345,7 @@ function cw_plain_page_content(array $page, int $count): array
     for ($i = 0; $i < $count; $i++) {
         $items[] = [
             'title' => pin_enforce_max_chars($page['title'], 100),
-            'description' => pin_enforce_max_chars($page['description'] ?: $page['title'], 500),
+            'description' => pin_enforce_max_chars(pin_description_clean($page['description'] ?: $page['title']), 500),
             'alt_text' => pin_enforce_max_chars($page['title'], 500),
             'keywords' => '',
             'headline' => pin_enforce_max_chars($page['title'], 60),

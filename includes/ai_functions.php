@@ -394,9 +394,8 @@ function ai_generate_pin_batch(PDO $pdo, array $keywords, bool $withTags, string
         return ['ok' => empty($chunkErrors), 'items' => $items, 'error' => $chunkErrors ? implode(' | ', array_unique($chunkErrors)) : null];
     }
 
-    $ctaLine = $destLink !== ''
-        ? "End every description with a short, natural call-to-action inviting the reader to visit the website ($destLink)."
-        : "End every description with a short, natural call-to-action inviting the reader to visit the website for more.";
+    // The link goes on the pin itself (Pinterest's link field) — never inside the description text.
+    $ctaLine = pin_description_cta_rules();
     $tagsLine = $withTags
         ? "After the CTA, add 3-5 relevant Pinterest hashtags (e.g. #hashtag), space-separated, as part of the description text."
         : "Do not include any hashtags in the description.";
@@ -482,7 +481,7 @@ function ai_generate_pin_batch(PDO $pdo, array $keywords, bool $withTags, string
             // rejects a pin outright if these are over its limits, so this must never rely on
             // the model reliably following the prompt's character-count instructions alone.
             'title' => $title,
-            'description' => pin_enforce_max_chars(is_array($row) ? trim((string)($row['description'] ?? '')) : '', 500),
+            'description' => pin_enforce_max_chars(pin_description_clean(is_array($row) ? trim((string)($row['description'] ?? '')) : ''), 500),
             'alt_text' => pin_enforce_max_chars(is_array($row) ? trim((string)($row['alt_text'] ?? '')) : '', 500),
             'keywords' => pin_enforce_max_chars(is_array($row) ? trim((string)($row['keywords'] ?? '')) : '', 500),
         ];
@@ -518,9 +517,8 @@ function ai_generate_pin_variations(PDO $pdo, string $sourceTitle, int $count, s
 
     $number = preg_match('/\d+/', $sourceTitle, $m) ? $m[0] : null;
     $normalize = fn($s) => trim(preg_replace('/[^a-z0-9]+/', ' ', strtolower((string)$s)));
-    $ctaLine = $destLink !== ''
-        ? "End every description with a short, natural call-to-action inviting the reader to visit $destLink."
-        : 'End every description with a short, natural call-to-action inviting the reader to visit the website.';
+    // The link goes on the pin itself (Pinterest's link field) — never inside the description text.
+    $ctaLine = pin_description_cta_rules();
     $numberLine = $number !== null
         ? "The source title contains the number $number: EVERY title must contain that exact number $number, written as a digit — never drop it, spell it out or change it."
         : 'The source title has no number: do NOT add any number to the titles.';
@@ -574,7 +572,7 @@ function ai_generate_pin_variations(PDO $pdo, string $sourceTitle, int $count, s
             $usedKeys[$key] = true;
             $items[] = [
                 'title' => $title,
-                'description' => pin_enforce_max_chars(trim((string)($row['description'] ?? '')), 500),
+                'description' => pin_enforce_max_chars(pin_description_clean(trim((string)($row['description'] ?? ''))), 500),
                 'alt_text' => pin_enforce_max_chars(trim((string)($row['alt_text'] ?? '')), 500),
                 'keywords' => pin_enforce_max_chars(trim((string)($row['keywords'] ?? '')), 500),
             ];
@@ -649,7 +647,7 @@ function ai_generate_single_pin_fallback(PDO $pdo, string $provider, string $mod
 
     return [
         'title' => pin_enforce_max_chars($title, 100),
-        'description' => pin_enforce_max_chars($description, 500),
+        'description' => pin_enforce_max_chars(pin_description_clean($description), 500),
         'alt_text' => '',
         'keywords' => '',
     ];

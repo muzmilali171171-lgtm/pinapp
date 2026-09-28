@@ -299,7 +299,7 @@ include __DIR__ . '/includes/user-header.php';
                     </div>
                     <button type="button" class="btn-primary" id="aiGenerateBtn" style="width:100%;">Generate &amp; Insert with AI</button>
                     <div id="aiProgress" class="ai-progress"></div>
-                    <p class="muted" style="margin-bottom:0;">Generates a title, description, alt text and keywords for each pin, 10 at a time. Descriptions end with a call-to-action to your Global Link. Titles keep any number found in the keyword (e.g. "20 ...").</p>
+                    <p class="muted" style="margin-bottom:0;">Generates a title, description, alt text and keywords for each pin, 10 at a time. Descriptions end with a short call-to-action (no link or keyword list in the text — your Global Link is attached to the pin). Titles keep any number found in the keyword (e.g. "20 ...").</p>
                 </div>
             </div>
         </div>
