@@ -47,6 +47,8 @@ while (time() < $end) {
             $idle = $r['steps'] === 0;
         } else {
             scheduler_run($pdo, 'runner', 20, 45);
+            // No cron job: the storage work (external upload + hosting cleanup) runs here too.
+            ext_background_tick($pdo);
             $idle = true;
         }
     } catch (Throwable $e) {

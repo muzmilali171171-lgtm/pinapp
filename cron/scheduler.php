@@ -31,16 +31,6 @@ if (!$isCli) {
 $r = scheduler_run($pdo, $isCli ? 'cron' : 'web', 40, 240);
 echo implode("\n", $r['messages']) . "\n";
 
-// Move new images to external storage + hourly hosting cleanup (Admin → Storage Settings).
-try {
-    $sw = ext_sweep($pdo, 25, 3, 40);
-    if ($sw['checked']) echo "External storage: {$sw['uploaded']} uploaded, {$sw['hosting']} kept on hosting.\n";
-    $cleanFlag = __DIR__ . '/../uploads/.ext_cleanup_last';
-    if (!is_file($cleanFlag) || filemtime($cleanFlag) < time() - 3600) {
-        @touch($cleanFlag);
-        $removed = ext_cleanup_local($pdo);
-        if ($removed) echo "Removed $removed hosting copies (already on external storage).\n";
-    }
-} catch (Throwable $e) {
-    ext_log_error($pdo, null, null, 'Background upload error: ' . $e->getMessage());
-}
+// Move new images to external storage + remove hosting copies of published pins / articles
+// when due (Admin → Storage Settings).
+foreach (ext_background_tick($pdo) as $m) echo "$m\n";

@@ -51,6 +51,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ext_save_settings($pdo, $vals);
         log_event($pdo, 'system', 'Admin updated external storage settings');
         redirect('storage-settings?saved=1');
+    } elseif ($action === 'save_publish_cleanup') {
+        ext_save_settings($pdo, [
+            'pin_delete_after_days' => max(0, min(3650, (int)($_POST['pin_delete_after_days'] ?? 5))),
+            'article_delete_after_hours' => max(0, min(8760, (int)($_POST['article_delete_after_hours'] ?? 1))),
+        ]);
+        log_event($pdo, 'system', 'Admin updated hosting cleanup after publish (pins days / article hours)');
+        redirect('storage-settings?saved=1#publish-cleanup');
+    } elseif ($action === 'run_publish_cleanup') {
+        // Apply the rules to everything already published, right now.
+        @set_time_limit(300);
+        ignore_user_abort(true);
+        if (!ext_cleanup_possible($pdo)) {
+            $_SESSION['storage_flash'] = 'Nothing removed: external storage is off, or no active account has a Public Base URL — hosting copies are kept so no image breaks.';
+        } else {
+            $s = ext_settings($pdo);
+            $p = ext_cleanup_published_pins($pdo, 3000, 120, max(0, (int)$s['pin_delete_after_days']));
+            $a = ext_cleanup_published_articles($pdo, 1000, 120, max(0, (int)$s['article_delete_after_hours']));
+            $kept = $p['kept'] + $a['kept'];
+            $_SESSION['storage_flash'] = "Removed {$p['deleted']} published pin image(s) and {$a['deleted']} article image(s) from hosting ({$a['articles']} article(s) checked)."
+                . ($kept ? " $kept image(s) kept on hosting because they could not be copied to external storage yet (see Storage Errors)." : '')
+                . (($p['more'] || $a['more']) ? ' More are waiting — click Run Now again (the background job also keeps going).' : '');
+            log_event($pdo, 'system', "Admin ran hosting cleanup: {$p['deleted']} pin + {$a['deleted']} article images removed");
+        }
+        redirect('storage-settings#publish-cleanup');
+    } elseif ($action === 'run_db_optimize') {
+        @set_time_limit(0);
+        ignore_user_abort(true);
+        $before = db_size_summary($pdo);
+        $steps = db_optimize_run($pdo, 240);
+        $after = db_size_summary($pdo);
+        $saved = max(0, ($before['total'] + $before['free']) - ($after['total'] + $after['free']));
+        $_SESSION['storage_flash'] = 'Optimize finished: ' . implode(' ', $steps)
+            . ' Database size: ' . fmt_bytes($before['total']) . ' → ' . fmt_bytes($after['total']) . ($saved > 0 ? ' (' . fmt_bytes($saved) . ' freed).' : '.');
+        log_event($pdo, 'system', 'Admin ran database optimize');
+        redirect('storage-settings#database');
     } elseif ($action === 'sync_existing') {
         @set_time_limit(120);
         $r = ext_sweep($pdo, 60, 0, 60);
@@ -100,6 +135,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ext_ensure_schema($pdo);
 $extSettings = ext_settings($pdo);
 $extSummary = ext_status_summary($pdo);
+$cleanupPossible = ext_cleanup_possible($pdo);
+$dbSize = db_size_summary($pdo);
+// Hosting copies still waiting for the publish rules (shown next to the Run Now button).
+$pendingPins = $pendingArticles = null;
+try {
+    ext_cleanup_ensure_schema($pdo);
+    $pd = max(0, (int)$extSettings['pin_delete_after_days']);
+    $ph = max(0, (int)$extSettings['article_delete_after_hours']);
+    if ($pd > 0) $pendingPins = (int)$pdo->query("SELECT COUNT(DISTINCT sp.image_path) FROM scheduled_pins sp
+        LEFT JOIN external_files ef ON ef.local_path = sp.image_path
+        WHERE sp.status = 'published' AND sp.published_at < (NOW() - INTERVAL $pd DAY) AND sp.image_path LIKE 'uploads/%'
+          AND (ef.id IS NULL OR ef.local_deleted = 0)")->fetchColumn();
+    if ($ph > 0) $pendingArticles = (int)$pdo->query("SELECT COUNT(*) FROM articles WHERE status = 'published' AND local_images_cleaned = 0
+        AND published_at < (NOW() - INTERVAL $ph HOUR)")->fetchColumn();
+} catch (Throwable $e) { /* counts are optional */ }
 $recentErrors = [];
 try { $recentErrors = $pdo->query("SELECT e.*, p.label, p.bucket, p.provider FROM storage_error_log e LEFT JOIN storage_providers p ON p.id = e.provider_row_id ORDER BY e.id DESC LIMIT 20")->fetchAll(); } catch (Throwable $e) {}
 $flash = $_SESSION['storage_flash'] ?? null;
@@ -149,6 +199,80 @@ else { $whereNow = ['success', "External storage is ON — new images go to your
         </div>
         <button type="submit" class="btn-primary">Save</button>
     </form>
+</div>
+
+<div class="card" id="publish-cleanup">
+    <h2>Remove Hosting Copies After Publishing</h2>
+    <p class="muted" style="margin-top:0;">Once a pin or article is published, its images are removed from hosting (file manager) and
+        <strong>only one copy stays on external storage</strong>. Every old link keeps working — it redirects to the external copy.
+        An image that isn't on external storage yet is uploaded first; if that isn't possible it stays on hosting, so nothing breaks.
+        Set 0 to switch a rule off.</p>
+    <?php if (!$cleanupPossible): ?>
+        <div class="alert alert-info">Paused: external storage is off or no active account has a Public Base URL, so hosting copies are kept for now.</div>
+    <?php endif; ?>
+    <form method="POST">
+        <input type="hidden" name="action" value="save_publish_cleanup">
+        <div class="two-col">
+            <div class="form-row">
+                <label>Pin images — delete from hosting after (days)</label>
+                <input type="number" name="pin_delete_after_days" min="0" max="3650" value="<?= (int)$extSettings['pin_delete_after_days'] ?>">
+                <p class="muted" style="margin:4px 0 0;">Days after the pin is published (default 5). Images still used by a pending pin are kept.</p>
+            </div>
+            <div class="form-row">
+                <label>Article images — delete from hosting after (hours)</label>
+                <input type="number" name="article_delete_after_hours" min="0" max="8760" value="<?= (int)$extSettings['article_delete_after_hours'] ?>">
+                <p class="muted" style="margin:4px 0 0;">Hours after the article is published (default 1) — featured and in-article images.</p>
+            </div>
+        </div>
+        <button type="submit" class="btn-primary">Save</button>
+    </form>
+    <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-top:14px; padding-top:14px; border-top:1px solid var(--border, #eee);">
+        <form method="POST" onsubmit="return confirm('Remove the hosting copies of all already-published pins and articles that are past these limits? Only the external copy will remain.');">
+            <input type="hidden" name="action" value="run_publish_cleanup">
+            <button type="submit" class="btn-secondary" <?= $cleanupPossible ? '' : 'disabled' ?>>Run Now for Existing Images</button>
+        </form>
+        <span class="muted">Waiting now:
+            <?= $pendingPins === null ? 'pin rule off' : '<strong>' . number_format($pendingPins) . '</strong> pin image(s)' ?> ·
+            <?= $pendingArticles === null ? 'article rule off' : '<strong>' . number_format($pendingArticles) . '</strong> article(s)' ?>.
+            The background job also does this every 10 minutes.</span>
+    </div>
+</div>
+
+<div class="card" id="database">
+    <h2>Database</h2>
+    <div class="two-col">
+        <div>
+            <p style="margin-top:0;">Total size: <strong style="font-size:18px;"><?= e(fmt_bytes($dbSize['total'])) ?></strong>
+                <span class="muted">(data <?= e(fmt_bytes($dbSize['data'])) ?> · indexes <?= e(fmt_bytes($dbSize['index'])) ?> · <?= number_format($dbSize['tables']) ?> tables · ~<?= number_format($dbSize['rows']) ?> rows)</span></p>
+            <p>Reclaimable space: <strong><?= e(fmt_bytes($dbSize['free'])) ?></strong></p>
+            <?php if (db_needs_optimize($dbSize)): ?>
+                <div class="alert alert-error" style="margin:8px 0;">You need to optimize — <?= e(fmt_bytes($dbSize['free'])) ?> can be freed. Click <strong>Run Optimize</strong>.</div>
+            <?php else: ?>
+                <div class="alert alert-success" style="margin:8px 0;">Database is in good shape.</div>
+            <?php endif; ?>
+            <form method="POST" onsubmit="this.querySelector('button').disabled=true; this.querySelector('button').textContent='Optimizing… (can take a few minutes)';">
+                <input type="hidden" name="action" value="run_db_optimize">
+                <button type="submit" class="btn-primary">Run Optimize</button>
+            </form>
+            <p class="muted" style="margin-top:6px;">Cleans unwanted data and files — logs older than 90 days, storage errors older than 30 days, expired
+                analytics cache, read notifications older than 90 days, page-image data left in finished website pin pages, leftover lock/temp
+                files — then optimizes the tables to free the space. Pins, articles, users, images and settings are never touched.</p>
+        </div>
+        <div>
+            <div style="font-weight:600; margin-bottom:6px;">Largest tables</div>
+            <table>
+                <tr><th>Table</th><th>Size</th><th>Free</th><th>Rows</th></tr>
+                <?php foreach ($dbSize['top'] as $t): ?>
+                <tr>
+                    <td style="font-size:12px;"><?= e($t['t']) ?></td>
+                    <td><?= e(fmt_bytes((int)$t['d'] + (int)$t['i'])) ?></td>
+                    <td class="muted"><?= e(fmt_bytes((int)$t['f'])) ?></td>
+                    <td class="muted">~<?= number_format((int)$t['r']) ?></td>
+                </tr>
+                <?php endforeach; ?>
+            </table>
+        </div>
+    </div>
 </div>
 
 <div class="card">
