@@ -206,6 +206,10 @@ include __DIR__ . '/includes/user-header.php';
 .cal-tip { display: none; position: absolute; z-index: 20; left: 50%; top: 100%; transform: translate(-50%, 6px); min-width: 210px;
     background: #111827; color: #fff; border-radius: 10px; padding: 10px 12px; font-size: 12px; line-height: 1.7; box-shadow: 0 8px 24px rgba(0,0,0,.25); pointer-events: none; }
 .cal-day.has:hover .cal-tip { display: block; }
+/* the hovered day (and its tooltip) sits above the next rows' days */
+.cal-day.has:hover, .cal-day.has:focus { z-index: 30; }
+/* last row: open the tooltip upwards so it isn't cut off at the bottom */
+.cal-day.tip-up .cal-tip { top: auto; bottom: 100%; transform: translate(-50%, -6px); }
 .cal-legend { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; font-size: 12px; }
 .cal-chip i { font-style: normal; }
 .cal-legend .cal-chip { white-space: normal; }
@@ -414,7 +418,7 @@ include __DIR__ . '/includes/user-header.php';
             $has = ($s + $pb + $fl + $ps + $ar) > 0;
             $cls = $fl ? 'c-failed' : ($s || $ps ? 'c-scheduled' : ($pb ? 'c-published' : ($ar ? 'c-articles' : '')));
         ?>
-        <div class="cal-day <?= $has ? 'has ' . $cls : '' ?> <?= $ymd === $todayUser ? 'today' : '' ?>" <?= $has ? 'data-day="' . e($ymd) . '" tabindex="0" data-sum="' . e("⏳ $s scheduled · ✅ $pb published · ⚠️ $fl failed" . ($ps ? " · ⏸ $ps stopped" : '') . " · 📝 $ar articles not generated yet") . '"' : '' ?>>
+        <div class="cal-day <?= $has ? 'has ' . $cls : '' ?> <?= $ymd === $todayUser ? 'today' : '' ?> <?= ($lead + $d - 1) >= intdiv($lead + $daysInMonth - 1, 7) * 7 ? 'tip-up' : '' ?>" <?= $has ? 'data-day="' . e($ymd) . '" tabindex="0" data-sum="' . e("⏳ $s scheduled · ✅ $pb published · ⚠️ $fl failed" . ($ps ? " · ⏸ $ps stopped" : '') . " · 📝 $ar articles not generated yet") . '"' : '' ?>>
             <div class="cal-num"><?= $d ?></div>
             <?php if ($has): ?>
             <div class="cal-chips">
