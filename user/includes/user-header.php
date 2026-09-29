@@ -101,7 +101,7 @@ require_once __DIR__ . '/../../includes/pricing_functions.php';
                 ['link', 'storage', 'storage', 'Storage'],
             ]],
             ['label' => 'Analytics', 'entries' => [
-                ['group', 'analyticsSubmenu', 'Analytics', [['pinterest-analytics', 'pinterest-analytics', 'Pinterest Analytics'], ['template-tracking', 'template-tracking', 'Template Tracking'], ['keyword-research', 'keyword-research', 'Keyword Research']]],
+                ['group', 'analyticsSubmenu', 'Analytics', [['pinterest-analytics', 'pinterest-analytics', 'Pinterest Analytics'], ['template-tracking', 'template-tracking', 'Template Tracking'], ['keyword-research', 'keyword-research', 'Keyword Research'], ['competitor-analysis', 'competitor-analysis', 'Competitor Analysis'], ['competitor-research', 'competitor-research', 'Competitor Research']]],
             ]],
             ['label' => 'Websites', 'entries' => [
                 ['group', 'addWebsitesSubmenu', 'Add Websites', [['websites', 'websites', 'All Websites'], ['website-wordpress', 'website-wordpress', 'WordPress'], ['shopify-stores', 'shopify-stores', 'Shopify'], ['wix-sites', 'wix-sites', 'Wix'], ['custom-websites', 'custom-websites', 'Custom Websites']]],
