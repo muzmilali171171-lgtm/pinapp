@@ -557,7 +557,7 @@
             const images = E.pickImages(p.images, mode, i);
             if (images.length < 2) mode = 'single';
             const design = {
-                template: E.pickTemplate(cfg.pool, r.category, cfg.ai, pageIndex, i, r.items.length),
+                template: E.pickTemplate(cfg.pool, r.category, cfg.ai, pageIndex, i, r.items.length, it.headline || it.title || ''),
                 size: cfg.size, mode, images, page_images: p.images,
                 headline: it.headline, kicker: it.kicker, cta: it.cta, website: S.site.host || hostOf(p.url),
                 palette: cfg.palette, fonts: cfg.fonts, category: r.category,

@@ -11,8 +11,9 @@
     const BOOT = window.DE_BOOT || {};
     const AJAX = window.DE_AJAX || 'ajax-design';
     const BASE = window.DE_BASE || '../';
+    const EDITOR_URL = window.DE_EDITOR_URL || 'design-editor';   // this page (the admin template editor uses its own)
     const $ = (id) => document.getElementById(id);
-    const PROPS = ['deId', 'name', 'isFrame', 'frameShape', 'frameW', 'frameH', 'frameFit', 'frameRadius', 'deSrc', 'lockedDE', 'fxName', 'isBg', 'deFill', 'imgRadius', 'selectable', 'evented', 'hasControls', 'lockMovementX', 'lockMovementY', 'lockScalingX', 'lockScalingY', 'lockRotation'];
+    const PROPS = ['deId', 'deRole', 'name', 'isFrame', 'frameShape', 'frameW', 'frameH', 'frameFit', 'frameRadius', 'deSrc', 'lockedDE', 'fxName', 'isBg', 'deFill', 'imgRadius', 'selectable', 'evented', 'hasControls', 'lockMovementX', 'lockMovementY', 'lockScalingX', 'lockScalingY', 'lockRotation'];
 
     const FONTS = ['Poppins', 'Montserrat', 'Open Sans', 'Roboto', 'Lato', 'Raleway', 'Nunito', 'Quicksand', 'Josefin Sans', 'Fredoka',
         'Playfair Display', 'Merriweather', 'DM Serif Display', 'Abril Fatface', 'Cinzel', 'Alfa Slab One',
@@ -1688,7 +1689,7 @@
         return thumbP.then((thumb) => post({ action: 'save', id: design.id, title: $('deTitle').value, width: design.w, height: design.h, json: JSON.stringify(data), thumb: thumb || '' }))
             .then((r) => {
                 if (!r.ok) { $('deSaveState').textContent = 'Not saved'; toast(r.error || 'Save failed.', 5000); return false; }
-                if (!design.id) { design.id = r.id; history.replaceState(null, '', 'design-editor?id=' + r.id); }
+                if (!design.id) { design.id = r.id; history.replaceState(null, '', EDITOR_URL + '?id=' + r.id); }
                 dirty = false; $('deSaveState').textContent = 'All changes saved';
                 delete tplCache.mine;
                 return true;
@@ -1751,7 +1752,7 @@
             if (!r.ok) { toast(r.error || 'Could not open that design.'); return; }
             const d = r.design;
             if (asOwn && d.mine) {
-                design.id = d.id; $('deTitle').value = d.title; history.replaceState(null, '', 'design-editor?id=' + d.id);
+                design.id = d.id; $('deTitle').value = d.title; history.replaceState(null, '', EDITOR_URL + '?id=' + d.id);
                 return loadJSONInto(d.json, d.width, d.height).then(() => { dirty = false; $('deSaveState').textContent = 'All changes saved'; toast('Design opened.'); });
             }
             if (pages.length <= 1) return loadJSONInto(d.json, d.width, d.height).then(() => { markDirty(); toast('Template loaded.'); });
@@ -2254,4 +2255,20 @@
         bootBlank();
     }
     updateCtx();
+
+    /* Small API for add-ons (the admin template editor): read the design, render pages, save. */
+    window.DE_API = {
+        canvas,
+        design,
+        props: PROPS,
+        commit: () => commitActive(),
+        pageJSON: () => { commitActive(); return JSON.parse(JSON.stringify(pages[cur].json)); },
+        serialize: () => { commitActive(); return serializeDesign(); },
+        renderJSON: (json, opts) => renderJSON(json, opts),
+        save: () => save(),
+        toast: (m, ms) => toast(m, ms),
+        markDirty: () => markDirty(),
+        isText,
+    };
+    document.dispatchEvent(new CustomEvent('de:ready'));
 })();

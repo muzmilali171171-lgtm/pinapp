@@ -3,6 +3,7 @@
  * Public, read-only list of pin templates for the "Pin Templates & Styles" picker
  * (assets/js/template-picker.js). Each item has a preview URL rendered by pin-template-preview.php.
  */
+require_once __DIR__ . '/includes/db.php';
 require_once __DIR__ . '/includes/pin_template_registry.php';
 
 header('Content-Type: application/json; charset=utf-8');
@@ -12,8 +13,10 @@ header('Pragma: no-cache');
 
 $ver = pin_template_preview_version();
 $items = [];
-foreach (pin_template_registry() as $t) {
-    $t['preview'] = 'pin-template-preview?s=' . rawurlencode($t['key']) . '&v=' . $ver;
+foreach (pin_template_registry_active() as $t) {
+    // admin templates carry their own version, so editing one only refreshes its own preview
+    $t['preview'] = 'pin-template-preview?s=' . rawurlencode($t['key']) . '&v=' . ($t['ver'] ?? $ver);
+    unset($t['active'], $t['any_category']);
     $items[] = $t;
 }
 echo json_encode(['ok' => true, 'count' => count($items), 'version' => $ver, 'categories' => pin_template_categories(), 'templates' => $items], JSON_UNESCAPED_UNICODE);

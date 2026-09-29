@@ -116,10 +116,12 @@
         </div>
 
         <div class="admin-nav-group">
-            <button type="button" class="admin-nav-group-toggle <?= in_array($activePage, ['design-elements', 'user-designs'], true) ? 'open' : '' ?>" id="canvaToggle">
+            <button type="button" class="admin-nav-group-toggle <?= in_array($activePage, ['design-elements', 'user-designs', 'pin-templates'], true) ? 'open' : '' ?>" id="canvaToggle">
                 🎨 Canva <span class="admin-nav-caret">▾</span>
             </button>
-            <div class="admin-nav-submenu <?= in_array($activePage, ['design-elements', 'user-designs'], true) ? 'open' : '' ?>" id="canvaSubmenu">
+            <div class="admin-nav-submenu <?= in_array($activePage, ['design-elements', 'user-designs', 'pin-templates'], true) ? 'open' : '' ?>" id="canvaSubmenu">
+                <a href="pin-templates" class="<?= $activePage === 'pin-templates' ? 'active' : '' ?>">All Image Style Templates</a>
+                <a href="pin-template-editor">Create New Template</a>
                 <a href="design-elements" class="<?= $activePage === 'design-elements' ? 'active' : '' ?>">Add Elements</a>
                 <a href="user-designs" class="<?= $activePage === 'user-designs' ? 'active' : '' ?>">User Designs</a>
                 <a href="user-designs?view=published">Published Templates</a>

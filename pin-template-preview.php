@@ -10,6 +10,7 @@
 ini_set('display_errors', '0');
 
 $GLOBALS['TT_SKIP'] = true; // previews aren't pins
+require_once __DIR__ . '/includes/db.php';
 require_once __DIR__ . '/includes/functions.php';
 require_once __DIR__ . '/includes/ai_functions.php';
 
@@ -19,13 +20,13 @@ if (!isset($reg[$key])) { http_response_code(404); exit; }
 
 $dir = __DIR__ . '/uploads/template-previews/';
 if (!is_dir($dir)) @mkdir($dir, 0755, true);
-$ver = pin_template_preview_version();
+$ver = $reg[$key]['ver'] ?? pin_template_preview_version();
 $file = $dir . $key . '-' . $ver . '.jpg';
 
 if (!is_file($file)) {
     $sample = pin_template_sample_image($dir);
     $t = $reg[$key];
-    $imgs = $t['layout'] === 'collage' ? [$sample, $sample, $sample, $sample] : [$sample];
+    $imgs = array_fill(0, max(1, $t['layout'] === 'collage' ? max(4, (int)($t['photos'] ?? 4)) : 1), $sample);
     $full = $sample !== null
         ? compose_pin_image($imgs, pin_template_sample_title($t['category']), 'yourwebsite.com', 'Read More', '2:3', $key)
         : null;

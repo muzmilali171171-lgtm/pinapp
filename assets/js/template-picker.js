@@ -132,7 +132,7 @@
             if (state.cat === 'Selected' && state.sel.indexOf(t.key) === -1) return false;
             if (state.cat !== 'All' && state.cat !== 'Selected' && t.category !== state.cat) return false;
             if (state.layout !== 'all' && t.layout !== state.layout) return false;
-            if (state.q && (t.name + ' ' + t.category + ' ' + t.layout).toLowerCase().indexOf(state.q) === -1) return false;
+            if (state.q && (t.name + ' ' + t.category + ' ' + t.layout + ' ' + (t.tags || []).join(' ')).toLowerCase().indexOf(state.q) === -1) return false;
             return true;
         });
         grid.innerHTML = list.length ? list.map(function (t) {
@@ -140,6 +140,8 @@
             return '<button type="button" class="tplpick-card' + (i !== -1 ? ' sel' : '') + '" data-key="' + esc(t.key) + '">' +
                 '<span class="tplpick-img"><img loading="lazy" src="' + esc(root + t.preview) + '" alt="' + esc(t.name) + '"></span>' +
                 (i !== -1 ? '<span class="tplpick-check">✓</span>' : '') +
+                ((t.tags && t.tags.length) || t.numbered ? '<span class="tplpick-tags">' + (t.tags || []).slice(0, 2).map(function (g) { return '<span>' + esc(g) + '</span>'; }).join('') +
+                    (t.numbered ? '<span class="num" title="Used only for titles with a number">🔢</span>' : '') + '</span>' : '') +
                 '<span class="tplpick-name">' + esc(t.name) + '</span>' +
                 '<span class="tplpick-meta">' + esc(t.category) + ' · ' + (t.layout === 'collage' ? 'Collage · ' + (t.photos || 4) + ' photos' : 'Single photo') + '</span>' +
                 '</button>';

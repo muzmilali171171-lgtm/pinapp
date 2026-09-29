@@ -2,6 +2,7 @@
 require_once __DIR__ . '/pin_templates_60.php';
 require_once __DIR__ . '/pin_templates_100.php';
 require_once __DIR__ . '/pin_templates_300.php';
+require_once __DIR__ . '/admin_pin_templates.php';
 /**
  * One list of every pin template/style: key, display name, category and layout.
  * Drives the "Pin Templates & Styles" picker (pin-templates.php → assets/js/template-picker.js),
@@ -95,7 +96,27 @@ function pin_template_registry(): array
         if (isset($remap[$t['category']])) $list[$k]['category'] = $remap[$t['category']];
     }
     $list['hairstyles_simple']['category'] = 'Hairstyles';
+    // On/off from Admin → Canva → All Image Style Templates (built-in templates are on unless switched off).
+    $off = at_disabled_default_keys();
+    foreach ($list as $k => $t) {
+        $list[$k] += ['admin' => false, 'numbered' => false, 'priority' => 5, 'tags' => []];
+        $list[$k]['active'] = !isset($off[$k]);
+    }
+    // Admin-made templates (Admin → Canva → Create New Template), highest priority first.
+    $list = at_registry_entries() + $list;   // (kept in the static cache too)
     return $list;
+}
+
+/** Only the templates that are switched on — what users can pick and what AI Auto uses. */
+function pin_template_registry_active(): array
+{
+    return array_filter(pin_template_registry(), fn($t) => !empty($t['active']));
+}
+
+/** A numbered template (it prints the title's number on its own) only fits titles that have a number. */
+function pin_template_fits_title(array $t, string $title): bool
+{
+    return empty($t['numbered']) || at_title_has_number($title);
 }
 
 /** How many AI photos a template needs (1 = single-photo template). */
@@ -110,8 +131,17 @@ function pin_template_categories(): array
     $cats = [];
     // the main category list (same order as the user-facing list), then anything else in use
     if (function_exists('pt4_themes')) foreach (pt4_themes() as $t) $cats[$t[0]] = false;
-    foreach (pin_template_registry() as $t) $cats[$t['category']] = true;
+    foreach (pin_template_registry_active() as $t) $cats[$t['category']] = true;
     return array_keys(array_filter($cats));
+}
+
+/** Every category a template can be filed under (the main list + any in use), for the admin publish form. */
+function pin_template_categories_all(): array
+{
+    $cats = [];
+    if (function_exists('pt4_themes')) foreach (pt4_themes() as $t) $cats[$t[0]] = true;
+    foreach (pin_template_registry() as $t) $cats[$t['category']] = true;
+    return array_keys($cats);
 }
 
 /** Which category a title belongs to (for "AI Auto"). */
@@ -179,14 +209,25 @@ function pin_template_category_for_title(string $title): string
  */
 function pin_pick_auto_style(string $title, array $pool = []): string
 {
-    $reg = pin_template_registry();
-    $pool = array_values(array_filter($pool, fn($k) => isset($reg[$k])));
+    $all = pin_template_registry();
+    $reg = pin_template_registry_active();
+    // switched-off templates and numbered templates for titles without a number are never picked
+    $fits = fn($k) => isset($reg[$k]) && pin_template_fits_title($reg[$k], $title);
+    $pool = array_values(array_filter($pool, $fits));
+    $keys = array_values(array_filter(array_keys($reg), $fits));
     $cat = pin_template_category_for_title($title);
     $candidates = [];
-    foreach (($pool ?: array_keys($reg)) as $k) if ($reg[$k]['category'] === $cat) $candidates[] = $k;
+    foreach (($pool ?: $keys) as $k) if ($reg[$k]['category'] === $cat || !empty($reg[$k]['any_category'])) $candidates[] = $k;
     if (!$candidates && $pool) $candidates = $pool;
-    if (!$candidates) foreach ($reg as $k => $t) if (in_array($t['category'], ['General', 'Lifestyle'], true)) $candidates[] = $k;
-    return $candidates[abs(crc32($title)) % count($candidates)];
+    if (!$candidates) foreach ($keys as $k) if (in_array($reg[$k]['category'], ['General', 'Lifestyle'], true) || !empty($reg[$k]['any_category'])) $candidates[] = $k;
+    if (!$candidates) $candidates = $keys ?: ['high_attractive_multi'];
+    // Priority (1–10, default 5): a higher-priority template is picked more often.
+    $weighted = [];
+    foreach ($candidates as $k) {
+        $w = max(1, min(10, (int)($all[$k]['priority'] ?? 5)));
+        for ($i = 0; $i < $w; $i++) $weighted[] = $k;
+    }
+    return $weighted[abs(crc32($title)) % count($weighted)];
 }
 
 /**
@@ -203,6 +244,11 @@ function pin_resolve_style(string $value, string $title): string
     $auto = in_array('auto', $parts, true);
     $keys = array_values(array_filter($parts, fn($p) => $p !== 'auto'));
     if ($auto) return pin_pick_auto_style($title, $keys);
+    // Skip picks that are switched off or need a number the title doesn't have — unless nothing else is left.
+    $reg = pin_template_registry();
+    $usable = array_values(array_filter($keys, fn($k) => !isset($reg[$k]) || (!empty($reg[$k]['active']) && pin_template_fits_title($reg[$k], $title))));
+    if ($usable) $keys = $usable;
+    elseif ($keys && isset($reg[$keys[0]]) && !pin_template_fits_title($reg[$keys[0]], $title)) return pin_pick_auto_style($title);
     if (count($keys) === 1) return $keys[0];
     return $keys[mt_rand(0, count($keys) - 1)];
 }

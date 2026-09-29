@@ -61,3 +61,8 @@ html.tplpick-lock { overflow: hidden; }
 .tplpick-selbtn.on { background: #e60023; border-color: #e60023; color: #fff; }
 .tplpick-selbtn.on span { color: #ffd6dc; }
 [data-theme="dark"] .tplpick-catsel, [data-theme="dark"] .tplpick-selbtn { background: #1e2025; border-color: #33353c; color: #e5e7eb; }
+
+/* tags on admin-made templates (Trending, Popular, …) and the numbered marker */
+.tplpick-tags { position: absolute; left: 6px; top: 6px; display: flex; flex-wrap: wrap; gap: 4px; pointer-events: none; }
+.tplpick-tags span { background: #e60023; color: #fff; font-size: 10px; font-weight: 700; border-radius: 999px; padding: 2px 7px; }
+.tplpick-tags span.num { background: #0891b2; }

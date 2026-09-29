@@ -1307,7 +1307,7 @@
             const id = 'pt:' + t.key;
             if (TEMPLATE_MAP[id]) return;
             const hit = PRO_CAT.find(([re]) => re.test(t.category || ''));
-            const tpl = { id, name: t.name, tags: [hit ? hit[1] : 'general', PRO_TAG], pt: t.key, photos: Math.max(1, +t.photos || 1), layout: t.layout, preview: t.preview, category: t.category };
+            const tpl = { id, name: t.name, tags: [hit ? hit[1] : 'general', PRO_TAG], pt: t.key, photos: Math.max(1, +t.photos || 1), layout: t.layout, preview: t.preview, category: t.category, numbered: !!t.numbered };
             TEMPLATES.push(tpl);
             TEMPLATE_MAP[id] = tpl;
         });
@@ -1390,8 +1390,13 @@
      * Template for one pin. aiOn: prefer templates tagged with the page's category (from AI).
      * Different pins of the same page always get different templates when the pool allows.
      */
-    function pickTemplate(pool, category, aiOn, pageIndex, pinIndex, pinsPerPage) {
-        const all = pool && pool.length ? pool : TEMPLATES.map((t) => t.id);
+    function pickTemplate(pool, category, aiOn, pageIndex, pinIndex, pinsPerPage, headline) {
+        let all = pool && pool.length ? pool : TEMPLATES.map((t) => t.id);
+        // Numbered templates print the title's number — never use them for a title without one.
+        if (headline !== undefined && !/\d/.test(String(headline))) {
+            const ok = all.filter((id) => { const t = TEMPLATE_MAP[id]; return !(t && t.numbered); });
+            if (ok.length) all = ok;
+        }
         let list = all;
         if (aiOn) {
             const tagged = all.filter((id) => { const t = TEMPLATE_MAP[id]; return t && t.tags.includes(category); });

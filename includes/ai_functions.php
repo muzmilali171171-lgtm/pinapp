@@ -2342,6 +2342,12 @@ function compose_pin_image_render(array $imageBytesList, string $title, string $
         ? $colorPalette              // already-normalized (internal re-use)
         : pin_normalize_color_palette($colorPalette);
 
+    if (strpos($style, 'at_') === 0 && function_exists('at_render')) {
+        // Admin-made template (Admin → Canva → Create New Template).
+        $out = at_render($style, $imageBytesList, $title, $website, $ctaText, $sizeKey);
+        if ($out !== null) return $out;
+        $style = 'high_attractive_multi';
+    }
     if (strpos($style, 'tpl_') === 0) {
         $out = pt_render($style, $imageBytesList, $title, $website, $ctaText, $sizeKey, $palette);
         if ($out !== null) return $out;
