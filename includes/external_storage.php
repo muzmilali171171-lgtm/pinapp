@@ -458,7 +458,7 @@ function ext_cleanup_published_pins(PDO $pdo, int $limit = 300, int $timeBudget 
         WHERE sp.status = 'published' AND sp.published_at IS NOT NULL AND sp.published_at < (NOW() - INTERVAL $days DAY)
           AND sp.image_path LIKE 'uploads/%'
           AND (ef.id IS NULL OR (ef.local_deleted = 0 AND NOT (ef.status = 'hosting' AND ef.updated_at > (NOW() - INTERVAL 30 MINUTE))))
-          AND NOT EXISTS (SELECT 1 FROM scheduled_pins p2 WHERE p2.image_path = sp.image_path AND p2.status IN ('pending', 'processing'))
+          AND NOT EXISTS (SELECT 1 FROM scheduled_pins p2 WHERE p2.image_path = sp.image_path AND p2.status IN ('pending', 'processing', 'paused'))
         GROUP BY sp.image_path
         LIMIT " . (int)$limit);
     $stmt->execute();

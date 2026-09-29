@@ -133,7 +133,7 @@ CREATE TABLE IF NOT EXISTS scheduled_pins (
     source_article_id INT DEFAULT NULL,
     source_website_page_id INT DEFAULT NULL,
     publish_at DATETIME NOT NULL,
-    status ENUM('pending','processing','published','failed') NOT NULL DEFAULT 'pending',
+    status ENUM('pending','processing','published','failed','paused') NOT NULL DEFAULT 'pending',
     pinterest_pin_id VARCHAR(100) DEFAULT NULL,
     attempts INT NOT NULL DEFAULT 0,
     last_error TEXT DEFAULT NULL,
