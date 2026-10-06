@@ -1,4 +1,4 @@
-# VideoConvertly Pinterest Auto Scheduler
+# Pinterest Auto Scheduler and bulk Blog writer
 
 A self-hosted PHP + MySQL app: users connect their own Pinterest account via
 OAuth (no API keys typed by them), schedule pins with an image/title/
